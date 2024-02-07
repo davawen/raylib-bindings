@@ -61,6 +61,7 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>) -> io::Result<()
         }
 
         writeln!(out, "#[repr(C)]")?;
+        writeln!(out, "#[derive(Clone, Copy)]")?;
         writeln!(out, "pub struct {} {{", s.name)?;
         for field in s.fields {
             if !field.desc.is_empty() {
