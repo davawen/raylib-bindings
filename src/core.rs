@@ -169,7 +169,7 @@ impl Raylib {
     pub fn is_cursor_on_screen(&self) -> bool { unsafe { ffi::IsCursorOnScreen() } }
 
     /// Setup canvas (framebuffer) to start drawing
-    pub fn begin_drawing<'a>(&'a mut self) -> DrawHandle<'a> {
+    pub fn begin_drawing(&mut self) -> DrawHandle {
         unsafe { ffi::BeginDrawing() }
         DrawHandle { _raylib: Some(self), mode: RenderMode::Drawing }
     }
