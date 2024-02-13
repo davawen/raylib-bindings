@@ -1,6 +1,7 @@
 
 pub mod color;
 pub mod vector2;
+pub mod vector3;
 
 /// Reimplementation of raylib math utils
 pub trait MathUtils: Copy {
