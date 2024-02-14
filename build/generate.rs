@@ -78,6 +78,25 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>) -> io::Result<()
 
 fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>) -> io::Result<()> {
     for a in aliases {
+        // generate quaternion manually
+        if a.name == "Quaternion" { 
+            writeln!(out, "/// Quaternion, 4 float components")?;
+            writeln!(out, "#[repr(C)]")?;
+            writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
+            writeln!(out, "pub struct Quaternion {{")?;
+            writeln!(out, "    /// Imaginary `i` part of the quaternion")?;
+            writeln!(out, "    pub x: f32,")?;
+            writeln!(out, "    /// Imaginary `j` part of the quaternion")?;
+            writeln!(out, "    pub y: f32,")?;
+            writeln!(out, "    /// Imaginary `k` part of the quaternion")?;
+            writeln!(out, "    pub z: f32,")?;
+            writeln!(out, "    /// Real part of the quaternion")?;
+            writeln!(out, "    pub w: f32")?;
+            writeln!(out, "}}")?;
+
+            continue;
+        }
+
         if !a.desc.is_empty() {
             writeln!(out, "/// {}", a.desc)?;
         }

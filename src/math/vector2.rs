@@ -1,6 +1,6 @@
 ///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
-use crate::ffi::Vector2;
+use crate::{ffi::{Vector2, Vector4, Matrix}, Vector3};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 
@@ -17,6 +17,9 @@ impl Vector2 {
 
     pub const fn tuple(self) -> (f32, f32) { (self.x, self.y) }
     pub const fn array(self) -> [f32; 2] { [self.x, self.y] }
+
+    pub const fn vec3(self, z: f32) -> Vector3 { Vector3::new(self.x, self.y, z) }
+    pub const fn vec4(self, z: f32, w: f32) -> Vector4 { Vector4::new(self.x, self.y, z, w) }
 
     /// Calculate the length of the vector
     /// NOTE: If you need the length squared, consider using `Vector2::length_sqr`
@@ -62,6 +65,7 @@ impl Vector2 {
     }
 
     /// Normalizes this vector (make its length 1)
+    /// Undefined for the null vector
     pub fn normalize(self) -> Self {
         self / self.length()
     }
@@ -100,6 +104,11 @@ impl Vector2 {
         let cos = angle.cos();
         let sin = angle.sin();
         Vector2::new(self.x*cos - self.y*sin, self.x*sin + self.y*cos)
+    }
+    /// Transforms this vector by the given matrix (with translation)
+    /// Same as `mat * self`
+    pub fn transform(self, mat: Matrix) -> Self {
+        mat * self
     }
     /// Move vector towards the targets, moving by a maximum step of `max_distance`
     pub fn move_towards(self, target: Self, max_distance: f32) -> Self {
@@ -163,6 +172,3 @@ impl Neg for Vector2 {
     type Output = Vector2;
     fn neg(self) -> Self::Output { Vector2::new(-self.x, -self.y) }
 }
-
-// TODO: 
-// impl Mul<Mat> for Vector2

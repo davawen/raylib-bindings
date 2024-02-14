@@ -1,6 +1,6 @@
 ///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
-use crate::ffi::Vector3;
+use crate::{ffi::{Vector3, Vector4, Matrix, Quaternion}, Vector2};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 
@@ -18,6 +18,9 @@ impl Vector3 {
 
     pub const fn tuple(self) -> (f32, f32, f32) { (self.x, self.y, self.z) }
     pub const fn array(self) -> [f32; 3] { [self.x, self.y, self.z] }
+
+    pub const fn vec2(self) -> Vector2 { Vector2::new(self.x, self.y) }
+    pub const fn vec4(self, w: f32) -> Vector4 { Vector4::new(self.x, self.y, self.z, w) }
 
     /// Calculate the length of the vector
     /// NOTE: If you need the length squared, consider using `Vector3::length_sqr`
@@ -43,7 +46,7 @@ impl Vector3 {
     
     /// Calculate the dot product between the two vectors
     pub fn dot(self, rhs: Self) -> f32 {
-        self.x*rhs.x + self.y*rhs.y 
+        self.x*rhs.x + self.y*rhs.y + self.z*self.z
     }
     /// Calculate the 3d cross product between the two vectors
     pub fn cross(self, rhs: Self) -> Self {
@@ -59,6 +62,7 @@ impl Vector3 {
     }
 
     /// Normalizes this vector (make its length 1)
+    /// Undefined for the null vector
     pub fn normalize(self) -> Self {
         self / self.length()
     }
@@ -144,20 +148,20 @@ impl Vector3 {
         }
     }
 
-    // TODO:
-    // /// Transforms the vector by the given matrix
-    // pub fn transform(self, mat: Matrix) -> Self {
-    //
-    // }
+    /// Transforms the vector by the given matrix (with the translation)
+    /// Same as `mat * self`
+    pub fn transform(self, mat: Matrix) -> Self {
+        mat * self
+    }
 
-    // TODO:
-    // /// Rotates the vector by the given quaternion
-    // pub fn rotate_by_quaternion(self, quat: Quaternion) -> Self {
-    //
-    // }
+    /// Rotates the vector by the given quaternion
+    /// Same as `self * quat`
+    pub fn rotate_by_quaternion(self, quat: Quaternion) -> Self {
+        self * quat
+    }
 
     /// Rotates the vector around an axis
-    /// `axis` needs to be normalized
+    /// WARN: `axis` needs to be normalized
     pub fn rotate_by_axis_angle(self, axis: Self, angle: f32) -> Self {
         let angle = angle / 2.0;
 
@@ -219,7 +223,7 @@ impl Vector3 {
 }
 
 impl PartialEq for Vector3 {
-    fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y }
+    fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y && self.z == other.z }
 }
 
 impl Add<Vector3> for Vector3 {
@@ -267,5 +271,13 @@ impl Neg for Vector3 {
     fn neg(self) -> Self::Output { Vector3::new(-self.x, -self.y, -self.z) }
 }
 
-// TODO: 
-// impl Mul<Mat> for Vector3
+impl Mul<Quaternion> for Vector3 {
+    type Output = Vector3;
+    fn mul(self, q: Quaternion) -> Self::Output {
+        Vector3::new(
+            self.x*(q.x*q.x + q.w*q.w - q.y*q.y - q.z*q.z) + self.y*(2.0*q.x*q.y - 2.0*q.w*q.z) + self.z*(2.0*q.x*q.z + 2.0*q.w*q.y),
+            self.x*(2.0*q.w*q.z + 2.0*q.x*q.y) + self.y*(q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z) + self.z*(-2.0*q.w*q.x + 2.0*q.y*q.z),
+            self.x*(-2.0*q.w*q.y + 2.0*q.x*q.z) + self.y*(2.0*q.w*q.x + 2.0*q.y*q.z)+ self.z*(q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z),
+        )
+    }
+}
