@@ -8,10 +8,6 @@ build = "build/main.rs"
 name = "raylib"
 path = "src/lib.rs"
 
-[[bin]]
-name = "raylib-example"
-path = "src/bin.rs"
-
 [dependencies]
 bitflags = "2.4.2"
 va_list = "0.1.4"

@@ -1,5 +1,9 @@
 use std::ffi::CStr;
+use crate::ffi::{self, Image, Vector2};
+
 use bitflags::bitflags;
+
+use super::Raylib;
 
 bitflags! {
     pub struct ConfigFlags: u32 {
@@ -38,16 +42,10 @@ bitflags! {
     }
 }
 
-use crate::ffi::{self, Image, Vector2, Color, Camera2D, Camera3D, RenderTexture2D, Shader, VrStereoConfig};
-
-pub struct Raylib {
-    // disallows initialization from outside
-    _private: ()
-}
-
 impl Raylib {
-    pub fn init_window(width: i32, height: i32, title: &CStr) -> Self {
+    pub fn init_window(width: i32, height: i32, title: &CStr, target_fps: i32) -> Self {
         unsafe { ffi::InitWindow(width, height, title.as_ptr()) }
+        unsafe { ffi::SetTargetFPS(target_fps) }
 
         Self { _private: () }
     }
@@ -94,6 +92,7 @@ impl Raylib {
     pub fn set_window_title(&self, title: &CStr) { unsafe { ffi::SetWindowTitle(title.as_ptr()) } }
     /// Set window position on screen (only PLATFORM_DESKTOP)
     pub fn set_window_position(&self, x: i32, y: i32) { unsafe { ffi::SetWindowPosition(x, y) } }
+    /// TODO: Safer handling for monitor indices
     /// Set monitor for the current window
     pub fn set_window_monitor(&self, monitor: i32) { unsafe { ffi::SetWindowMonitor(monitor) } }
     /// Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
@@ -109,6 +108,7 @@ impl Raylib {
     /// Set window focused (only PLATFORM_DESKTOP)
     pub fn set_window_focused(&self) { unsafe { ffi::SetWindowFocused() } }
 
+    // TODO:
     // /// Get native window handle
     // pub fn GetWindowHandle(void) -> void * ;
 
@@ -154,103 +154,5 @@ impl Raylib {
     pub fn enable_event_waiting(&self) { unsafe { ffi::EnableEventWaiting() } }
     /// Disable waiting for events on EndDrawing(), automatic events polling   
     pub fn disable_event_waiting(&self) { unsafe { ffi::DisableEventWaiting() } }
-
-    /// Shows cursor
-    pub fn show_cursor(&self) { unsafe { ffi::ShowCursor() } }
-    /// Hides cursor
-    pub fn hide_cursor(&self) { unsafe { ffi::HideCursor() } }
-    /// Checks if cursor is visible or not
-    pub fn is_cursor_hidden(&self) -> bool { unsafe { ffi::IsCursorHidden() } }
-    /// Unlocks cursor
-    pub fn enable_cursor(&self) { unsafe { ffi::EnableCursor() } }
-    /// Locks cursor
-    pub fn disable_cursor(&self) { unsafe { ffi::DisableCursor() } }
-    /// Checks if cursor is on the screen
-    pub fn is_cursor_on_screen(&self) -> bool { unsafe { ffi::IsCursorOnScreen() } }
-
-    /// Setup canvas (framebuffer) to start drawing
-    pub fn begin_drawing(&mut self) -> DrawHandle {
-        unsafe { ffi::BeginDrawing() }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::Drawing }
-    }
-    // Begin 2D mode with custom camera (2D)
-    pub fn begin_mode2d(&mut self, camera: Camera2D) -> DrawHandle {
-        unsafe { ffi::BeginMode2D(camera) }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::Mode2D }
-    }
-    // Begin 3D mode with custom camera (3D)
-    pub fn begin_mode3d(&mut self, camera: Camera3D) -> DrawHandle {
-        unsafe { ffi::BeginMode3D(camera) }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::Mode3D }
-    }
-    // Begin drawing to render texture
-    pub fn begin_texture_mode(&mut self, target: RenderTexture2D) -> DrawHandle {
-        unsafe { ffi::BeginTextureMode(target) }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::TextureMode }
-    }
-    // Begin custom shader drawing
-    pub fn begin_shader_mode(&mut self, shader: Shader) -> DrawHandle {
-        unsafe { ffi::BeginShaderMode(shader) }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::ShaderMode }
-    }
-    // Begin blending mode (alpha, additive, multiplied, subtract, custom) 
-    pub fn begin_blend_mode(&mut self, mode: i32) -> DrawHandle {
-        unsafe { ffi::BeginBlendMode(mode) }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::BlendMode }
-    }
-    // Begin stereo rendering (requires VR simulator)
-    pub fn begin_vr_stereo_mode(&mut self, config: VrStereoConfig) -> DrawHandle {
-        unsafe { ffi::BeginVrStereoMode(config) }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::VrStereoMode }
-    }
-    // Begin scissor mode (define screen area for following drawing)
-    pub fn begin_scissor_mode(&mut self, x: i32, y: i32, width: i32, height: i32) -> DrawHandle {
-        unsafe { ffi::BeginScissorMode(x, y, width, height) }
-        DrawHandle { _raylib: Some(self), mode: RenderMode::ScissorMode }
-    }
 }
 
-impl Drop for Raylib {
-    fn drop(&mut self) {
-        unsafe { ffi::CloseWindow() }
-    }
-}
-
-pub enum RenderMode {
-    Drawing,
-    Mode2D,
-    Mode3D,
-    TextureMode,
-    ShaderMode,
-    BlendMode,
-    VrStereoMode,
-    ScissorMode
-}
-
-pub struct DrawHandle<'a> {
-    _raylib: Option<&'a mut Raylib>,
-    mode: RenderMode
-}
-
-impl<'a> DrawHandle<'a> {
-    pub fn end_drawing(mut self) -> &'a mut Raylib {
-        self._raylib.take().unwrap()
-    }
-
-    pub fn clear_background(&self, color: Color) { unsafe { ffi::ClearBackground(color) } }
-}
-
-impl Drop for DrawHandle<'_> {
-    fn drop(&mut self) {
-        unsafe { match self.mode {
-            RenderMode::Drawing => ffi::EndDrawing(),
-            RenderMode::Mode2D => ffi::EndMode2D(),
-            RenderMode::Mode3D => ffi::EndMode3D(),
-            RenderMode::TextureMode => ffi::EndTextureMode(),
-            RenderMode::ShaderMode => ffi::EndShaderMode(),
-            RenderMode::BlendMode => ffi::EndBlendMode(),
-            RenderMode::VrStereoMode => ffi::EndVrStereoMode(),
-            RenderMode::ScissorMode => ffi::EndScissorMode()
-        } }
-    }
-}
