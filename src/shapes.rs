@@ -1,4 +1,4 @@
 use crate::core::draw::DrawHandle;
 
-impl<P> DrawHandle<P> {
+impl<P> DrawHandle<'_, P> {
 }

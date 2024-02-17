@@ -10,13 +10,14 @@ fn main() {
     let time_uniform = shader.get_uniform("time");
 
     while !rl.window_should_close() {
-        let draw = rl.begin_drawing();
+        let mut draw = rl.begin_drawing();
         draw.clear_background(Color::WHITE);
 
         shader.set_uniform_value(time_uniform, unsafe { raylib::ffi::GetTime() as f32 });
-        let draw = draw.begin_shader_mode(&shader);
+        let shader = draw.begin_shader_mode(&shader);
         unsafe { raylib::ffi::DrawRectangle(50, 50, 700, 700, Color::WHITE) }
-        let draw = draw.end();
+        shader.end();
+
         draw.end();
     }
 }
