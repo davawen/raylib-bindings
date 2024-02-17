@@ -14,14 +14,14 @@ pub enum RenderMode {
 
 pub struct DrawHandle<'a, P> {
     mode: RenderMode,
-    parent: Option<&'a mut P>
+    _parent: Option<&'a mut P>
 }
 
 impl Raylib {
     /// Setup canvas (framebuffer) to start drawing
     pub fn begin_drawing(&mut self) -> DrawHandle<'static, ()> {
         unsafe { ffi::BeginDrawing() }
-        DrawHandle { mode: RenderMode::Drawing, parent: None }
+        DrawHandle { mode: RenderMode::Drawing, _parent: None }
     }
 }
 
@@ -29,37 +29,37 @@ impl<P> DrawHandle<'_, P> {
     // Begin 2D mode with custom camera (2D)
     pub fn begin_mode2d(&mut self, camera: Camera2D) -> DrawHandle<Self> {
         unsafe { ffi::BeginMode2D(camera) }
-        DrawHandle { mode: RenderMode::Mode2D, parent: Some(self) }
+        DrawHandle { mode: RenderMode::Mode2D, _parent: Some(self) }
     }
     // Begin 3D mode with custom camera (3D)
     pub fn begin_mode3d(&mut self, camera: Camera3D) -> DrawHandle<Self> {
         unsafe { ffi::BeginMode3D(camera) }
-        DrawHandle { mode: RenderMode::Mode3D, parent: Some(self) }
+        DrawHandle { mode: RenderMode::Mode3D, _parent: Some(self) }
     }
     // Begin drawing to render texture
     pub fn begin_texture_mode(&mut self, target: RenderTexture2D) -> DrawHandle<Self> {
         unsafe { ffi::BeginTextureMode(target) }
-        DrawHandle { mode: RenderMode::TextureMode, parent: Some(self) }
+        DrawHandle { mode: RenderMode::TextureMode, _parent: Some(self) }
     }
     // Begin custom shader drawing
     pub fn begin_shader_mode(&mut self, shader: &Shader) -> DrawHandle<Self> {
         unsafe { ffi::BeginShaderMode(shader.get_ffi_shader()) }
-        DrawHandle { mode: RenderMode::ShaderMode, parent: Some(self) }
+        DrawHandle { mode: RenderMode::ShaderMode, _parent: Some(self) }
     }
     // Begin blending mode (alpha, additive, multiplied, subtract, custom) 
     pub fn begin_blend_mode(&mut self, mode: BlendMode) -> DrawHandle<Self> {
         unsafe { ffi::BeginBlendMode(mode as i32) }
-        DrawHandle { mode: RenderMode::BlendMode, parent: Some(self) }
+        DrawHandle { mode: RenderMode::BlendMode, _parent: Some(self) }
     }
     // Begin stereo rendering (requires VR simulator)
     pub fn begin_vr_stereo_mode(&mut self, config: VrStereoConfig) -> DrawHandle<Self> {
         unsafe { ffi::BeginVrStereoMode(config) }
-        DrawHandle { mode: RenderMode::VrStereoMode, parent: Some(self) }
+        DrawHandle { mode: RenderMode::VrStereoMode, _parent: Some(self) }
     }
     // Begin scissor mode (define screen area for following drawing)
     pub fn begin_scissor_mode(&mut self, x: i32, y: i32, width: i32, height: i32) -> DrawHandle<Self> {
         unsafe { ffi::BeginScissorMode(x, y, width, height) }
-        DrawHandle { mode: RenderMode::ScissorMode, parent: Some(self) }
+        DrawHandle { mode: RenderMode::ScissorMode, _parent: Some(self) }
     }
 }
 

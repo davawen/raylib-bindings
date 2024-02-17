@@ -3,6 +3,7 @@ pub mod cursor;
 pub mod draw;
 pub mod shader;
 pub mod vr;
+pub mod other;
 
 use crate::ffi;
 

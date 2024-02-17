@@ -112,14 +112,22 @@ impl Raylib {
     // /// Get native window handle
     // pub fn GetWindowHandle(void) -> void * ;
 
-    /// Get current screen width
-    pub fn get_screen_width(&self) -> i32 { unsafe { ffi::GetScreenWidth() } }
-    /// Get current screen height
-    pub fn get_screen_height(&self) -> i32 { unsafe { ffi::GetScreenHeight() } }
-    /// Get current render width (it considers HiDPI)
-    pub fn get_render_width(&self) -> i32 { unsafe { ffi::GetRenderWidth() } }
-    /// Get current render height (it considers HiDPI)
-    pub fn get_render_height(&self) -> i32 { unsafe { ffi::GetRenderHeight() } }
+    /// Gets the current screen (window) width
+    /// If you need to consider HiDPI, use `Raylib::get_render_width`
+    pub fn get_screen_width(&self) -> f32 { unsafe { ffi::GetScreenWidth() as f32 } }
+    /// Gets the current screen (window) height
+    /// If you need to consider HiDPI, use `Raylib::get_render_width`
+    pub fn get_screen_height(&self) -> f32 { unsafe { ffi::GetScreenHeight() as f32 } }
+    /// Gets the current screen (window) size as a vector
+    /// If you need to consider HiDPI, use `Raylib::get_render_size`
+    pub fn get_screen_size(&self) -> Vector2 { Vector2::new(self.get_screen_width(), self.get_screen_height()) }
+    /// Gets the current render width (considering HiDPI)
+    pub fn get_render_width(&self) -> f32 { unsafe { ffi::GetRenderWidth() as f32 } }
+    /// Gets the current render height (considering HiDPI)
+    pub fn get_render_height(&self) -> f32 { unsafe { ffi::GetRenderHeight() as f32 } }
+    /// Gets the current render size as vector (considering HiDPI)
+    pub fn get_render_size(&self) -> Vector2 { Vector2::new(self.get_render_width(), self.get_render_height()) }
+
     /// Get number of connected monitors
     pub fn get_monitor_count(&self) -> i32 { unsafe { ffi::GetMonitorCount() } }
     /// Get current connected monitor
@@ -141,7 +149,7 @@ impl Raylib {
     /// Get window scale DPI factor
     pub fn get_window_scale_dpi(&self) -> Vector2 { unsafe { ffi::GetWindowScaleDPI() } }
     /// Get the human-readable, UTF-8 encoded name of the specified monitor
-    pub fn get_monitor_name(&self, monitor: i32) -> &'static CStr {
+    pub fn get_monitor_name(&self, monitor: i32) -> &CStr {
         unsafe { CStr::from_ptr(ffi::GetMonitorName(monitor)) }
     }
     /// Set clipboard text content   

@@ -1,10 +1,10 @@
-
 pub mod color;
 pub mod vector2;
 pub mod vector3;
 pub mod vector4;
 pub mod matrix;
 pub mod quaternion;
+pub mod camera;
 
 /// Reimplementation of raylib math utils
 pub trait MathUtils: Copy {
