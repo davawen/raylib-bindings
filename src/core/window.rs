@@ -1,5 +1,5 @@
 use std::ffi::{CStr, CString};
-use crate::ffi::{self, Image, Vector2};
+use crate::ffi::{self, Image, Vector2, MouseCursor};
 
 use bitflags::bitflags;
 
@@ -185,5 +185,8 @@ impl Raylib {
     pub fn enable_event_waiting(&self) { unsafe { ffi::EnableEventWaiting() } }
     /// Disable waiting for events on EndDrawing(), automatic events polling   
     pub fn disable_event_waiting(&self) { unsafe { ffi::DisableEventWaiting() } }
+
+    /// Set the current mouse cursor kind
+    pub fn set_mouse_cursor(&mut self, cursor: MouseCursor) { unsafe { ffi::SetMouseCursor(cursor as i32) } }
 }
 

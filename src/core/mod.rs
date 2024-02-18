@@ -4,6 +4,7 @@ pub mod draw;
 pub mod shader;
 pub mod vr;
 pub mod automation;
+pub mod input;
 pub mod other;
 
 use std::{ptr::NonNull, ffi::c_void};

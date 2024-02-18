@@ -156,9 +156,21 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
         }
         writeln!(out, "#[repr(C)]")?;
         writeln!(out, "pub enum {} {{", e.name)?;
-        for (name, value) in e.values {
+        for (name, value) in &e.values {
             writeln!(out, "    {} = {},", name, value)?;
         }
+        writeln!(out, "}}")?;
+
+        writeln!(out, "impl TryFrom<i32> for {} {{", e.name)?;
+        writeln!(out, "    type Error = ();")?;
+        writeln!(out, "    fn try_from(value: i32) -> Result<Self, Self::Error> {{")?;
+        writeln!(out, "        match value {{")?;
+        for (name, value) in &e.values {
+            writeln!(out, "            {} => Ok({}::{}),", value, e.name, name)?;
+        }
+        writeln!(out, "            _ => Err(())")?;
+        writeln!(out, "        }}")?;
+        writeln!(out, "    }}")?;
         writeln!(out, "}}")?;
     }
 
