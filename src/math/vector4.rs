@@ -1,3 +1,5 @@
+use float_cmp::{ApproxEq, F32Margin};
+
 use crate::{ffi::Vector4, Vector2, Vector3};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
@@ -56,6 +58,15 @@ impl Vector4 {
 
 impl PartialEq for Vector4 {
     fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w }
+}
+
+impl ApproxEq for Vector4 {
+    type Margin = F32Margin;
+    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
+        let margin = margin.into();
+        self.x.approx_eq(other.x, margin) && self.y.approx_eq(other.y, margin) &&
+        self.z.approx_eq(other.z, margin) && self.w.approx_eq(other.w, margin)
+    }
 }
 
 impl Add<Vector4> for Vector4 {

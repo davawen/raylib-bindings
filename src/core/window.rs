@@ -1,4 +1,4 @@
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use crate::ffi::{self, Image, Vector2};
 
 use bitflags::bitflags;
@@ -43,10 +43,29 @@ bitflags! {
 }
 
 impl Raylib {
-    pub fn init_window(width: i32, height: i32, title: &CStr, target_fps: i32) -> Self {
-        unsafe { ffi::InitWindow(width, height, title.as_ptr()) }
-        unsafe { ffi::SetTargetFPS(target_fps) }
+    /// Initializes raylib.
+    /// # Example
+    /// Basic main loop:
+    /// ```
+    /// use raylib::{Color, Raylib};
+    /// let mut rl = Raylib::init_window(800, 800, "Raylib bindings!", 60);
+    /// while !rl.window_should_close() {
+    ///     let draw = rl.begin_drawing();
+    ///     draw.clear_background(Color::RAYWHITE);
+    ///     draw.end();
+    ///     # break
+    /// }
+    /// ```
+    /// # Panics
+    /// Panics if the given title contains null characters
+    pub fn init_window(width: i32, height: i32, title: &str, target_fps: i32) -> Self {
+        let rl = Raylib::init_window_cstr(width, height, CString::new(title).expect("a title without null characters").as_c_str());
+        rl.set_target_fps(target_fps);
+        rl
+    }
 
+    pub fn init_window_cstr(width: i32, height: i32, title: &CStr) -> Self {
+        unsafe { ffi::InitWindow(width, height, title.as_ptr()) }
         Self { 
             automation_event_set: false,
             automation_event_recording: false,

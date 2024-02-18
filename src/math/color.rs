@@ -78,4 +78,3 @@ impl Color {
 // // TODO: create safe for pixel format
 // /// Get pixel data size in bytes for certain format
 // pub fn get_pixel_data_size(width: i32, height: i32, format: i32) -> i32 {}
-

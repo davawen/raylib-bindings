@@ -3,6 +3,7 @@
 use crate::{ffi::{Vector2, Vector4, Matrix}, Vector3};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
+use float_cmp::{ApproxEq, F32Margin};
 
 use super::MathUtils;
 
@@ -66,6 +67,11 @@ impl Vector2 {
 
     /// Normalizes this vector (make its length 1)
     /// Undefined for the null vector
+    /// ```
+    /// use raylib::Vector2;
+    /// use float_cmp::assert_approx_eq;
+    /// assert_approx_eq!(f32, Vector2::splat(1.0).normalize().length(), 1.0, ulps = 1);
+    /// ```
     pub fn normalize(self) -> Self {
         self / self.length()
     }
@@ -126,6 +132,14 @@ impl Vector2 {
 
 impl PartialEq for Vector2 {
     fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y }
+}
+
+impl ApproxEq for Vector2 {
+    type Margin = F32Margin;
+    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
+        let margin = margin.into();
+        self.x.approx_eq(other.x, margin) && self.y.approx_eq(other.y, margin)
+    }
 }
 
 impl Add<Vector2> for Vector2 {

@@ -13,16 +13,19 @@ impl Raylib {
     /// 
     /// # Example
     /// ```
-    /// # use raylib::Raylib;
-    /// # let mut rl = Raylib::init_window(100, 100, CString::default(), 60);
+    /// # use raylib::{Raylib, Vector2, ShaderValue};
+    /// # let mut rl = Raylib::init_window(500, 500, "shader test", 60);
     /// let shader = rl.load_shader(None, Some("assets/mandelbrot.glsl")).unwrap();
+    /// let resolution_uniform = shader.get_uniform("resolution");
     /// let camera_pos_uniform = shader.get_uniform("camera_pos");
     /// let camera_pos = Vector2::ZERO;
     /// while !rl.window_should_close() {
-    ///     // ...
-    ///     let draw = rl.begin_drawing();
-    ///     shader.set_value(camera_pos_uniform, camera_pos);
-    ///     // ...
+    ///     let mut draw = rl.begin_drawing();
+    ///     shader.set_uniform_value(resolution_uniform, rl.get_screen_size());
+    ///     shader.set_uniform_value(camera_pos_uniform, camera_pos);
+    ///     let mut draw = draw.begin_shader_mode(&shader);
+    ///     unsafe { raylib::ffi::DrawRectangle(0, 0, rl.get_screen_width() as i32, rl.get_screen_height() as i32, raylib::Color::WHITE) }
+    ///     # break
     /// }
     /// ```
     pub fn load_shader<P: AsRef<std::path::Path>>(&self, vs_file_name: Option<P>, fs_file_name: Option<P>) -> std::io::Result<Shader> {

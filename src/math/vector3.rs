@@ -1,3 +1,5 @@
+use float_cmp::{ApproxEq, F32Margin};
+
 ///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
 use crate::{ffi::{Vector3, Vector4, Matrix, Quaternion}, Vector2};
@@ -79,7 +81,7 @@ impl Vector3 {
     /// ```
     /// use raylib::Vector3;
     /// let v = Vector3::splat(2.0); // length is sqrt(12.0)
-    /// assert_eq!(v.clamp_magnitude(5.0, 10.0).length(), 12.0_f32.sqrt()); // 5.0 < sqrt(12.0) < 10.0
+    /// assert_eq!(v.clamp_magnitude(3.0, 10.0).length(), 12.0_f32.sqrt()); // 3.0 < sqrt(12.0) < 10.0
     /// ```
     pub fn clamp_magnitude(self, min: f32, max: f32) -> Self {
         let length = self.length_sqr();
@@ -180,6 +182,7 @@ impl Vector3 {
     ///
     /// ```
     /// use raylib::Vector3;
+    /// use float_cmp::assert_approx_eq;
     /// let a = Vector3::new(0.0, 0.0, 0.0);
     /// let b = Vector3::new(1.0, 0.0, 0.0);
     /// let c = Vector3::new(0.0, 1.0, 0.0);
@@ -189,7 +192,7 @@ impl Vector3 {
     /// let p = Vector3::new(0.75, 0.0, 0.0);
     /// assert_eq!(p.barycenter(a, b, c), Vector3::new(0.25, 0.75, 0.0)); // between a and b
     /// let p = Vector3::new(1.0/3.0, 1.0/3.0, 0.0);
-    /// assert_eq!(p.barycenter(a, b, c), Vector::splat(1.0/3.0)) // center
+    /// assert_approx_eq!(Vector3, p.barycenter(a, b, c), Vector3::splat(1.0/3.0), ulps = 2) // center
     /// ```
     pub fn barycenter(self, a: Self, b: Self, c: Self) -> Self {
         let v0 = b - a;
@@ -224,6 +227,14 @@ impl Vector3 {
 
 impl PartialEq for Vector3 {
     fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y && self.z == other.z }
+}
+
+impl ApproxEq for Vector3 {
+    type Margin = F32Margin;
+    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
+        let margin = margin.into();
+        self.x.approx_eq(other.x, margin) && self.y.approx_eq(other.y, margin) && self.z.approx_eq(other.z, margin)
+    }
 }
 
 impl Add<Vector3> for Vector3 {
