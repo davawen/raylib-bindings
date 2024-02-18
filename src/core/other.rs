@@ -1,6 +1,8 @@
-use std::ffi::{CStr, CString};
+use std::{ffi::{CStr, CString}, ptr::NonNull};
 
 use crate::{Raylib, ffi::{self, TraceLogLevel}};
+
+use super::RaylibAlloc;
 
 // === Timing related functions ===
 impl Raylib {
@@ -148,3 +150,46 @@ impl Raylib {
 }
 
 // TODO: Set custom callbacks
+
+// === Compression/Encoding functionality ===
+impl Raylib {
+    /// Compress data using the DEFLATE algorithm
+    /// # Panics
+    /// This function panics if raylib was not compiled with support for the compression api
+    pub fn compress_data(&self, data: &[u8]) -> RaylibAlloc<[u8]> {
+        let mut comp_data_size: i32 = 0;
+        let compressed = unsafe { ffi::CompressData(data.as_ptr(), data.len() as i32, &mut comp_data_size as *mut i32) };
+        let slice = std::ptr::slice_from_raw_parts_mut(compressed, comp_data_size as usize);
+
+        RaylibAlloc(NonNull::new(slice).expect("expected a valid pointer returned by CompressData"))
+    }
+
+    /// Decompress data compressed using the DEFLATE algorithm
+    /// # Panics
+    /// This function panics if raylib was not compiled with support for the compression api
+    pub fn decompress_data(&self, compressed: &[u8]) -> RaylibAlloc<[u8]> {
+        let mut data_size: i32 = 0;
+        let data = unsafe { ffi::DecompressData(compressed.as_ptr(), compressed.len() as i32, &mut data_size as *mut i32) };
+
+        let slice = std::ptr::slice_from_raw_parts_mut(data, data_size as usize);
+        RaylibAlloc(NonNull::new(slice).unwrap())
+    }
+
+    /// Encode data into a base 64 string
+    pub fn encode_data_base64(&self, data: &[u8]) -> RaylibAlloc<[u8]> {
+        let mut comp_data_size: i32 = 0;
+        let compressed = unsafe { ffi::EncodeDataBase64(data.as_ptr(), data.len() as i32, &mut comp_data_size as *mut i32) };
+        let slice = std::ptr::slice_from_raw_parts_mut(compressed as *mut u8, comp_data_size as usize);
+
+        RaylibAlloc(NonNull::new(slice).unwrap())
+    }
+
+    /// Decode data from a base 64 string
+    pub fn decode_data_base64(&self, compressed: &[u8]) -> RaylibAlloc<[u8]> {
+        let mut data_size: i32 = 0;
+        let data = unsafe { ffi::DecodeDataBase64(compressed.as_ptr(), &mut data_size as *mut i32) };
+
+        let slice = std::ptr::slice_from_raw_parts_mut(data, data_size as usize);
+        RaylibAlloc(NonNull::new(slice).unwrap())
+    }
+}

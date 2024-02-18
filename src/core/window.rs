@@ -47,7 +47,11 @@ impl Raylib {
         unsafe { ffi::InitWindow(width, height, title.as_ptr()) }
         unsafe { ffi::SetTargetFPS(target_fps) }
 
-        Self { _private: () }
+        Self { 
+            automation_event_set: false,
+            automation_event_recording: false,
+            _private: () 
+        }
     }
 
     /// Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
