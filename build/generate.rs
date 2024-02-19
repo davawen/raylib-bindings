@@ -150,6 +150,17 @@ fn generate_functions(out: &mut impl Write, functions: Vec<Function>) -> io::Res
 }
 
 fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
+    fn screaming_snake_to_pascal(snake: &str) -> String {
+        snake.split('_').map(|word| {
+            let mut chars = word.chars();
+            if let Some(c) = chars.next() {
+                c.to_uppercase()
+                    .chain(chars.as_str().to_lowercase().chars())
+                    .collect()
+            } else { String::new() }
+        }).collect()
+    }
+
     for e in enums {
         if !e.desc.is_empty() {
             writeln!(out, "/// {}", e.desc)?;
@@ -157,7 +168,7 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
         writeln!(out, "#[repr(C)]")?;
         writeln!(out, "pub enum {} {{", e.name)?;
         for (name, value) in &e.values {
-            writeln!(out, "    {} = {},", name, value)?;
+            writeln!(out, "    {} = {},", screaming_snake_to_pascal(name), value)?;
         }
         writeln!(out, "}}")?;
 
@@ -166,7 +177,7 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
         writeln!(out, "    fn try_from(value: i32) -> Result<Self, Self::Error> {{")?;
         writeln!(out, "        match value {{")?;
         for (name, value) in &e.values {
-            writeln!(out, "            {} => Ok({}::{}),", value, e.name, name)?;
+            writeln!(out, "            {} => Ok({}::{}),", value, e.name, screaming_snake_to_pascal(name))?;
         }
         writeln!(out, "            _ => Err(())")?;
         writeln!(out, "        }}")?;
