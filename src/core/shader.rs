@@ -125,48 +125,48 @@ pub unsafe trait ShaderValue<T> {
 
 // === Floating point uniforms ===
 unsafe impl ShaderDataType<f32> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformFloat;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Float;
 }
 
 unsafe impl ShaderDataType<[f32; 2]> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformVec2;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Vec2;
 }
 
 unsafe impl ShaderDataType<[f32; 3]> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformVec3;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Vec3;
 }
 
 unsafe impl ShaderDataType<[f32; 4]> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformVec4;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Vec4;
 }
 
 unsafe impl ShaderDataType<Vector2> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformVec2;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Vec2;
 }
 
 unsafe impl ShaderDataType<Vector3> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformVec3;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Vec3;
 }
 
 unsafe impl ShaderDataType<Vector4> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformVec4;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Vec4;
 }
 
 // === Integer uniforms ===
 unsafe impl ShaderDataType<i32> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformInt;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Int;
 }
 
 unsafe impl ShaderDataType<[i32; 2]> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformIvec2;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Ivec2;
 }
 
 unsafe impl ShaderDataType<[i32; 3]> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformIvec3;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Ivec3;
 }
 
 unsafe impl ShaderDataType<[i32; 4]> for Shader {
-    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::ShaderUniformIvec4;
+    const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Ivec4;
 }
 
 // === Impls and other types ===

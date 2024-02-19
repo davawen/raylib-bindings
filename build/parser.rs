@@ -15,7 +15,7 @@ impl<T: Iterator<Item = U>, U> NextUnwrap for T {
     }
 }
 
-pub fn parse_define<'a>(stream: &mut Stream<'a>) -> Define<'a> {
+fn parse_define<'a>(stream: &mut Stream<'a>) -> Define<'a> {
     let _ = stream.unwrapped();
     let name = stream.unwrapped().split_once(':').unwrap().1.trim();
     let kind = stream.unwrapped().split_once(':').unwrap().1.trim();
@@ -24,7 +24,7 @@ pub fn parse_define<'a>(stream: &mut Stream<'a>) -> Define<'a> {
     Define { name, kind, value, desc }
 }
 
-pub fn parse_type(ty: &str) -> Type<'_> {
+fn parse_type(ty: &str) -> Type<'_> {
     #[derive(Debug)]
     enum Token<'a> {
         Word(&'a str),
@@ -112,7 +112,7 @@ pub fn parse_type(ty: &str) -> Type<'_> {
     parse_tokenized(&tokens)
 }
 
-pub fn parse_struct<'a>(stream: &mut Stream<'a>) -> Struct<'a> {
+fn parse_struct<'a>(stream: &mut Stream<'a>) -> Struct<'a> {
     let num_fields: usize = stream.unwrapped()
         .split_once('(').unwrap()
         .1.split_once(' ').unwrap()
@@ -133,7 +133,7 @@ pub fn parse_struct<'a>(stream: &mut Stream<'a>) -> Struct<'a> {
     Struct { name, desc, fields }
 }
 
-pub fn parse_alias<'a>(stream: &mut Stream<'a>) -> Alias<'a> {
+fn parse_alias<'a>(stream: &mut Stream<'a>) -> Alias<'a> {
     let _ = stream.unwrapped();
     let ty = stream.unwrapped().split_once(':').unwrap().1.trim();
     let name = stream.unwrapped().split_once(':').unwrap().1.trim();
@@ -141,7 +141,18 @@ pub fn parse_alias<'a>(stream: &mut Stream<'a>) -> Alias<'a> {
     Alias { name, ty, desc }
 }
 
-pub fn parse_enum<'a>(stream: &mut Stream<'a>) -> Enum<'a> {
+fn snake_to_pascal(snake: &str) -> String {
+    snake.split('_').map(|word| {
+        let mut chars = word.chars();
+        if let Some(c) = chars.next() {
+            c.to_uppercase()
+                .chain(chars.as_str().to_lowercase().chars())
+                .collect()
+        } else { String::new() }
+    }).collect()
+}
+
+fn parse_enum<'a>(stream: &mut Stream<'a>) -> Enum<'a> {
     let num_values: usize = stream.unwrapped()
         .split_once('(').unwrap()
         .1.split_once(' ').unwrap()
@@ -152,16 +163,32 @@ pub fn parse_enum<'a>(stream: &mut Stream<'a>) -> Enum<'a> {
     let values = (0..num_values)
         .map(|_| stream.unwrapped())
         .map(|line| {
-            let name = &line[line.find('[').unwrap()+1..line.find(']').unwrap()];
+            // convert enum variant to pascal case
+            let variant = &line[line.find('[').unwrap()+1..line.find(']').unwrap()];
+            let mut variant = snake_to_pascal(variant);
+
+            // remove common prefix between enum name and enum variant
+            let idx = variant.char_indices().zip(name.chars())
+                .take_while(|((_, x), y)| x == y)
+                .map(|((idx, _), _)| idx)
+                .last()
+                .unwrap_or(0);
+
+            if idx > 0 {
+                variant.drain(..=idx);
+            }
+
+            // get discriminant
             let value: i32 = line.split_once(':').unwrap().1.trim().parse().unwrap();
-            (name, value)
+            
+            (variant, value)
         })
         .collect();
 
     Enum { name, desc, values }
 }
 
-pub fn parse_param(line: &str) -> Param<'_> {
+fn parse_param(line: &str) -> Param<'_> {
     let line = line.split_once(':').unwrap().1.trim();
     let (name, lparen) = line.split_once('(').unwrap();
     let name = name.trim();
@@ -169,7 +196,7 @@ pub fn parse_param(line: &str) -> Param<'_> {
     Param { name, ty: parse_type(ty) }
 }
 
-pub fn parse_function<'a>(stream: &mut Stream<'a>) -> Function<'a> {
+fn parse_function<'a>(stream: &mut Stream<'a>) -> Function<'a> {
     let num_params: usize = stream.unwrapped() 
         .rsplit_once('(').unwrap().1
         .split_once(' ').unwrap().0
@@ -188,12 +215,12 @@ pub fn parse_function<'a>(stream: &mut Stream<'a>) -> Function<'a> {
     Function { name, ret: parse_type(ret), desc, params }
 }
 
-pub fn parse_callback<'a>(stream: &mut Stream<'a>) -> Callback<'a> {
+fn parse_callback<'a>(stream: &mut Stream<'a>) -> Callback<'a> {
     let func = parse_function(stream);
     Callback { name: func.name, desc: func.desc, ret: func.ret, params: func.params }
 }
 
-pub fn parse_multiple<'a, T>(stream: &mut Stream<'a>, parse: impl Fn(&mut Stream<'a>) -> T) -> Vec<T> {
+fn parse_multiple<'a, T>(stream: &mut Stream<'a>, parse: impl Fn(&mut Stream<'a>) -> T) -> Vec<T> {
     let _ = stream.unwrapped();
     let num: usize = stream.unwrapped().split_once(':').unwrap().1.trim().parse().unwrap();
     let _ = stream.unwrapped();

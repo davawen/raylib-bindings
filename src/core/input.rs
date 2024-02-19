@@ -1,4 +1,6 @@
-use crate::{Raylib, ffi::{KeyboardKey, self, MouseButton}, Vector2};
+use std::ffi::CStr;
+
+use crate::{Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton}, Vector2};
 
 // === Keyboard functions ===
 impl Raylib {
@@ -30,7 +32,7 @@ impl Raylib {
     /// Get the keycode of the key pressed
     /// Call multiple times to get queued presses
     /// Returns `None` when the queue is empty
-    /// Will never return `KeyboardKey::KEY_NULL`
+    /// Will never return `KeyboardKey::Null`
     pub fn get_key_pressed(&mut self) -> Option<KeyboardKey> {
         let key = unsafe { ffi::GetKeyPressed() };
         if key == 0 { return None }
@@ -53,9 +55,145 @@ impl Raylib {
     }
 }
 
-// TODO: Gamepad functions
-// impl Raylib {
-// }
+/// A gamepad identifier
+/// Use `Raylib::is_gamepad_available` to construct it
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Gamepad(i32);
+
+pub enum GamepadAxis {
+    /// X and Y values of the left joystick
+    Left,
+    /// X and Y values of the right joystick
+    Right,
+    /// Values of the left and right triggers
+    Trigger
+}
+
+impl Raylib {
+    fn gamepad_available(&mut self, gamepad: i32) -> bool {
+        unsafe { ffi::IsGamepadAvailable(gamepad) }
+    }
+
+    /// Checks if the given gamepad is available
+    /// Returns Some(id) if the gamepad is available, and None otherwise
+    /// # Examples
+    /// ```
+    /// # use raylib::{Raylib, GamepadButton, Color};
+    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// if let Some(gamepad) = rl.is_gamepad_available(0) {
+    ///     if rl.is_button_down(gamepad, GamepadButton::ButtonMiddleLeft) {
+    ///         rl.draw_circle(100.0, 100.0, 20.0, Color::RED);
+    ///     }
+    /// }
+    /// ```
+    pub fn is_gamepad_available(&mut self, gamepad: i32) -> Option<Gamepad> {
+        if self.gamepad_available(gamepad) {
+            Some(Gamepad(gamepad))
+        } else {
+            None
+        }
+    }
+
+    /// Gets the gamepad's internal name id
+    /// Returns `None` if:
+    /// - it isn't available
+    /// - it doesn't have a name (if the underlying raylib API returns a NULL pointer)
+    /// - if its name is not valid utf-8. If you need its name regardless, you can use `get_name_cstr` directly.
+    pub fn get_gamepad_name(&mut self, gamepad: Gamepad) -> Option<&str> {
+        if !self.gamepad_available(gamepad.0) { return None }
+
+        let cstr = self.get_gamepad_name_cstr(gamepad)?;
+        cstr.to_str().ok()
+    }
+
+    /// Gets the gamepad's internal name id
+    /// Returns `None` if it isn't available or it doesn't have a name (if the underlying raylib API returns a NULL pointer)
+    /// # Examples 
+    /// Get a `Cow<str>` with invalid characters removed:
+    /// ```
+    /// # use raylib::Raylib;
+    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// if let Some(gamepad) = rl.is_gamepad_available(0) {
+    ///     let name = rl.get_name_cstr(gamepad).map(|s| s.to_string_lossy());
+    /// }
+    /// ```
+    pub fn get_gamepad_name_cstr(&mut self, gamepad: Gamepad) -> Option<&CStr> {
+        if !self.gamepad_available(gamepad.0) { return None }
+
+        unsafe { 
+            let ptr = ffi::GetGamepadName(gamepad.0);
+            if ptr.is_null() { return None }
+
+            Some(CStr::from_ptr(ptr))
+        }
+    }
+
+    /// Checks if a gamepad button has been pressed this frame (rising edge)
+    /// Returns false if the gamepad isn't available
+    pub fn is_gamepad_button_pressed(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+        if !self.gamepad_available(gamepad.0) { return false }
+        unsafe { ffi::IsGamepadButtonPressed(gamepad.0, button as i32) }
+    }
+
+    /// Checks if a gamepad button has been released this frame (falling edge)
+    /// Returns false if the gamepad isn't available
+    pub fn is_gamepad_button_released(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+        if !self.gamepad_available(gamepad.0) { return false }
+        unsafe { ffi::IsGamepadButtonReleased(gamepad.0, button as i32) }
+    }
+
+    /// Checks if a gamepad button is currently being held down
+    /// Returns false if the gamepad isn't available
+    pub fn is_gamepad_button_down(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+        if !self.gamepad_available(gamepad.0) { return false }
+        unsafe { ffi::IsGamepadButtonDown(gamepad.0, button as i32) }
+    }
+
+    /// Checks if a gamepad button is currently not being held down
+    /// Returns false if the gamepad isn't available
+    pub fn is_gamepad_button_up(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+        if !self.gamepad_available(gamepad.0) { return false }
+        unsafe { ffi::IsGamepadButtonUp(gamepad.0, button as i32) }
+    }
+
+    /// Get the last gamepad button pressed
+    /// Returns `None` if there wasn't any
+    /// Will never return `GamepadButton::Unknown`
+    pub fn get_gamepad_button_pressed(&mut self) -> Option<GamepadButton> {
+        let button = unsafe { ffi::GetGamepadButtonPressed() };
+
+        if button == 0 { return None }
+        button.try_into().ok()
+    }
+
+    /// Get the number of axis of the gamepad
+    /// Returns 0 if the gamepad isn't available
+    pub fn get_gamepad_axis_count(&mut self, gamepad: Gamepad) -> i32 {
+        if !self.gamepad_available(gamepad.0) { return 0 }
+
+        unsafe { ffi::GetGamepadAxisCount(gamepad.0) }
+    }
+
+    /// Get the axis movement for a given gamepad
+    /// Returns `Vector2::ZERO` if the gamepad isn't available
+    pub fn get_gamepad_axis_movement(&mut self, gamepad: Gamepad, axis: GamepadAxis) -> Vector2 {
+        if !self.gamepad_available(gamepad.0) { return Vector2::ZERO }
+
+        let (x, y) = match axis {
+            GamepadAxis::Left => (ffi::GamepadAxis::LeftX, ffi::GamepadAxis::LeftY),
+            GamepadAxis::Right => (ffi::GamepadAxis::LeftX, ffi::GamepadAxis::LeftY),
+            GamepadAxis::Trigger => (ffi::GamepadAxis::LeftTrigger, ffi::GamepadAxis::RightTrigger),
+        };
+
+        Vector2::new(
+            unsafe { ffi::GetGamepadAxisMovement(gamepad.0, x as i32) },
+            unsafe { ffi::GetGamepadAxisMovement(gamepad.0, y as i32) },
+        )
+    }
+
+    // TODO:
+    // pub fn set_gamepad_mappings(&mut self, mappings: *const c_char) -> i32
+}
 
 // === Mouse functions ===
 impl Raylib {

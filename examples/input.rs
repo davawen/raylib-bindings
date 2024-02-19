@@ -1,4 +1,4 @@
-use raylib::{Raylib, Color, ffi::{KeyboardKey, MouseButton}, Vector2};
+use raylib::{Raylib, Color, ffi::{KeyboardKey, MouseButton}};
 
 fn main() {
     let mut rl = Raylib::init_window(800, 800, "Test input", 60);
@@ -13,7 +13,7 @@ fn main() {
         }
         while let Some(k) = rl.get_key_pressed() {
             match k {
-                KeyboardKey::KEY_BACKSPACE => {
+                KeyboardKey::Backspace => {
                     if cursor_pos > 0 {
                         cursor_pos -= 1;
                         while cursor_pos > 0 && !s.is_char_boundary(cursor_pos) {
@@ -22,13 +22,13 @@ fn main() {
                         s.remove(cursor_pos);
                     }
                 },
-                KeyboardKey::KEY_LEFT => if cursor_pos > 0 && cursor_pos <= s.len() {
+                KeyboardKey::Left => if cursor_pos > 0 && cursor_pos <= s.len() {
                     cursor_pos -= 1;
                     while cursor_pos > 0 && !s.is_char_boundary(cursor_pos) {
                         cursor_pos -= 1;
                     }
                 },
-                KeyboardKey::KEY_RIGHT => if cursor_pos < s.len() {
+                KeyboardKey::Right => if cursor_pos < s.len() {
                     let c = s[cursor_pos..].chars().next().unwrap();
                     cursor_pos += c.len_utf8() 
                 },
@@ -36,7 +36,7 @@ fn main() {
             }
         }
 
-        if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
+        if rl.is_mouse_button_pressed(MouseButton::Left) {
             let mut idx = s.len();
             let mut c = std::ffi::CString::new(s.as_str()).unwrap();
             let mut bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };

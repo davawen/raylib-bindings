@@ -45,7 +45,7 @@ pub struct Alias<'a> {
 pub struct Enum<'a> {
     pub name: &'a str,
     pub desc: &'a str,
-    pub values: Vec<(&'a str, i32)>
+    pub values: Vec<(String, i32)>
 }
 
 #[derive(Debug)]
