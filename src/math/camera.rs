@@ -1,4 +1,4 @@
-use crate::ffi::{self, Vector2, Camera, Ray, Matrix, Vector3, Camera2D};
+use crate::ffi::{self, Vector2, Camera, Ray, Matrix, Vector3, Camera2D, CameraMode};
 
 impl Camera {
     /// Get a ray trace from mouse position
@@ -20,6 +20,20 @@ impl Camera {
     /// Gets the screen space coordinate of a position in the window of the given size
     pub fn get_world_to_screen_ex(&self, position: Vector3, size: Vector2) -> Vector2 {
         unsafe { ffi::GetWorldToScreenEx(position, *self, size.x as i32, size.y as i32) }
+    }
+
+    /// Update the camera position for the selected mode
+    pub fn update_camera(&mut self, mode: CameraMode) {
+        // SAFETY: rcamera is a separate module and shares no state with the rest of raylib
+        unsafe { ffi::UpdateCamera(self as *mut Camera, mode as i32) }
+    }
+
+    /// Update the camera's values
+    /// - `movement` is { x: forwards/backwards, y: right/left, z: up/down }
+    /// - `rotation` is { x: yaw, y: pitch, z: roll }
+    pub fn udpate_camera_pro(&mut self, movement: Vector3, rotation: Vector3, zoom: f32) {
+        // SAFETY: rcamera is a separate module and shares no state with the rest of raylib
+        unsafe { ffi::UpdateCameraPro(self as *mut Camera, movement, rotation, zoom) }
     }
 }
 
