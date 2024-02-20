@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use ffi::{Vector2, Rectangle};
 
-use crate::{core::draw::DrawHandle, prelude::Color, ffi};
+use crate::{core::draw::DrawHandle, prelude::{Color, Raylib}, ffi};
 
 /// # Basic shapes drawing functions (module: [rshapes])
 ///
@@ -258,5 +258,149 @@ impl<P> DrawHandle<'_, P> {
     #[inline]
     pub fn draw_poly_lines_ex(&mut self, center: Vector2, sides: usize, radius: f32, rotation: f32, thickness: f32, color: Color) {
         unsafe { ffi::DrawPolyLinesEx(center, sides as i32, radius, rotation, thickness, color) }
+    }
+}
+
+/// # Spline drawing functions (module: [rshapes])
+///
+/// ---
+impl<P> DrawHandle<'_, P> {
+    /// Draw a linear spline. Draws nothing if less than 2 points are given.
+    #[inline]
+    pub fn draw_spline_linear(&mut self, points: &mut [Vector2], thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineLinear(points.as_mut_ptr(), points.len() as i32, thickness, color) }
+    }
+    /// Draw a B-Spline. Draws nothing if less than 4 points are given.
+    #[inline]
+    pub fn draw_spline_basis(&mut self, points: &mut [Vector2], thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineBasis(points.as_mut_ptr(), points.len() as i32, thickness, color) }
+    }
+    /// Draw a Catmull-Rom spline. Draws nothing if less than 4 points are given.
+    /// A Catmull-Rom spline goes through every point given.
+    #[inline]
+    pub fn draw_spline_catmull_rom(&mut self, points: &mut [Vector2], thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineCatmullRom(points.as_mut_ptr(), points.len() as i32, thickness, color) }
+    }
+    /// Draw a quadratic bezier spline. Draws nothing if less than 3 points are given.
+    /// Points should be given in order: [position, control, position, control, ...].
+    #[inline]
+    pub fn draw_spline_bezier_quadratic(&mut self, points: &mut [Vector2], thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineBezierQuadratic(points.as_mut_ptr(), points.len() as i32, thickness, color) }
+    }
+    /// Draw a cubic bezier spline. Draws nothing if less than 4 points are given.
+    /// Points should be given in order: [position, control, control, position, control, control, position, ...].
+    #[inline]
+    pub fn draw_spline_bezier_cubic(&mut self, points: &mut [Vector2], thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineBezierCubic(points.as_mut_ptr(), points.len() as i32, thickness, color) }
+    }
+    /// Draw a single linear spline.
+    #[inline]
+    pub fn draw_spline_seg_linear(&mut self, p1: Vector2, p2: Vector2, thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineSegmentLinear(p1, p2, thickness, color) }
+    }
+    /// Draw a single B-Spline.
+    #[inline]
+    pub fn draw_spline_seg_basis(&mut self, p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineSegmentBasis(p1, p2, p3, p4, thickness, color) }
+    }
+    /// Draw a single Catmull-Rom spline.
+    #[inline]
+    pub fn draw_spline_seg_catmull_rom(&mut self, p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineSegmentCatmullRom(p1, p2, p3, p4, thickness, color) }
+    }
+    /// Draw a single quadratic bezier spline.
+    #[inline]
+    pub fn draw_spline_seg_bezier_quad(&mut self, p1: Vector2, p2: Vector2, p3: Vector2, thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineSegmentBezierQuadratic(p1, p2, p3, thickness, color) }
+    }
+    /// Draw a single cubic bezier spline.
+    #[inline]
+    pub fn draw_spline_seg_bezier_cubic(&mut self, p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, thickness: f32, color: Color) {
+        unsafe { ffi::DrawSplineSegmentBezierCubic(p1, p2, p3, p4, thickness, color) }
+    }
+}
+
+/// # Spline segment point evaluation functions (module: [rshapes])
+/// 
+/// ---
+impl Raylib {
+    /// Evaluate a linear spline for `t` in `[0.0, 1.0]`
+    #[inline]
+    pub fn get_spline_point_linear(&self, start: Vector2, end: Vector2, t: f32) -> Vector2 {
+        unsafe { ffi::GetSplinePointLinear(start, end, t) }
+    }
+    /// Evaluate a linear spline for `t` in `[0.0, 1.0]`
+    #[inline]
+    pub fn get_spline_point_basis(&self, p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, t: f32) -> Vector2 {
+        unsafe { ffi::GetSplinePointBasis(p1, p2, p3, p4, t) }
+    }
+    /// Evaluate a Catmull-Rom spline for `t` in `[0.0, 1.0]`
+    #[inline]
+    pub fn get_spline_point_catmull_rom(&self, p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, t: f32) -> Vector2 {
+        unsafe { ffi::GetSplinePointCatmullRom(p1, p2, p3, p4, t) }
+    }
+    /// Evaluate a quadratic bezier spline for `t` in `[0.0, 1.0]`
+    #[inline]
+    pub fn get_spline_point_bezier_quad(&self, p1: Vector2, p2: Vector2, p3: Vector2, t: f32) -> Vector2 {
+        unsafe { ffi::GetSplinePointBezierQuad(p1, p2, p3, t) }
+    }
+    /// Evaluate a cubic bezier spline for `t` in `[0.0, 1.0]`
+    #[inline]
+    pub fn get_spline_point_bezier_cubic(&self, p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2, t: f32) -> Vector2 {
+        unsafe { ffi::GetSplinePointBezierCubic(p1, p2, p3, p4, t) }
+    }
+}
+
+/// # Shape collision detection functions (module: [rshapes])
+impl Raylib {
+    #[inline]
+    pub fn check_collision_recs(&self, rec1: Rectangle, rec2: Rectangle) -> bool {
+        unsafe { ffi::CheckCollisionRecs(rec1, rec2) }
+    }
+    #[inline]
+    pub fn check_collision_circles(&self, center1: Vector2, radius1: f32, center2: Vector2, radius2: f32) -> bool {
+        unsafe { ffi::CheckCollisionCircles(center1, radius1, center2, radius2) }
+    }
+    #[inline]
+    pub fn check_collision_circle_rec(&self, center: Vector2, radius: f32, rec: Rectangle) -> bool {
+        unsafe { ffi::CheckCollisionCircleRec(center, radius, rec) }
+    }
+    #[inline]
+    pub fn check_collision_point_rec(&self, point: Vector2, rec: Rectangle) -> bool {
+        unsafe { ffi::CheckCollisionPointRec(point, rec) }
+    }
+    #[inline]
+    pub fn check_collision_point_circle(&self, point: Vector2, center: Vector2, radius: f32) -> bool {
+        unsafe { ffi::CheckCollisionPointCircle(point, center, radius) }
+    }
+    #[inline]
+    pub fn check_collision_point_triangle(&self, point: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> bool {
+        unsafe { ffi::CheckCollisionPointTriangle(point, p1, p2, p3) }
+    }
+    #[inline]
+    pub fn check_collision_point_poly(&self, point: Vector2, points: &[Vector2]) -> bool {
+        unsafe { ffi::CheckCollisionPointPoly(point, points.as_ptr().cast_mut(), points.len() as i32) }
+    }
+    /// Returns `Some` with the coordinate if there is a collision and `None` if there wasn't any.
+    #[inline]
+    pub fn check_collision_lines(&self, start1: Vector2, end1: Vector2, start2: Vector2, end2: Vector2) -> Option<Vector2> {
+        let mut p = Vector2::ZERO;
+        let col = unsafe { ffi::CheckCollisionLines(start1, end1, start2, end2, &mut p as *mut _) };
+        if col { Some(p) } else { None }
+    }
+    /// Checks if the given point belongs to the given line, within the given threshold in pixels
+    #[inline]
+    pub fn check_collision_point_line(&self, point: Vector2, start: Vector2, end: Vector2, threshold: i32) -> bool {
+       unsafe { ffi::CheckCollisionPointLine(point, start, end, threshold) }
+    }
+    /// Get the intersection between two rectangles
+    /// Returns None if the resulting intersection is empty
+    #[inline]
+    pub fn get_collision_rec(&self, rec1: Rectangle, rec2: Rectangle) -> Option<Rectangle> {
+        let rec = unsafe { ffi::GetCollisionRec(rec1, rec2) };
+        if rec.is_empty() {
+            return None
+        }
+        Some(rec)
     }
 }
