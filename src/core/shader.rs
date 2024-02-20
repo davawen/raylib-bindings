@@ -1,5 +1,5 @@
 use std::{ffi::{CString, CStr, c_void}, ptr::null};
-use crate::{ffi::{self, ShaderUniformDataType, Vector4, Matrix, Texture2D}, Vector2, Vector3};
+use crate::ffi::{self, ShaderUniformDataType, Vector4, Matrix, Texture2D, Vector2, Vector3};
 
 use super::Raylib;
 
@@ -13,7 +13,7 @@ impl Raylib {
     /// 
     /// # Example
     /// ```
-    /// # use raylib::{Raylib, Vector2, ShaderValue};
+    /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(500, 500, "shader test", 60);
     /// let shader = rl.load_shader(None, Some("assets/mandelbrot.glsl")).unwrap();
     /// let resolution_uniform = shader.get_uniform("resolution");
@@ -24,7 +24,7 @@ impl Raylib {
     ///     shader.set_uniform_value(resolution_uniform, rl.get_screen_size());
     ///     shader.set_uniform_value(camera_pos_uniform, camera_pos);
     ///     let mut draw = draw.begin_shader_mode(&shader);
-    ///     unsafe { raylib::ffi::DrawRectangle(0, 0, rl.get_screen_width() as i32, rl.get_screen_height() as i32, raylib::Color::WHITE) }
+    ///     unsafe { raylib::ffi::DrawRectangle(0, 0, rl.get_screen_width() as i32, rl.get_screen_height() as i32, Color::WHITE) }
     ///     # break
     /// }
     /// ```

@@ -1,4 +1,4 @@
-use raylib::{Raylib, Color, ffi::{KeyboardKey, MouseButton}};
+use raylib::prelude::*;
 
 fn main() {
     let mut rl = Raylib::init_window(800, 800, "Test input", 60);
@@ -54,7 +54,7 @@ fn main() {
             }
         }
 
-        let draw = rl.begin_drawing();
+        let mut draw = rl.begin_drawing();
         draw.clear_background(Color::RAYWHITE);
 
         let c = std::ffi::CString::new(s.as_str()).unwrap();

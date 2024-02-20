@@ -1,6 +1,4 @@
-use std::ffi::{CStr, CString};
-
-use crate::{Raylib, ffi::{self, AutomationEvent}};
+use crate::ffi::{self, AutomationEvent};
 
 pub struct AutomationEventList(ffi::AutomationEventList);
 

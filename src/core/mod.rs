@@ -14,9 +14,11 @@ use crate::ffi;
 pub struct Raylib {
     /// Keeps track of wether an automation event list is currently set
     /// See `core::automation`
+    #[allow(unused)]
     automation_event_set: bool,
     /// Keeps track of wether an automation event is currently recording
     /// See `core::automation`
+    #[allow(unused)]
     automation_event_recording: bool,
     // disallows initialization from outside
     _private: ()

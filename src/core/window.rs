@@ -47,7 +47,7 @@ impl Raylib {
     /// # Example
     /// Basic main loop:
     /// ```
-    /// use raylib::{Color, Raylib};
+    /// use raylib::prelude::*;
     /// let mut rl = Raylib::init_window(800, 800, "Raylib bindings!", 60);
     /// while !rl.window_should_close() {
     ///     let draw = rl.begin_drawing();
@@ -92,40 +92,41 @@ impl Raylib {
     /// Check if one specific window flag is enabled
     pub fn is_window_state(&self, flag: ffi::ConfigFlags) -> bool { unsafe { ffi::IsWindowState(flag as u32) } }                      
     /// Set window configuration state using flags (only PLATFORM_DESKTOP)
-    pub fn set_window_state(&self, flags: ConfigFlags) { unsafe { ffi::SetWindowState(flags.bits()) } }
-    /// Clear the window configuration state flags
-    pub fn clear_window_state(&self, flags: ConfigFlags) { unsafe { ffi::ClearWindowState(flags.bits()) } }
+    pub fn set_window_state(&mut self, flags: ConfigFlags) { unsafe { ffi::SetWindowState(flags.bits()) } }
+    /// Clear the window configuration state flags.
+    /// That is, set the given flags to false.
+    pub fn clear_window_state(&mut self, flags: ConfigFlags) { unsafe { ffi::ClearWindowState(flags.bits()) } }
     /// Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
-    pub fn toggle_fullscreen(&self) { unsafe { ffi::ToggleFullscreen() } }
+    pub fn toggle_fullscreen(&mut self) { unsafe { ffi::ToggleFullscreen() } }
     /// Toggle window state: borderless windowed (only PLATFORM_DESKTOP)
-    pub fn toggle_borderless_windowed(&self) { unsafe { ffi::ToggleBorderlessWindowed() } }
+    pub fn toggle_borderless_windowed(&mut self) { unsafe { ffi::ToggleBorderlessWindowed() } }
     /// Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
-    pub fn maximize_window(&self) { unsafe { ffi::MaximizeWindow() } }
+    pub fn maximize_window(&mut self) { unsafe { ffi::MaximizeWindow() } }
     /// Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
-    pub fn minimize_window(&self) { unsafe { ffi::MinimizeWindow() } }
+    pub fn minimize_window(&mut self) { unsafe { ffi::MinimizeWindow() } }
     /// Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
-    pub fn restore_window(&self) { unsafe { ffi::RestoreWindow() } }
+    pub fn restore_window(&mut self) { unsafe { ffi::RestoreWindow() } }
     /// Set icon for window (single image, RGBA 32bit, only PLATFORM_DESKTOP)
-    pub fn set_window_icon(&self, image: Image) { unsafe { ffi::SetWindowIcon(image) } }
+    pub fn set_window_icon(&mut self, image: Image) { unsafe { ffi::SetWindowIcon(image) } }
     /// Set icon for window (multiple images, RGBA 32bit, only PLATFORM_DESKTOP)
-    pub fn set_window_icons(&self, images: &[Image]) {
+    pub fn set_window_icons(&mut self, images: &[Image]) {
         unsafe { ffi::SetWindowIcons(images.as_ptr() as *mut Image, images.len() as i32) }
     }
     /// Set title for window (only PLATFORM_DESKTOP and PLATFORM_WEB)
-    pub fn set_window_title(&self, title: &CStr) { unsafe { ffi::SetWindowTitle(title.as_ptr()) } }
+    pub fn set_window_title(&mut self, title: &CStr) { unsafe { ffi::SetWindowTitle(title.as_ptr()) } }
     /// Set window position on screen (only PLATFORM_DESKTOP)
-    pub fn set_window_position(&self, x: i32, y: i32) { unsafe { ffi::SetWindowPosition(x, y) } }
+    pub fn set_window_position(&mut self, x: i32, y: i32) { unsafe { ffi::SetWindowPosition(x, y) } }
     /// TODO: Safer handling for monitor indices
     /// Set monitor for the current window
-    pub fn set_window_monitor(&self, monitor: i32) { unsafe { ffi::SetWindowMonitor(monitor) } }
+    pub fn set_window_monitor(&mut self, monitor: i32) { unsafe { ffi::SetWindowMonitor(monitor) } }
     /// Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
-    pub fn set_window_min_size(&self, width: i32, height: i32) { unsafe { ffi::SetWindowMinSize(width, height) } }
+    pub fn set_window_min_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowMinSize(width, height) } }
     /// Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
-    pub fn set_window_max_size(&self, width: i32, height: i32) { unsafe { ffi::SetWindowMaxSize(width, height) } }
+    pub fn set_window_max_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowMaxSize(width, height) } }
     /// Set window dimensions
-    pub fn set_window_size(&self, width: i32, height: i32) { unsafe { ffi::SetWindowSize(width, height) } }
+    pub fn set_window_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowSize(width, height) } }
     /// Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
-    pub fn set_window_opacity(&self, opacity: f32) { unsafe { ffi::SetWindowOpacity(opacity) } }
+    pub fn set_window_opacity(&mut self, opacity: f32) { unsafe { ffi::SetWindowOpacity(opacity) } }
 
 
     /// Set window focused (only PLATFORM_DESKTOP)

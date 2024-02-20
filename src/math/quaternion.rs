@@ -1,6 +1,6 @@
 use float_cmp::{ApproxEq, F32Margin};
 
-use crate::{ffi::{Quaternion, Matrix, Vector4}, Vector3};
+use crate::ffi::{Quaternion, Matrix, Vector3, Vector4};
 
 use std::ops::{Add, Sub, Mul, Div};
 
@@ -111,7 +111,7 @@ impl Quaternion {
     /// That is, the quaternion that undoes whatever rotation the given quaternion does
     /// Undefined for the null quaternion
     /// ```
-    /// use raylib::Quaternion;
+    /// use raylib::prelude::Quaternion;
     /// # let q = Quaternion::new(0.3, 0.6, 0.2, 0.6).normalize();
     /// assert!((q * q.inverse() - Quaternion::IDENTITY).length() <= f32::EPSILON);
     /// ```

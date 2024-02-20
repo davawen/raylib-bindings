@@ -1,4 +1,4 @@
-use crate::{ffi::{self, Color, Camera2D, Camera3D, RenderTexture2D, VrStereoConfig, BlendMode}, Shader};
+use crate::{ffi::{self, Color, Camera2D, Camera3D, RenderTexture2D, VrStereoConfig, BlendMode}, core::shader::Shader};
 use super::Raylib;
 
 pub enum RenderMode {
@@ -66,7 +66,7 @@ impl<P> DrawHandle<'_, P> {
 impl<P> DrawHandle<'_, P> {
     pub fn end(self) { }
 
-    pub fn clear_background(&self, color: Color) { unsafe { ffi::ClearBackground(color) } }
+    pub fn clear_background(&mut self, color: Color) { unsafe { ffi::ClearBackground(color) } }
 }
 
 impl<P> Drop for DrawHandle<'_, P> {

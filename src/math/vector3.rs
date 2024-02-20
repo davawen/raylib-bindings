@@ -2,7 +2,7 @@ use float_cmp::{ApproxEq, F32Margin};
 
 ///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
-use crate::{ffi::{Vector3, Vector4, Matrix, Quaternion}, Vector2};
+use crate::ffi::{Vector2, Vector3, Vector4, Matrix, Quaternion};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 
@@ -79,7 +79,7 @@ impl Vector3 {
     /// Clamps the length of this vector between the specified values by stretching or squeezing it if needed
     /// Doesn't do anything if `self` is the null vector
     /// ```
-    /// use raylib::Vector3;
+    /// use raylib::prelude::Vector3;
     /// let v = Vector3::splat(2.0); // length is sqrt(12.0)
     /// assert_eq!(v.clamp_magnitude(3.0, 10.0).length(), 12.0_f32.sqrt()); // 3.0 < sqrt(12.0) < 10.0
     /// ```
@@ -181,7 +181,7 @@ impl Vector3 {
     /// NOTE: Assume `self` is on the plane of the triangle
     ///
     /// ```
-    /// use raylib::Vector3;
+    /// use raylib::prelude::Vector3;
     /// use float_cmp::assert_approx_eq;
     /// let a = Vector3::new(0.0, 0.0, 0.0);
     /// let b = Vector3::new(1.0, 0.0, 0.0);

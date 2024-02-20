@@ -2,32 +2,32 @@ use std::ffi::CStr;
 
 use bitflags::bitflags;
 
-use crate::{Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture}, Vector2};
+use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture, Vector2}};
 
 // === Keyboard functions ===
 impl Raylib {
     /// Check if a key has been pressed in this frame (rising edge)
-    pub fn is_key_pressed(&mut self, key: KeyboardKey) -> bool {
+    pub fn is_key_pressed(&self, key: KeyboardKey) -> bool {
         unsafe { ffi::IsKeyPressed(key as i32) }
     }
 
     /// Check if a key has been pressed again (only on desktop platforms)
-    pub fn is_key_pressed_again(&mut self, key: KeyboardKey) -> bool {
+    pub fn is_key_pressed_again(&self, key: KeyboardKey) -> bool {
         unsafe { ffi::IsKeyPressedRepeat(key as i32) }
     }
 
     /// Check if a key has been released in this frame (falling edge)
-    pub fn is_key_released(&mut self, key: KeyboardKey) -> bool {
+    pub fn is_key_released(&self, key: KeyboardKey) -> bool {
         unsafe { ffi::IsKeyReleased(key as i32) }
     }
 
     /// Check if a key is currently being pressed
-    pub fn is_key_down(&mut self, key: KeyboardKey) -> bool {
+    pub fn is_key_down(&self, key: KeyboardKey) -> bool {
         unsafe { ffi::IsKeyDown(key as i32) }
     }
 
     /// Check if a key is currently not being pressed
-    pub fn is_key_up(&mut self, key: KeyboardKey) -> bool {
+    pub fn is_key_up(&self, key: KeyboardKey) -> bool {
         unsafe { ffi::IsKeyUp(key as i32) }
     }
 
@@ -72,7 +72,7 @@ pub enum GamepadAxis {
 }
 
 impl Raylib {
-    fn gamepad_available(&mut self, gamepad: i32) -> bool {
+    fn gamepad_available(&self, gamepad: i32) -> bool {
         unsafe { ffi::IsGamepadAvailable(gamepad) }
     }
 
@@ -81,15 +81,16 @@ impl Raylib {
     /// There is maximum of 4 gamepads
     /// # Examples
     /// ```
-    /// # use raylib::{Raylib, GamepadButton, Color};
+    /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let mut draw = rl.begin_drawing();
     /// if let Some(gamepad) = rl.is_gamepad_available(0) {
-    ///     if rl.is_gamepad_button_down(gamepad, GamepadButton::ButtonMiddleLeft) {
-    ///         rl.draw_circle(100.0, 100.0, 20.0, Color::RED);
+    ///     if rl.is_gamepad_button_down(gamepad, GamepadButton::MiddleLeft) {
+    ///         draw.circle(100.0, 100.0, 20.0, Color::RED);
     ///     }
     /// }
     /// ```
-    pub fn is_gamepad_available(&mut self, gamepad: i32) -> Option<Gamepad> {
+    pub fn is_gamepad_available(&self, gamepad: i32) -> Option<Gamepad> {
         if self.gamepad_available(gamepad) {
             Some(Gamepad(gamepad))
         } else {
@@ -102,7 +103,7 @@ impl Raylib {
     /// - it isn't available
     /// - it doesn't have a name (if the underlying raylib API returns a NULL pointer)
     /// - if its name is not valid utf-8. If you need its name regardless, you can use `get_name_cstr` directly.
-    pub fn get_gamepad_name(&mut self, gamepad: Gamepad) -> Option<&str> {
+    pub fn get_gamepad_name(&self, gamepad: Gamepad) -> Option<&str> {
         if !self.gamepad_available(gamepad.0) { return None }
 
         let cstr = self.get_gamepad_name_cstr(gamepad)?;
@@ -114,13 +115,13 @@ impl Raylib {
     /// # Examples 
     /// Get a `Cow<str>` with invalid characters removed:
     /// ```
-    /// # use raylib::Raylib;
+    /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
     /// if let Some(gamepad) = rl.is_gamepad_available(0) {
-    ///     let name = rl.get_name_cstr(gamepad).map(|s| s.to_string_lossy());
+    ///     let name = rl.get_gamepad_name_cstr(gamepad).map(|s| s.to_string_lossy());
     /// }
     /// ```
-    pub fn get_gamepad_name_cstr(&mut self, gamepad: Gamepad) -> Option<&CStr> {
+    pub fn get_gamepad_name_cstr(&self, gamepad: Gamepad) -> Option<&CStr> {
         if !self.gamepad_available(gamepad.0) { return None }
 
         unsafe { 
@@ -133,28 +134,28 @@ impl Raylib {
 
     /// Checks if a gamepad button has been pressed this frame (rising edge)
     /// Returns false if the gamepad isn't available
-    pub fn is_gamepad_button_pressed(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+    pub fn is_gamepad_button_pressed(&self, gamepad: Gamepad, button: GamepadButton) -> bool {
         if !self.gamepad_available(gamepad.0) { return false }
         unsafe { ffi::IsGamepadButtonPressed(gamepad.0, button as i32) }
     }
 
     /// Checks if a gamepad button has been released this frame (falling edge)
     /// Returns false if the gamepad isn't available
-    pub fn is_gamepad_button_released(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+    pub fn is_gamepad_button_released(&self, gamepad: Gamepad, button: GamepadButton) -> bool {
         if !self.gamepad_available(gamepad.0) { return false }
         unsafe { ffi::IsGamepadButtonReleased(gamepad.0, button as i32) }
     }
 
     /// Checks if a gamepad button is currently being held down
     /// Returns false if the gamepad isn't available
-    pub fn is_gamepad_button_down(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+    pub fn is_gamepad_button_down(&self, gamepad: Gamepad, button: GamepadButton) -> bool {
         if !self.gamepad_available(gamepad.0) { return false }
         unsafe { ffi::IsGamepadButtonDown(gamepad.0, button as i32) }
     }
 
     /// Checks if a gamepad button is currently not being held down
     /// Returns false if the gamepad isn't available
-    pub fn is_gamepad_button_up(&mut self, gamepad: Gamepad, button: GamepadButton) -> bool {
+    pub fn is_gamepad_button_up(&self, gamepad: Gamepad, button: GamepadButton) -> bool {
         if !self.gamepad_available(gamepad.0) { return false }
         unsafe { ffi::IsGamepadButtonUp(gamepad.0, button as i32) }
     }
@@ -162,7 +163,7 @@ impl Raylib {
     /// Get the last gamepad button pressed
     /// Returns `None` if there wasn't any
     /// Will never return `GamepadButton::Unknown`
-    pub fn get_gamepad_button_pressed(&mut self) -> Option<GamepadButton> {
+    pub fn get_gamepad_button_pressed(&self) -> Option<GamepadButton> {
         let button = unsafe { ffi::GetGamepadButtonPressed() };
 
         if button == 0 { return None }
@@ -171,7 +172,7 @@ impl Raylib {
 
     /// Get the number of axis of the gamepad
     /// Returns 0 if the gamepad isn't available
-    pub fn get_gamepad_axis_count(&mut self, gamepad: Gamepad) -> i32 {
+    pub fn get_gamepad_axis_count(&self, gamepad: Gamepad) -> i32 {
         if !self.gamepad_available(gamepad.0) { return 0 }
 
         unsafe { ffi::GetGamepadAxisCount(gamepad.0) }
@@ -179,7 +180,7 @@ impl Raylib {
 
     /// Get the axis movement for a given gamepad
     /// Returns `Vector2::ZERO` if the gamepad isn't available
-    pub fn get_gamepad_axis_movement(&mut self, gamepad: Gamepad, axis: GamepadAxis) -> Vector2 {
+    pub fn get_gamepad_axis_movement(&self, gamepad: Gamepad, axis: GamepadAxis) -> Vector2 {
         if !self.gamepad_available(gamepad.0) { return Vector2::ZERO }
 
         let (x, y) = match axis {
@@ -201,42 +202,42 @@ impl Raylib {
 // === Mouse functions ===
 impl Raylib {
     /// Checks if a mouse button has been pressed in this frame (rising edge).
-    pub fn is_mouse_button_pressed(&mut self, button: MouseButton) -> bool {
+    pub fn is_mouse_button_pressed(&self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonPressed(button as i32) }
     }
 
     /// Checks if a mouse button is being pressed currently.
-    pub fn is_mouse_button_down(&mut self, button: MouseButton) -> bool {
+    pub fn is_mouse_button_down(&self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonDown(button as i32) }
     }
 
     /// Checks if a mouse button has been release in this frame (falling edge).
-    pub fn is_mouse_button_released(&mut self, button: MouseButton) -> bool {
+    pub fn is_mouse_button_released(&self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonReleased(button as i32) }
     }
 
     /// Checks if a mouse button is not being pressed currently.
-    pub fn is_mouse_button_up(&mut self, button: MouseButton) -> bool {
+    pub fn is_mouse_button_up(&self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonUp(button as i32) }
     }
 
     /// Gets the current X position of the mouse (relative to the window).
-    pub fn get_mouse_x(&mut self) -> f32 {
+    pub fn get_mouse_x(&self) -> f32 {
         unsafe { ffi::GetMouseX() as f32 }
     }
 
     /// Gets the current Y position of the mouse (relative to the window).
-    pub fn get_mouse_y(&mut self) -> f32 {
+    pub fn get_mouse_y(&self) -> f32 {
         unsafe { ffi::GetMouseY() as f32 }
     }
 
     /// Gets the current position of the mouse (relative to the window).
-    pub fn get_mouse_pos(&mut self) -> Vector2 {
+    pub fn get_mouse_pos(&self) -> Vector2 {
         unsafe { ffi::GetMousePosition() }
     }
 
     /// Gets how much the mouse has travelled between the last frame and the current frame.
-    pub fn get_mouse_delta(&mut self) -> Vector2 {
+    pub fn get_mouse_delta(&self) -> Vector2 {
         unsafe { ffi::GetMouseDelta() }
     }
 
@@ -258,12 +259,12 @@ impl Raylib {
     }
 
     /// Gets the X or Y mouse wheel movement, whichever is larger.
-    pub fn get_mouse_wheel_move(&mut self) -> f32 {
+    pub fn get_mouse_wheel_move(&self) -> f32 {
         unsafe { ffi::GetMouseWheelMove() }
     }
 
     /// Gets the X and Y mouse wheel movement.
-    pub fn get_mouse_wheel_move_v(&mut self) -> Vector2 {
+    pub fn get_mouse_wheel_move_v(&self) -> Vector2 {
         unsafe { ffi::GetMouseWheelMoveV() }
     }
 }
@@ -272,14 +273,14 @@ impl Raylib {
 impl Raylib {
     /// Gets the X position for the first touch point.
     /// Returns `None` if there are no touch points.
-    pub fn get_touch_x(&mut self) -> Option<f32> {
+    pub fn get_touch_x(&self) -> Option<f32> {
         if self.get_touch_point_count() == 0 { return None }
         unsafe { Some(ffi::GetTouchX() as f32) }
     }
 
     /// Gets the Y position for the first touch point.
     /// Returns `None` if there are no touch points.
-    pub fn get_touch_y(&mut self) -> Option<f32> {
+    pub fn get_touch_y(&self) -> Option<f32> {
         if self.get_touch_point_count() == 0 { return None }
         unsafe { Some(ffi::GetTouchY() as f32) }
     }
@@ -289,13 +290,14 @@ impl Raylib {
     /// If you need a specific touch point index, use `Raylib::get_touch_position` instead.
     /// # Examples
     /// ```
-    /// # use raylib::{Raylib, Color};
+    /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let mut draw = rl.begin_drawing();
     /// if let Some(pos) = rl.get_touch_pos() {
-    ///     rl.draw_circle_v(pos, 30.0, Color::ORANGE);
+    ///     draw.circle_v(pos, 30.0, Color::ORANGE);
     /// }
     /// ```
-    pub fn get_touch_pos(&mut self) -> Option<Vector2> {
+    pub fn get_touch_pos(&self) -> Option<Vector2> {
         if self.get_touch_point_count() == 0 { return None }
         unsafe { Some(ffi::GetTouchPosition(0)) }
     }
@@ -303,7 +305,7 @@ impl Raylib {
     /// Gets the position for the given touch point.
     /// Returns `None` if the given index is over the number of touch points.
     /// If you need every touch position, prefer using `Raylib::get_touch_positions`
-    pub fn get_touch_position(&mut self, index: usize) -> Option<Vector2> {
+    pub fn get_touch_position(&self, index: usize) -> Option<Vector2> {
         if self.get_touch_point_count() < index { return None }
         unsafe { Some(ffi::GetTouchPosition(index as i32)) }
     }
@@ -314,9 +316,10 @@ impl Raylib {
     /// ```
     /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let mut draw = rl.begin_drawing();
     /// for (idx, pos) in rl.get_touch_positions().enumerate() {
-    ///     rl.draw_circle_v(pos, 30.0, Color::ORANGE);
-    ///     rl.draw_text(&format!("{idx}"), pos.x - 10.0, pos.y - 70.0, 40.0, Color::BLACK);
+    ///     draw.circle_v(pos, 30.0, Color::ORANGE);
+    ///     draw.text(&format!("{idx}"), pos.x - 10.0, pos.y - 70.0, 40.0, Color::BLACK);
     /// }
     /// ```
     /// Get the identifier of every point:
@@ -341,7 +344,7 @@ impl Raylib {
     }
 
     /// Returns an iterator over every touch id.
-    pub fn get_touch_ids(&self) -> impl Iterator<Item = i32> {
+    pub fn get_touch_point_ids(&self) -> impl Iterator<Item = i32> {
         (0..self.get_touch_point_count()).map(|index| {
             unsafe { ffi::GetTouchPointId(index as i32) }
         })

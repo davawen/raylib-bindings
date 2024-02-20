@@ -1,4 +1,4 @@
-use raylib::*;
+use raylib::prelude::*;
 
 fn main() {
     let mut rl = Raylib::init_window(800, 800, "Window title", 60);

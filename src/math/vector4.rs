@@ -1,6 +1,6 @@
 use float_cmp::{ApproxEq, F32Margin};
 
-use crate::{ffi::Vector4, Vector2, Vector3};
+use crate::ffi::{Vector2, Vector3, Vector4};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 

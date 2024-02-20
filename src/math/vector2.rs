@@ -1,6 +1,6 @@
 ///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
-use crate::{ffi::{Vector2, Vector4, Matrix}, Vector3};
+use crate::ffi::{Vector2, Vector3, Vector4, Matrix};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 use float_cmp::{ApproxEq, F32Margin};
@@ -68,7 +68,7 @@ impl Vector2 {
     /// Normalizes this vector (make its length 1)
     /// Undefined for the null vector
     /// ```
-    /// use raylib::Vector2;
+    /// use raylib::prelude::Vector2;
     /// use float_cmp::assert_approx_eq;
     /// assert_approx_eq!(f32, Vector2::splat(1.0).normalize().length(), 1.0, ulps = 1);
     /// ```
@@ -86,7 +86,7 @@ impl Vector2 {
     /// Clamp the length of this vector between the specified values by stretching or squeezing it if needed
     /// Doesn't do anything if `self` is the null vector
     /// ```
-    /// use raylib::Vector2;
+    /// use raylib::prelude::Vector2;
     /// let v = Vector2::splat(2.0); // length is sqrt(8)
     /// assert_eq!(v.clamp_magnitude(5.0, 10.0).length(), 5.0);
     /// ```

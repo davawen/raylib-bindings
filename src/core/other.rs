@@ -1,6 +1,6 @@
 use std::{ffi::{CStr, CString}, ptr::NonNull};
 
-use crate::{Raylib, ffi::{self, TraceLogLevel}};
+use crate::{core::Raylib, ffi::{self, TraceLogLevel}};
 
 use super::RaylibAlloc;
 
@@ -64,7 +64,7 @@ impl Raylib {
     /// Set random seed with current time:
     /// ```
     /// use std::time::SystemTime;
-    /// use raylib::Raylib;
+    /// use raylib::prelude::*;
     /// let rl = Raylib::init_window(800, 800, "Random value", 60);
     /// rl.set_random_seed(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as u32)
     /// ```
