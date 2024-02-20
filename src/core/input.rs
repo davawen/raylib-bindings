@@ -73,6 +73,9 @@ pub enum GamepadAxis {
     Trigger
 }
 
+/// # Gamepad input functions (module: [rcore])
+/// 
+/// ---
 impl Raylib {
     fn gamepad_available(&self, gamepad: i32) -> bool {
         unsafe { ffi::IsGamepadAvailable(gamepad) }

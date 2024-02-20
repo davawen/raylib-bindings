@@ -17,6 +17,9 @@ pub struct DrawHandle<'a, P> {
     _parent: Option<&'a mut P>
 }
 
+/// # Drawing (module: [rcore])
+///
+/// ---
 impl Raylib {
     /// Setup canvas (framebuffer) to start drawing
     pub fn begin_drawing(&mut self) -> DrawHandle<'static, ()> {
@@ -25,6 +28,9 @@ impl Raylib {
     }
 }
 
+/// # Begin modes (module: [rcore])
+/// 
+/// ---
 impl<P> DrawHandle<'_, P> {
     // Begin 2D mode with custom camera (2D)
     pub fn begin_mode2d(&mut self, camera: Camera2D) -> DrawHandle<Self> {

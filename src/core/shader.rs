@@ -3,6 +3,9 @@ use crate::ffi::{self, ShaderUniformDataType, Vector4, Matrix, Texture2D, Vector
 
 use super::Raylib;
 
+/// # Shader creation functions (module: [rcore])
+/// 
+/// ---
 impl Raylib {
     /// Reads code for a shader from the given files, and loads them into raylib.
     /// The default shader is used for `None`s.

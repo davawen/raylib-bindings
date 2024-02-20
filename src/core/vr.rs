@@ -1,6 +1,9 @@
 use crate::ffi::{self, VrDeviceInfo, VrStereoConfig};
 use super::Raylib;
 
+/// # Vr config functions (module: [rcore])
+///
+/// ---
 impl Raylib {
     pub fn load_vr_stereo_config(device: VrDeviceInfo) -> VrStereoConfig {
         unsafe { ffi::LoadVrStereoConfig(device) }
