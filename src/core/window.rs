@@ -50,7 +50,7 @@ impl Raylib {
     /// use raylib::prelude::*;
     /// let mut rl = Raylib::init_window(800, 800, "Raylib bindings!", 60);
     /// while !rl.window_should_close() {
-    ///     let draw = rl.begin_drawing();
+    ///     let mut draw = rl.begin_drawing();
     ///     draw.clear_background(Color::RAYWHITE);
     ///     draw.end();
     ///     # break

@@ -5,6 +5,7 @@ pub mod vector4;
 pub mod matrix;
 pub mod quaternion;
 pub mod camera;
+pub mod rectangle;
 
 /// Reimplementation of raylib math utils
 pub trait MathUtils: Copy {
