@@ -1,7 +1,8 @@
 pub mod ffi;
 
-mod core;
-mod math;
-mod shapes;
+pub mod core;
+pub mod math;
+pub mod shapes;
+pub mod textures;
 
 pub mod prelude;

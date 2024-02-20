@@ -1,5 +1,5 @@
 use std::{ffi::{CString, CStr, c_void}, ptr::null};
-use crate::ffi::{self, ShaderUniformDataType, Vector4, Matrix, Texture2D, Vector2, Vector3};
+use crate::{ffi::{self, ShaderUniformDataType, Vector4, Matrix, Vector2, Vector3}, prelude::Texture};
 
 use super::Raylib;
 
@@ -195,8 +195,8 @@ unsafe impl ShaderValue<Matrix> for Shader {
     }
 }
 
-unsafe impl ShaderValue<Texture2D> for Shader {
-    fn set_uniform_value(&self, uniform: Uniform, v: Texture2D) {
-        unsafe { ffi::SetShaderValueTexture(self.0, uniform.0, v) }
+unsafe impl ShaderValue<Texture> for Shader {
+    fn set_uniform_value(&self, uniform: Uniform, v: Texture) {
+        unsafe { ffi::SetShaderValueTexture(self.0, uniform.0, v.get_ffi_texture()) }
     }
 }

@@ -2,16 +2,24 @@ use std::f32::consts::PI;
 
 use ffi::{Vector2, Rectangle};
 
-use crate::{core::draw::DrawHandle, prelude::{Color, Raylib}, ffi};
+use crate::{core::draw::DrawHandle, prelude::{Color, Raylib, Texture}, ffi};
 
 /// # Basic shapes drawing functions (module: [rshapes])
 ///
 /// ---
 impl<P> DrawHandle<'_, P> {
+    /// Set texture and rectangle to be used on shapes drawing.
+    #[inline]
+    pub fn set_shapes_texture(&mut self, texture: Texture, source: Rectangle) {
+        unsafe { ffi::SetShapesTexture(texture.get_ffi_texture(), source) }
+    }
+
+    /// Draw a single pixel.
     #[inline]
     pub fn pixel(&mut self, pos_x: f32, pos_y: f32, color: Color) {
         self.pixel_v(Vector2::new(pos_x, pos_y), color)
     }
+    /// Draw a single pixel.
     #[inline]
     pub fn pixel_v(&mut self, pos: Vector2, color: Color) {
         unsafe { ffi::DrawPixelV(pos, color) }

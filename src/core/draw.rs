@@ -1,4 +1,4 @@
-use crate::{ffi::{self, Color, Camera2D, Camera3D, RenderTexture2D, VrStereoConfig, BlendMode}, core::shader::Shader};
+use crate::{ffi::{self, Color, Camera2D, Camera3D, VrStereoConfig, BlendMode}, core::shader::Shader, prelude::RenderTexture};
 use super::Raylib;
 
 pub enum RenderMode {
@@ -43,8 +43,8 @@ impl<P> DrawHandle<'_, P> {
         DrawHandle { mode: RenderMode::Mode3D, _parent: Some(self) }
     }
     // Begin drawing to render texture
-    pub fn begin_texture_mode(&mut self, target: RenderTexture2D) -> DrawHandle<Self> {
-        unsafe { ffi::BeginTextureMode(target) }
+    pub fn begin_texture_mode(&mut self, target: RenderTexture) -> DrawHandle<Self> {
+        unsafe { ffi::BeginTextureMode(target.get_ffi_texture()) }
         DrawHandle { mode: RenderMode::TextureMode, _parent: Some(self) }
     }
     // Begin custom shader drawing
