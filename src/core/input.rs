@@ -1,6 +1,8 @@
 use std::ffi::CStr;
 
-use crate::{Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton}, Vector2};
+use bitflags::bitflags;
+
+use crate::{Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture}, Vector2};
 
 // === Keyboard functions ===
 impl Raylib {
@@ -76,12 +78,13 @@ impl Raylib {
 
     /// Checks if the given gamepad is available
     /// Returns Some(id) if the gamepad is available, and None otherwise
+    /// There is maximum of 4 gamepads
     /// # Examples
     /// ```
     /// # use raylib::{Raylib, GamepadButton, Color};
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
     /// if let Some(gamepad) = rl.is_gamepad_available(0) {
-    ///     if rl.is_button_down(gamepad, GamepadButton::ButtonMiddleLeft) {
+    ///     if rl.is_gamepad_button_down(gamepad, GamepadButton::ButtonMiddleLeft) {
     ///         rl.draw_circle(100.0, 100.0, 20.0, Color::RED);
     ///     }
     /// }
@@ -197,70 +200,227 @@ impl Raylib {
 
 // === Mouse functions ===
 impl Raylib {
-    /// Check if a mouse button has been pressed in this frame (rising edge)
+    /// Checks if a mouse button has been pressed in this frame (rising edge).
     pub fn is_mouse_button_pressed(&mut self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonPressed(button as i32) }
     }
 
-    /// Check if a mouse button is being pressed currently
+    /// Checks if a mouse button is being pressed currently.
     pub fn is_mouse_button_down(&mut self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonDown(button as i32) }
     }
 
-    /// Check if a mouse button has been release in this frame (falling edge)
+    /// Checks if a mouse button has been release in this frame (falling edge).
     pub fn is_mouse_button_released(&mut self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonReleased(button as i32) }
     }
 
-    /// Check if a mouse button is not being pressed currently
+    /// Checks if a mouse button is not being pressed currently.
     pub fn is_mouse_button_up(&mut self, button: MouseButton) -> bool {
         unsafe { ffi::IsMouseButtonUp(button as i32) }
     }
 
-    /// Gets the current X position of the mouse (relative to the window)
+    /// Gets the current X position of the mouse (relative to the window).
     pub fn get_mouse_x(&mut self) -> f32 {
         unsafe { ffi::GetMouseX() as f32 }
     }
 
-    /// Gets the current Y position of the mouse (relative to the window)
+    /// Gets the current Y position of the mouse (relative to the window).
     pub fn get_mouse_y(&mut self) -> f32 {
         unsafe { ffi::GetMouseY() as f32 }
     }
 
-    /// Gets the current position of the mouse (relative to the window)
+    /// Gets the current position of the mouse (relative to the window).
     pub fn get_mouse_pos(&mut self) -> Vector2 {
         unsafe { ffi::GetMousePosition() }
     }
 
-    /// Gets how much the mouse has travelled between the last frame and the current frame
+    /// Gets how much the mouse has travelled between the last frame and the current frame.
     pub fn get_mouse_delta(&mut self) -> Vector2 {
         unsafe { ffi::GetMouseDelta() }
     }
 
-    /// Sets the mouse position (relative to the window)
+    /// Sets the mouse position (relative to the window).
     pub fn set_mouse_pos(&mut self, position: Vector2) {
         unsafe { ffi::SetMousePosition(position.x as i32, position.y as i32) }
     }
 
-    /// Sets the mouse offset applied to the mouse position when getting it
+    /// Sets the mouse offset applied to the mouse position when getting it.
     /// `mouse_pos = (real_mouse_pos + mouse_offset)*mouse_scale`
     pub fn set_mouse_offset(&mut self, offset: Vector2) {
         unsafe { ffi::SetMouseOffset(offset.x as i32, offset.y as i32) }
     }
 
-    /// Sets the mouse scale applied to the mouse position when getting it
+    /// Sets the mouse scale applied to the mouse position when getting it.
     /// `mouse_pos = (real_mouse_pos + mouse_offset)*mouse_scale`
     pub fn set_mouse_scale(&mut self, scale: Vector2) {
         unsafe { ffi::SetMouseScale(scale.x, scale.y) }
     }
 
-    /// Gets the X or Y mouse wheel movement, whichever is larger 
+    /// Gets the X or Y mouse wheel movement, whichever is larger.
     pub fn get_mouse_wheel_move(&mut self) -> f32 {
         unsafe { ffi::GetMouseWheelMove() }
     }
 
-    /// Gets the X and Y mouse wheel movement
+    /// Gets the X and Y mouse wheel movement.
     pub fn get_mouse_wheel_move_v(&mut self) -> Vector2 {
         unsafe { ffi::GetMouseWheelMoveV() }
+    }
+}
+
+// === Touch input ===
+impl Raylib {
+    /// Gets the X position for the first touch point.
+    /// Returns `None` if there are no touch points.
+    pub fn get_touch_x(&mut self) -> Option<f32> {
+        if self.get_touch_point_count() == 0 { return None }
+        unsafe { Some(ffi::GetTouchX() as f32) }
+    }
+
+    /// Gets the Y position for the first touch point.
+    /// Returns `None` if there are no touch points.
+    pub fn get_touch_y(&mut self) -> Option<f32> {
+        if self.get_touch_point_count() == 0 { return None }
+        unsafe { Some(ffi::GetTouchY() as f32) }
+    }
+
+    /// Gets the position for the first touch point.
+    /// Returns `None` if there are no touch points.
+    /// If you need a specific touch point index, use `Raylib::get_touch_position` instead.
+    /// # Examples
+    /// ```
+    /// # use raylib::{Raylib, Color};
+    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// if let Some(pos) = rl.get_touch_pos() {
+    ///     rl.draw_circle_v(pos, 30.0, Color::ORANGE);
+    /// }
+    /// ```
+    pub fn get_touch_pos(&mut self) -> Option<Vector2> {
+        if self.get_touch_point_count() == 0 { return None }
+        unsafe { Some(ffi::GetTouchPosition(0)) }
+    }
+
+    /// Gets the position for the given touch point.
+    /// Returns `None` if the given index is over the number of touch points.
+    /// If you need every touch position, prefer using `Raylib::get_touch_positions`
+    pub fn get_touch_position(&mut self, index: usize) -> Option<Vector2> {
+        if self.get_touch_point_count() < index { return None }
+        unsafe { Some(ffi::GetTouchPosition(index as i32)) }
+    }
+
+    /// Returns an iterator over every touch position.
+    /// # Examples
+    /// Draw a circle at every touch point:
+    /// ```
+    /// # use raylib::prelude::*;
+    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// for (idx, pos) in rl.get_touch_positions().enumerate() {
+    ///     rl.draw_circle_v(pos, 30.0, Color::ORANGE);
+    ///     rl.draw_text(&format!("{idx}"), pos.x - 10.0, pos.y - 70.0, 40.0, Color::BLACK);
+    /// }
+    /// ```
+    /// Get the identifier of every point:
+    /// ```
+    /// # use raylib::prelude::*;
+    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// for (pos, id) in rl.get_touch_positions().zip(rl.get_touch_point_ids()) {
+    ///     println!("At {pos:?}: {id}");
+    /// }
+    /// ```
+    pub fn get_touch_positions(&self) -> impl Iterator<Item = Vector2> {
+        (0..self.get_touch_point_count()).map(|index| {
+            unsafe { ffi::GetTouchPosition(index as i32) }
+        })
+    }
+
+    /// Get the touch point identifier of a given index.
+    /// Returns `None` if the given index is over the number of touch points
+    pub fn get_touch_point_id(&self, index: usize) -> Option<i32> {
+        if self.get_touch_point_count() < index { return None } 
+        unsafe { Some(ffi::GetTouchPointId(index as i32)) }
+    }
+
+    /// Returns an iterator over every touch id.
+    pub fn get_touch_ids(&self) -> impl Iterator<Item = i32> {
+        (0..self.get_touch_point_count()).map(|index| {
+            unsafe { ffi::GetTouchPointId(index as i32) }
+        })
+    }
+
+    /// Returns the number of touch points
+    pub fn get_touch_point_count(&self) -> usize {
+        unsafe { ffi::GetTouchPointCount() as usize }
+    }
+}
+
+bitflags! {
+    pub struct GestureFlags: u32 {
+        const NONE = Gesture::None as u32;
+        const TAP = Gesture::Tap as u32;
+        const DOUBLETAP = Gesture::Doubletap as u32;
+        const HOLD = Gesture::Hold as u32;
+        const DRAG = Gesture::Drag as u32;
+        const SWIPE_RIGHT = Gesture::SwipeRight as u32;
+        const SWIPE_LEFT = Gesture::SwipeLeft as u32;
+        const SWIPE_UP = Gesture::SwipeUp as u32;
+        const SWIPE_DOWN = Gesture::SwipeDown as u32;
+        const PINCH_IN = Gesture::PinchIn as u32;
+        const PINCH_OUT = Gesture::PinchOut as u32;
+    }
+}
+
+// === Gestures and Touch Handling Functions (Module: rgesture)
+impl Raylib {
+    /// Set which gestures are enabled using flags.
+    pub fn set_gestures_enabled(&mut self, flags: GestureFlags) {
+        unsafe { ffi::SetGesturesEnabled(flags.bits()) }
+    }
+
+    /// Checks if a gesture has been detected.
+    /// Always returns false if the gesture wasn't enabled.
+    pub fn is_gesture_detected(&self, gesture: Gesture) -> bool {
+        unsafe { ffi::IsGestureDetected(gesture as u32) }
+    }
+
+    /// Gets the latest gesture detected.
+    /// Returns `None` if there wasn't any.
+    /// Never returns `Gesture::None`.
+    pub fn get_gesture_detected(&self) -> Option<Gesture> {
+        let gesture = unsafe { ffi::GetGestureDetected() };
+        if gesture == 0 { return None }
+
+        gesture.try_into().ok()
+    }
+
+    /// Gets how long the current `Gesture::Hold` gesture is being held (in ms).
+    /// Always returns `0.0 `if there is no current gesture or if it is not a hold.
+    pub fn get_gesture_hold_duration(&self) -> f32 {
+        unsafe { ffi::GetGestureHoldDuration() }
+    }
+
+    /// Gets the vector between the initial touch point and the current one.
+    /// Works for Holds, Drags and Swipes. 
+    /// Otherwise, returns `Vector2::ZERO`.
+    pub fn get_gesture_drag_vector(&self) -> Vector2 {
+        unsafe { ffi::GetGestureDragVector() }
+    }
+
+    /// Gets the angle between the initial touch point and the current one.
+    /// Works for Hold, Drag and Swipe gestures. 
+    /// Otherwise, returns `0.0`.
+    pub fn get_gesture_drag_angle(&self) -> f32 {
+        unsafe { ffi::GetGestureDragAngle() }
+    }
+
+    /// Gets the distance between the two pinch points.
+    /// On gestures other than a pinch, returns `Vector2::ZERO`.
+    pub fn get_gesture_pinch_vector(&self) -> Vector2 {
+        unsafe { ffi::GetGesturePinchVector() }
+    }
+
+    /// Gets the angle between the two pinch points.
+    /// On gestures other than a pinch, returns `0.0`.
+    pub fn get_gesture_pinch_angle(&self) -> f32 {
+        unsafe { ffi::GetGesturePinchAngle() }
     }
 }
