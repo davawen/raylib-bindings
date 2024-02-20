@@ -11,10 +11,7 @@ fn main() {
         draw.clear_background(Color::WHITE);
 
         shader.set_uniform_value(time_uniform, unsafe { raylib::ffi::GetTime() as f32 });
-        let shader = draw.begin_shader_mode(&shader);
-        unsafe { raylib::ffi::DrawRectangle(50, 50, 700, 700, Color::WHITE) }
-        shader.end();
-
-        draw.end();
+        let mut shader = draw.begin_shader_mode(&shader);
+        shader.rectangle(50.0, 50.0, 700.0, 700.0, Color::WHITE);
     }
 }
