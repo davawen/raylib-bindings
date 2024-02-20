@@ -4,7 +4,9 @@ use crate::{core::Raylib, ffi::{self, TraceLogLevel}};
 
 use super::RaylibAlloc;
 
-// === Timing related functions ===
+/// # Timing related functions (module: [rcore])
+///
+/// ---
 impl Raylib {
     /// Sets the maximum FPS
     pub fn set_target_fps(&self, fps: i32) {
@@ -57,7 +59,9 @@ impl Raylib {
 
 pub struct RandomSequence<'a>(&'a mut [i32]);
 
-// === Random value generation functions ===
+/// # Random value generation functions (module: [rcore])
+///
+/// ---
 impl Raylib {
     /// Sets the seed for the random number generator
     /// # Examples
@@ -103,7 +107,9 @@ impl Drop for RandomSequence<'_> {
     }
 }
 
-// === Misc functions ===
+/// # Misc functions (module: [rcore])
+///
+/// ---
 impl Raylib {
     /// Takes a screenshot of the current screen (filename extension defines format)
     /// # Panics
@@ -129,7 +135,9 @@ impl Raylib {
     }
 }
 
-/// === Util functions ===
+/// # Util functions (module: [rcore])
+///
+/// ---
 impl Raylib {
     /// Show a log message of the given level
     /// # Panics
@@ -151,7 +159,9 @@ impl Raylib {
 
 // TODO: Set custom callbacks
 
-// === Compression/Encoding functionality ===
+/// # Compression/Encoding functions
+///
+/// ---
 impl Raylib {
     /// Compress data using the DEFLATE algorithm
     /// # Panics

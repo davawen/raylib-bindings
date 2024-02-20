@@ -4,7 +4,9 @@ use bitflags::bitflags;
 
 use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture, Vector2}};
 
-// === Keyboard functions ===
+/// # Keyboard input functions (module: [rcore])
+///
+/// ---
 impl Raylib {
     /// Check if a key has been pressed in this frame (rising edge)
     pub fn is_key_pressed(&self, key: KeyboardKey) -> bool {
@@ -199,7 +201,9 @@ impl Raylib {
     // pub fn set_gamepad_mappings(&mut self, mappings: *const c_char) -> i32
 }
 
-// === Mouse functions ===
+/// # Mouse input functions
+///
+/// ---
 impl Raylib {
     /// Checks if a mouse button has been pressed in this frame (rising edge).
     pub fn is_mouse_button_pressed(&self, button: MouseButton) -> bool {
@@ -269,7 +273,9 @@ impl Raylib {
     }
 }
 
-// === Touch input ===
+/// # Touch input functions
+///
+/// ---
 impl Raylib {
     /// Gets the X position for the first touch point.
     /// Returns `None` if there are no touch points.
@@ -372,7 +378,9 @@ bitflags! {
     }
 }
 
-// === Gestures and Touch Handling Functions (Module: rgesture)
+/// # Gestures and touch handling functions (module: [rgesture])
+/// 
+/// ---
 impl Raylib {
     /// Set which gestures are enabled using flags.
     pub fn set_gestures_enabled(&mut self, flags: GestureFlags) {

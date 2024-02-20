@@ -4,7 +4,9 @@ use ffi::{Vector2, Rectangle};
 
 use crate::{core::draw::DrawHandle, prelude::Color, ffi};
 
-// === Basic shapes ===
+/// # Basic shapes drawing functions (module: [rshapes])
+///
+/// ---
 impl<P> DrawHandle<'_, P> {
     #[inline]
     pub fn pixel(&mut self, pos_x: f32, pos_y: f32, color: Color) {

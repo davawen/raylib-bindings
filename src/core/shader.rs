@@ -123,7 +123,7 @@ pub unsafe trait ShaderValue<T> {
     fn set_uniform_value(&self, uniform: Uniform, v: T);
 }
 
-// === Floating point uniforms ===
+// Floating point uniforms
 unsafe impl ShaderDataType<f32> for Shader {
     const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Float;
 }
@@ -152,7 +152,7 @@ unsafe impl ShaderDataType<Vector4> for Shader {
     const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Vec4;
 }
 
-// === Integer uniforms ===
+// Integer uniforms
 unsafe impl ShaderDataType<i32> for Shader {
     const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Int;
 }
@@ -169,7 +169,7 @@ unsafe impl ShaderDataType<[i32; 4]> for Shader {
     const DATA_TYPE: ShaderUniformDataType = ShaderUniformDataType::Ivec4;
 }
 
-// === Impls and other types ===
+// Generic impls and other types
 unsafe impl<T> ShaderValue<T> for Shader where Shader: ShaderDataType<T> {
     fn set_uniform_value(&self, uniform: Uniform, v: T) {
         unsafe {
