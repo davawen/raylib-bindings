@@ -155,6 +155,7 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
             writeln!(out, "/// {}", e.desc)?;
         }
         writeln!(out, "#[repr(C)]")?;
+        writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
         writeln!(out, "pub enum {} {{", e.name)?;
         for (name, value) in &e.values {
             writeln!(out, "    {} = {},", name, value)?;

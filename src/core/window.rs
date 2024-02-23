@@ -36,7 +36,7 @@ bitflags! {
         /// Set to run program in borderless windowed mode
         const FLAG_BORDERLESS_WINDOWED_MODE = ffi::ConfigFlags::FlagBorderlessWindowedMode as u32;
         /// Set to try enabling MSAA 4X
-        const FLAG_MSAA_4X_HINT = ffi::ConfigFlags::FlagMsaa4xHint as u32;
+        const FLAG_MSAA_4X_HINT = ffi::ConfigFlags::FlagMsaa4XHint as u32;
         /// Set to try enabling interlaced video format (for V3D)
         const FLAG_INTERLACED_HINT= ffi::ConfigFlags::FlagInterlacedHint as u32;
     }

@@ -1,4 +1,6 @@
-use crate::ffi::{self, Color, Vector3, Vector4};
+use std::ffi::c_void;
+
+use crate::ffi::{self, Color, Vector3, Vector4, PixelFormat};
 
 impl Color {
     pub const LIGHTGRAY: Color = Color::rgb(200, 200, 200);
@@ -65,16 +67,67 @@ impl Color {
     /// Get color with alpha applied, alpha goes from 0.0f to 1.0f
     pub fn color_alpha(self, alpha: f32) -> Self { unsafe { ffi::ColorAlpha(self, alpha) } }
     /// Get src alpha-blended into dst color with tint
-    /// WARNING: argument order is reversed compared to original raylib function
+    /// WARNING: argument order is reversed compared to original raylib function to resemble lerp more closely
     pub fn color_alpha_blend(self, dst: Color, tint: Color) -> Self { unsafe { ffi::ColorAlphaBlend(dst, self, tint) } }
 
-    // TODO: create safe interface for pixel format
-    // /// Get Color from a source pixel pointer of certain format
-    // pub fn get_pixel_color(srcPtr: void *, format: i32) -> Self {  }
-    // /// Set color formatted into destination pixel pointer
-    // pub fn set_pixel_color(dstPtr: void *, format: i32) -> Self {  }
+    /// Get `Color` from a source pixel pointer of certain format
+    /// Compressed formats are not supported
+    /// # Panics
+    /// Panics if the given slice does not match the expected size of the format
+    pub fn get_pixel_color(src: &[u8], format: PixelFormat) -> Self {
+        if src.len() != format.get_size() {
+            panic!("expected `src` len({}) to match pixel format size({})", src.len(), format.get_size());
+        }
+
+        // SAFETY: The cast mut is safe because the function won't modify the given data.
+        // The api forgot to specify it as const.
+        unsafe { ffi::GetPixelColor(src.as_ptr().cast_mut() as *mut c_void, format as i32) }
+    }
+
+    /// Sets this color into the destination pixel pointer in the given pixel format
+    /// Compressed formats are not supported
+    pub fn set_pixel_color(self, dst: &mut [u8], format: PixelFormat) {
+        if dst.len() != format.get_size() {
+            panic!("expected `dst` len({}) to match pixel format size({:?} = {})", dst.len(), format, format.get_size());
+        }
+        unsafe { ffi::SetPixelColor(dst.as_ptr().cast_mut() as *mut c_void, self, format as i32) }
+    }
 }
 
-// // TODO: create safe for pixel format
-// /// Get pixel data size in bytes for certain format
-// pub fn get_pixel_data_size(width: i32, height: i32, format: i32) -> i32 {}
+impl PixelFormat {
+    /// Returns the size in bytes of a single pixel 
+    /// Compressed format are not supported and will return 0
+    pub fn get_size(&self) -> usize {
+        match self {
+            PixelFormat::UncompressedGrayscale => 1,
+            PixelFormat::UncompressedGrayAlpha => 2,
+            PixelFormat::UncompressedR5G6B5 => 2,
+            PixelFormat::UncompressedR5G5B5A1 => 2,
+            PixelFormat::UncompressedR4G4B4A4 => 2,
+            PixelFormat::UncompressedR16 => 2,
+            PixelFormat::UncompressedR8G8B8 => 3,
+            PixelFormat::UncompressedR8G8B8A8 => 4,
+            PixelFormat::UncompressedR32 => 4,
+            PixelFormat::UncompressedR16G16B16 => 6,
+            PixelFormat::UncompressedR16G16B16A16 => 8,
+            PixelFormat::UncompressedR32G32B32 => 12,
+            PixelFormat::UncompressedR32G32B32A32 => 16,
+            PixelFormat::CompressedDxt1Rgb => 0,
+            PixelFormat::CompressedDxt1Rgba => 0,
+            PixelFormat::CompressedDxt3Rgba => 0,
+            PixelFormat::CompressedDxt5Rgba => 0,
+            PixelFormat::CompressedEtc1Rgb => 0,
+            PixelFormat::CompressedEtc2Rgb => 0,
+            PixelFormat::CompressedEtc2EacRgba => 0,
+            PixelFormat::CompressedPvrtRgb => 0,
+            PixelFormat::CompressedPvrtRgba => 0,
+            PixelFormat::CompressedAstc4X4Rgba => 0,
+            PixelFormat::CompressedAstc8X8Rgba => 0,
+        }
+    }
+}
+
+/// Get the size of an image in bytes given a certain pixel format
+pub fn get_pixel_data_size(width: i32, height: i32, format: PixelFormat) -> i32 {
+    unsafe { ffi::GetPixelDataSize(width, height, format as i32) }
+}

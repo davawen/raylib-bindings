@@ -142,7 +142,9 @@ fn parse_alias<'a>(stream: &mut Stream<'a>) -> Alias<'a> {
 }
 
 fn snake_to_pascal(snake: &str) -> String {
-    snake.split('_').map(|word| {
+    snake.split('_')
+        .flat_map(|word| word.split_inclusive(|c: char| c.is_ascii_digit()))
+        .map(|word| {
         let mut chars = word.chars();
         if let Some(c) = chars.next() {
             c.to_uppercase()
@@ -166,6 +168,12 @@ fn parse_enum<'a>(stream: &mut Stream<'a>) -> Enum<'a> {
             // convert enum variant to pascal case
             let variant = &line[line.find('[').unwrap()+1..line.find(']').unwrap()];
             let mut variant = snake_to_pascal(variant);
+
+            // special case for PixelFormat enum,
+            // because enum variants are named PIXELFORMAT_* instead of PIXEL_FORMAT_*
+            if name == "PixelFormat" {
+                variant = variant.strip_prefix("Pixelformat").unwrap().to_string();
+            }
 
             // remove common prefix between enum name and enum variant
             let idx = variant.char_indices().zip(name.chars())

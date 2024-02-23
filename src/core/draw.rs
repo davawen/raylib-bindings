@@ -26,6 +26,12 @@ impl Raylib {
         unsafe { ffi::BeginDrawing() }
         DrawHandle { mode: RenderMode::Drawing, _parent: None }
     }
+
+    // Begin drawing to render texture
+    pub fn begin_texture_mode(&mut self, target: RenderTexture) -> DrawHandle<'static, ()> {
+        unsafe { ffi::BeginTextureMode(target.get_ffi_texture()) }
+        DrawHandle { mode: RenderMode::TextureMode, _parent: None }
+    }
 }
 
 /// # Begin modes (module: [rcore])
@@ -41,11 +47,6 @@ impl<P> DrawHandle<'_, P> {
     pub fn begin_mode3d(&mut self, camera: Camera3D) -> DrawHandle<Self> {
         unsafe { ffi::BeginMode3D(camera) }
         DrawHandle { mode: RenderMode::Mode3D, _parent: Some(self) }
-    }
-    // Begin drawing to render texture
-    pub fn begin_texture_mode(&mut self, target: RenderTexture) -> DrawHandle<Self> {
-        unsafe { ffi::BeginTextureMode(target.get_ffi_texture()) }
-        DrawHandle { mode: RenderMode::TextureMode, _parent: Some(self) }
     }
     // Begin custom shader drawing
     pub fn begin_shader_mode(&mut self, shader: &Shader) -> DrawHandle<Self> {
