@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use ffi::{PixelFormat, Color};
+use ffi::{PixelFormat, Color, Rectangle};
 
 use crate::{ffi, prelude::Raylib, cstr, math::color::get_pixel_data_size};
 
@@ -23,6 +23,66 @@ pub struct Image {
     /// The size in bytes of the underlying `image.data` buffer.
     size: usize
 }
+
+impl Image {
+    /// Creates a safe image struct from an ffi image by calculating its size.
+    /// Checks for image validity and returns `None` if the image is not valid.
+    pub fn from_ffi(image: ffi::Image) -> Option<Self> {
+        if !image.is_valid() { return None }
+        let format = image.format.try_into().unwrap();
+
+        Some(Image {
+            image,
+            format,
+            size: get_pixel_data_size(image.width, image.height, format) as usize 
+        })
+    }
+
+    /// Get access to the underlying image data buffer
+    pub fn data(&self) -> &[u8] {
+        unsafe { std::slice::from_raw_parts(self.image.data as *const u8, self.size) }
+    }
+
+    /// Get mutable access to the underlying image data buffer
+    pub fn data_mut(&mut self) -> &mut [u8] {
+        unsafe { std::slice::from_raw_parts_mut(self.image.data as *mut u8, self.size) }
+    }
+
+    /// Size in bytes of the image data buffer
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
+    /// The underlying image width
+    pub fn width(&self) -> u32 {
+        self.image.width as u32
+    }
+
+    /// The underlying image height
+    pub fn height(&self) -> u32 {
+        self.image.height as u32
+    }
+
+    pub fn format(&self) -> PixelFormat {
+        self.format
+    }
+
+    pub unsafe fn get_ffi_image(&self) -> ffi::Image {
+        self.image
+    }
+}
+
+impl ffi::Image {
+    /// Checks if the underlying image metadata is valid.
+    /// Equivalent to the not so well named `IsImageReady` raylib function.
+    /// Prefer using this instead of checking for a null image data pointer.
+    #[inline]
+    pub fn is_valid(&self) -> bool {
+        let ready = unsafe { ffi::IsImageReady(*self) };
+        ready && PixelFormat::try_from(self.format).is_ok()
+    }
+}
+
 
 impl Drop for Image {
     fn drop(&mut self) {
@@ -209,7 +269,7 @@ impl Raylib {
     /// Create an image of the given size composed of plain color.
     /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
     #[inline]
-    pub fn gen_image_color(&mut self, width: usize, height: usize, color: Color) -> Image {
+    pub fn gen_image_color(&mut self, width: u32, height: u32, color: Color) -> Image {
         let image = unsafe { ffi::GenImageColor(width as i32, height as i32, color) };
         Image::from_ffi(image).unwrap()
     }
@@ -219,7 +279,7 @@ impl Raylib {
     /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
     /// WARN: Due to raylib shenigans, the angle cannot go below integer degree precision.
     #[inline]
-    pub fn gen_image_gradient_linear(&mut self, width: usize, height: usize, angle: f32, start: Color, end: Color) -> Image {
+    pub fn gen_image_gradient_linear(&mut self, width: u32, height: u32, angle: f32, start: Color, end: Color) -> Image {
         let image = unsafe { ffi::GenImageGradientLinear(width as i32, height as i32, angle.to_degrees().round() as i32, start, end) };
         Image::from_ffi(image).unwrap()
     }
@@ -233,7 +293,7 @@ impl Raylib {
     ///
     /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
     #[inline]
-    pub fn gen_image_gradient_radial(&mut self, width: usize, height: usize, density: f32, inner: Color, outer: Color) -> Image {
+    pub fn gen_image_gradient_radial(&mut self, width: u32, height: u32, density: f32, inner: Color, outer: Color) -> Image {
         let image = unsafe { ffi::GenImageGradientRadial(width as i32, height as i32, density, inner, outer) };
         Image::from_ffi(image).unwrap()
     }
@@ -244,7 +304,7 @@ impl Raylib {
     ///
     /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
     #[inline]
-    pub fn gen_image_gradient_square(&mut self, width: usize, height: usize, density: f32, inner: Color, outer: Color) -> Image {
+    pub fn gen_image_gradient_square(&mut self, width: u32, height: u32, density: f32, inner: Color, outer: Color) -> Image {
         let image = unsafe { ffi::GenImageGradientSquare(width as i32, height as i32, density, inner, outer) };
         Image::from_ffi(image).unwrap()
     }
@@ -304,61 +364,24 @@ impl Raylib {
     }
 }
 
-impl ffi::Image {
-    /// Checks if the underlying image metadata is valid.
-    /// Equivalent to the not so well named `IsImageReady` raylib function.
-    /// Prefer using this instead of checking for a null image data pointer.
-    #[inline]
-    pub fn is_valid(&self) -> bool {
-        let ready = unsafe { ffi::IsImageReady(*self) };
-        ready && PixelFormat::try_from(self.format).is_ok()
-    }
-}
-
-impl Image {
-    /// Creates a safe image struct from an ffi image by calculating its size.
-    /// Checks for image validity and returns `None` if the image is not valid.
-    pub fn from_ffi(image: ffi::Image) -> Option<Self> {
-        if !image.is_valid() { return None }
-        let format = image.format.try_into().unwrap();
-
-        Some(Image {
-            image,
-            format,
-            size: get_pixel_data_size(image.width, image.height, format) as usize 
-        })
+/// # Image manipulation functions
+///
+/// ---
+impl Raylib {
+    /// Duplicates the given image to a new memory buffer.
+    /// Needs a reference to the raylib object since it allocates memory using raylib's allocator.
+    pub fn image_copy(&mut self, image: &Image) -> Image {
+        let other = unsafe { ffi::ImageCopy(image.image) };
+        Image::from_ffi(other).unwrap()
     }
 
-    /// Get access to the underlying image data buffer
-    pub fn data(&self) -> &[u8] {
-        unsafe { std::slice::from_raw_parts(self.image.data as *const u8, self.size) }
+    /// Duplicates part of the given image to a new memory buffer.
+    /// Needs a reference to the raylib object since it allocates memory using raylib's allocator.
+    pub fn image_from_image(&mut self, rec: Rectangle, image: &Image) -> Image {
+        let other = unsafe { ffi::ImageFromImage(image.image, rec) };
+        Image::from_ffi(other).unwrap()
     }
 
-    /// Get mutable access to the underlying image data buffer
-    pub fn data_mut(&mut self) -> &mut [u8] {
-        unsafe { std::slice::from_raw_parts_mut(self.image.data as *mut u8, self.size) }
-    }
-
-    /// Size in bytes of the image data buffer
-    pub fn size(&self) -> usize {
-        self.size
-    }
-
-    /// The underlying image width
-    pub fn width(&self) -> u32 {
-        self.image.width as u32
-    }
-
-    /// The underlying image height
-    pub fn height(&self) -> u32 {
-        self.image.height as u32
-    }
-
-    pub fn format(&self) -> PixelFormat {
-        self.format
-    }
-
-    pub unsafe fn get_ffi_image(&self) -> ffi::Image {
-        self.image
-    }
+    // TODO: Font support
+    // pub fn image_text_ex(&mut self, font: Font, color: Color) -> Image;
 }
