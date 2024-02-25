@@ -1,44 +1,32 @@
 use std::ffi::CStr;
 
-use ffi::PixelFormat;
+use ffi::{PixelFormat, Color};
 
 use crate::{ffi, prelude::Raylib, cstr, math::color::get_pixel_data_size};
 
-/// A raylib texture.
-/// Use `Raylib::load_texture` to create one.
-/// 
-/// Textures are stored on the GPU in VRAM.
-/// If you need to interact with graphical data from the CPU, prefer using an `Image`.
-pub struct Texture(ffi::Texture);
-
-/// A raylib render texture.
-/// Use `Raylib::load_render_texture` to create one.
-///
-/// Render textures work in the same way as textures, except that you can use them as render targets.
-pub struct RenderTexture(ffi::RenderTexture);
+use super::texture::Texture;
 
 /// A raylib image.
 /// Use `Raylib::load_image` to create one.
 /// 
 /// Images are stored on the CPU in RAM.
 /// If you need to draw images many times, or if you need to use them in shaders, prefer using a `Texture`.
-pub struct Image(ffi::Image, usize);
-
-impl Drop for Texture {
-    fn drop(&mut self) {
-        unsafe { ffi::UnloadTexture(self.0) }
-    }
-}
-
-impl Drop for RenderTexture {
-    fn drop(&mut self) {
-        unsafe { ffi::UnloadRenderTexture(self.0) }
-    }
+///
+/// # Safety
+/// An `ffi::Image` may have any data inside of it.
+/// A `raylib::Image` is garanteed to have valid data and well allocated memory.
+pub struct Image {
+    /// The underlying ffi image
+    image: ffi::Image,
+    /// The image format validated to be a `PixelFormat` variant.
+    format: PixelFormat,
+    /// The size in bytes of the underlying `image.data` buffer.
+    size: usize
 }
 
 impl Drop for Image {
     fn drop(&mut self) {
-        unsafe { ffi::UnloadImage(self.0) }
+        unsafe { ffi::UnloadImage(self.image) }
     }
 }
 
@@ -165,7 +153,7 @@ impl Raylib {
             mipmaps: 1
         };
 
-        Some(Image(image, size as usize))
+        Some(Image { image, format, size: size as usize })
     }
 
     /// Loads an image from a memory buffer (in the given filetype's encoding).
@@ -214,15 +202,105 @@ impl Raylib {
     }
 }
 
-impl Texture {
-    pub unsafe fn get_ffi_texture(&self) -> ffi::Texture {
-        self.0
+/// # Image generation functions
+/// 
+/// ---
+impl Raylib {
+    /// Create an image of the given size composed of plain color.
+    /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
+    #[inline]
+    pub fn gen_image_color(&mut self, width: usize, height: usize, color: Color) -> Image {
+        let image = unsafe { ffi::GenImageColor(width as i32, height as i32, color) };
+        Image::from_ffi(image).unwrap()
     }
-}
 
-impl RenderTexture {
-    pub unsafe fn get_ffi_texture(&self) -> ffi::RenderTexture {
-        self.0
+    /// Create an image of the given size composed of a linear gradient.
+    /// The angle is in radians, `0.0` is a vertical gradient from left to right.
+    /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
+    /// WARN: Due to raylib shenigans, the angle cannot go below integer degree precision.
+    #[inline]
+    pub fn gen_image_gradient_linear(&mut self, width: usize, height: usize, angle: f32, start: Color, end: Color) -> Image {
+        let image = unsafe { ffi::GenImageGradientLinear(width as i32, height as i32, angle.to_degrees().round() as i32, start, end) };
+        Image::from_ffi(image).unwrap()
+    }
+
+    /// Create an image of the given size composed of a radial gradient.
+    /// - The generated circle has a diameter of width or height, whichever is smaller.
+    /// - Its outside is `outer`, and its inside is a linear blend of `inner` and `outer` depending on distance.
+    /// - As density increases, it takes less distance for `outer` to blend into `inner`.
+    /// - If density is `1`, the result is a perfectly crisp circle.
+    /// - For densities above `1`, the gradient is reversed.
+    ///
+    /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
+    #[inline]
+    pub fn gen_image_gradient_radial(&mut self, width: usize, height: usize, density: f32, inner: Color, outer: Color) -> Image {
+        let image = unsafe { ffi::GenImageGradientRadial(width as i32, height as i32, density, inner, outer) };
+        Image::from_ffi(image).unwrap()
+    }
+
+    /// Create an image of the given size composed of a square gradient.
+    /// - As density increases, it takes less distance for `outer` to blend into `inner`.
+    /// - For densities above or equal to `1`, the image is plain `outer` color.
+    ///
+    /// The resulting image format is `PixelFormat::UncompressedR8G8B8A8`.
+    #[inline]
+    pub fn gen_image_gradient_square(&mut self, width: usize, height: usize, density: f32, inner: Color, outer: Color) -> Image {
+        let image = unsafe { ffi::GenImageGradientSquare(width as i32, height as i32, density, inner, outer) };
+        Image::from_ffi(image).unwrap()
+    }
+
+    /// Creates an image of the given size in a checkerboard pattern.
+    /// If you need a set number of square instead of a set size, use `Raylib::gen_image_checked_num`.
+    #[inline]
+    pub fn gen_image_checked(&mut self, width: u32, height: u32, check_width: u32, check_height: u32, top_left: Color, other: Color) -> Image {
+        let image = unsafe { ffi::GenImageChecked(width as i32, height as i32, check_width as i32, check_height as i32, top_left, other) };
+        Image::from_ffi(image).unwrap()
+    }
+
+    /// Creates an image of the given size in a checkerboard pattern.
+    /// If you need a set size instead of a set number of square, use `Raylib::gen_image_checked`.
+    #[inline]
+    pub fn gen_image_checked_num(&mut self, width: u32, height: u32, num_check_x: u32, num_check_y: u32, top_left: Color, other: Color) -> Image {
+        let w = width / num_check_x;
+        let h = height / num_check_y;
+        self.gen_image_checked(width, height, w, h, top_left, other)
+    }
+
+    /// Creates an image with white noise (TV snow).
+    /// - `factor` defines the ratio between white and black pixels.
+    /// - `0.0` means all black, `1.0` means all white.
+    #[inline]
+    pub fn gen_image_white_noise(&mut self, width: u32, height: u32, factor: f32) -> Image {
+        let image = unsafe { ffi::GenImageWhiteNoise(width as i32, height as i32, factor) };
+        Image::from_ffi(image).unwrap()
+    }
+
+    /// Generate an image with 2D layered perlin noise.
+    /// Raylib uses these default parameters:
+    /// - lacunarity = 2.0
+    /// - gain = 0.5
+    /// - octaves = 6
+    #[inline]
+    pub fn gen_image_perlin_noise(&mut self, width: u32, height: u32, offset_x: i32, offset_y: i32, scale: f32) -> Image {
+        let image = unsafe { ffi::GenImagePerlinNoise(width as i32, height as i32, offset_x, offset_y, scale) };
+        Image::from_ffi(image).unwrap()
+    }
+
+    /// Generate an image with cellular noise (whorley noise).
+    /// Use a bigger tile size to get less points.
+    /// Pixels close to points are black, pixels far away are white.
+    #[inline]
+    pub fn gen_image_cellular(&mut self, width: u32, height: u32, tile_size: u32) -> Image {
+        let image = unsafe { ffi::GenImageCellular(width as i32, height as i32, tile_size as i32) };
+        Image::from_ffi(image).unwrap()
+    }
+
+    /// Create an image from the byte data in text.
+    // NOTE: I honestly have no idea what would be the use for this.
+    #[inline]
+    pub fn gen_image_text(&mut self, width: u32, height: u32, text: &CStr) -> Image {
+        let image = unsafe { ffi::GenImageText(width as i32, height as i32, text.as_ptr()) };
+        Image::from_ffi(image).unwrap()
     }
 }
 
@@ -230,44 +308,57 @@ impl ffi::Image {
     /// Checks if the underlying image metadata is valid.
     /// Equivalent to the not so well named `IsImageReady` raylib function.
     /// Prefer using this instead of checking for a null image data pointer.
+    #[inline]
     pub fn is_valid(&self) -> bool {
-        unsafe { ffi::IsImageReady(*self) }
+        let ready = unsafe { ffi::IsImageReady(*self) };
+        ready && PixelFormat::try_from(self.format).is_ok()
     }
 }
 
 impl Image {
-    /// Create a safe image struct from an ffi image by calculating its size.
+    /// Creates a safe image struct from an ffi image by calculating its size.
     /// Checks for image validity and returns `None` if the image is not valid.
     pub fn from_ffi(image: ffi::Image) -> Option<Self> {
         if !image.is_valid() { return None }
+        let format = image.format.try_into().unwrap();
 
-        Some(Image(image, get_pixel_data_size(image.width, image.height, image.format.try_into().unwrap()) as usize))
+        Some(Image {
+            image,
+            format,
+            size: get_pixel_data_size(image.width, image.height, format) as usize 
+        })
     }
 
     /// Get access to the underlying image data buffer
     pub fn data(&self) -> &[u8] {
-        unsafe { std::slice::from_raw_parts(self.0.data as *const u8, self.1) }
+        unsafe { std::slice::from_raw_parts(self.image.data as *const u8, self.size) }
     }
 
     /// Get mutable access to the underlying image data buffer
     pub fn data_mut(&mut self) -> &mut [u8] {
-        unsafe { std::slice::from_raw_parts_mut(self.0.data as *mut u8, self.1) }
+        unsafe { std::slice::from_raw_parts_mut(self.image.data as *mut u8, self.size) }
     }
 
     /// Size in bytes of the image data buffer
     pub fn size(&self) -> usize {
-        self.1
+        self.size
     }
 
-    pub fn width(&self) -> i32 {
-        self.0.width
+    /// The underlying image width
+    pub fn width(&self) -> u32 {
+        self.image.width as u32
     }
 
-    pub fn height(&self) -> i32 {
-        self.0.height
+    /// The underlying image height
+    pub fn height(&self) -> u32 {
+        self.image.height as u32
+    }
+
+    pub fn format(&self) -> PixelFormat {
+        self.format
     }
 
     pub unsafe fn get_ffi_image(&self) -> ffi::Image {
-        self.0
+        self.image
     }
 }

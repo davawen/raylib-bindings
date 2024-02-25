@@ -19,4 +19,8 @@ pub use crate::core::{
     other::*
 };
 
-pub use crate::textures::*;
+pub use crate::textures::{
+    image::*,
+    texture::*,
+    render_texture::*
+};
