@@ -198,39 +198,39 @@ impl Raylib {
 impl<P> DrawHandle<'_, P> {
     /// Draw a texture.
     #[inline]
-    pub fn draw_texture(&mut self, texture: &Texture, x: f32, y: f32, tint: Color) {
-        self.draw_texture_ex(texture, Vector2::new(x, y), 0.0, 1.0, tint);
+    pub fn texture(&mut self, texture: &Texture, x: f32, y: f32, tint: Color) {
+        self.texture_ex(texture, Vector2::new(x, y), 0.0, 1.0, tint);
     }
     /// Draw a texture.
     #[inline]
     pub fn draw_texture_v(&mut self, texture: &Texture, pos: Vector2, tint: Color) {
-        self.draw_texture_ex(texture, pos, 0.0, 1.0, tint);
+        self.texture_ex(texture, pos, 0.0, 1.0, tint);
     }
     /// Draw a rotated and scaled texture.
     /// The rotation is in radians.
     #[inline]
-    pub fn draw_texture_ex(&mut self, texture: &Texture, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
+    pub fn texture_ex(&mut self, texture: &Texture, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
         let source = Rectangle::new(0.0, 0.0, texture.0.width as f32, texture.0.height as f32);
         let dest = Rectangle::new(pos.x, pos.y, texture.0.width as f32 * scale, texture.0.height as f32 * scale);
-        self.draw_texture_pro(texture, source, dest, Vector2::ZERO, rotation, tint)
+        self.texture_pro(texture, source, dest, Vector2::ZERO, rotation, tint)
     }
     /// Draw part of a texture.
     #[inline]
-    pub fn draw_texture_rec(&mut self, texture: &Texture, source: Rectangle, pos: Vector2, tint: Color) {
+    pub fn texture_rec(&mut self, texture: &Texture, source: Rectangle, pos: Vector2, tint: Color) {
         let dest = Rectangle::new(pos.x, pos.y, source.width, source.height);
-        self.draw_texture_pro(texture, source, dest, Vector2::ZERO, 0.0, tint)
+        self.texture_pro(texture, source, dest, Vector2::ZERO, 0.0, tint)
     }
     /// Draw part of a texture to a part of the screen, rotated around the given origin point.
     /// Origin is **relative** to the destination rectangle.
     /// The rotation is in radians.
     #[inline]
-    pub fn draw_texture_pro(&mut self, texture: &Texture, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+    pub fn texture_pro(&mut self, texture: &Texture, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
         unsafe { ffi::DrawTexturePro(texture.0, source, dest, origin, rotation.to_degrees(), tint) }
     }
     /// Draws a texture that stretches and shrinks using n-patch info.
     /// The rotation is in radians.
     #[inline]
-    pub fn draw_texture_npatch(&mut self, texture: &Texture, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+    pub fn texture_npatch(&mut self, texture: &Texture, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
         unsafe { ffi::DrawTextureNPatch(texture.0, info, dest, origin, rotation.to_degrees(), tint) }
     }
 }
