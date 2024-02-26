@@ -22,5 +22,4 @@ pub use crate::core::{
 pub use crate::textures::{
     image::*,
     texture::*,
-    render_texture::*
 };

@@ -11,7 +11,7 @@ use super::texture::Texture;
 /// Use `Raylib::load_image` to create one.
 /// 
 /// Images are stored on the CPU in RAM.
-/// If you need to draw images many times, or if you need to use them in shaders, prefer using a `Texture`.
+/// If you need to draw an image many times, or if you need to use them in shaders, prefer using a `Texture`.
 ///
 /// # Safety
 /// An `ffi::Image` may have any data inside of it.
@@ -195,7 +195,7 @@ impl ImageFiletype {
 impl Raylib {
     /// Loads an image from a file into CPU memory.
     /// Returns `Err` if there was an error when reading the file.
-    /// Returns `Some(None)` if the file was successfully read,
+    /// Returns `Ok(None)` if the file was successfully read,
     /// but support for the given file extension was not compiled into raylib,
     /// or the input file is in an unknown file format.
     /// Otherwise, returns the loaded image.
@@ -552,6 +552,7 @@ impl Raylib {
     /// Computes all mipmap levels of an image (until the resulting mipmap size is 1).
     /// Supports POT and non POT images.
     /// The resulting image format is unchanged.
+    /// NOTE: Prefer generating mipmaps for textures instead of images.
     pub fn image_mipmaps(&mut self, image: &mut Image) {
         unsafe { ffi::ImageMipmaps(&mut image.image as *mut _) };
         image.recompute();
