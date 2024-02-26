@@ -33,9 +33,14 @@ impl Color {
     pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
         Color { r, g, b, a }
     }
-
     pub const fn rgb(r: u8, g: u8, b: u8) -> Self {
         Color { r, g, b, a: 255 }
+    }
+    pub const fn gray(v: u8) -> Self {
+        Color::rgb(v, v, v)
+    }
+    pub const fn graya(v: u8, a: u8) -> Self {
+        Color::rgba(v, v, v, a)
     }
 
     /// Get Color structure from hexadecimal value

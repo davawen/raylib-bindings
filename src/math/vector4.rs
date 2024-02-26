@@ -56,10 +56,6 @@ impl Vector4 {
     }
 }
 
-impl PartialEq for Vector4 {
-    fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w }
-}
-
 impl ApproxEq for Vector4 {
     type Margin = F32Margin;
     fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {

@@ -164,10 +164,6 @@ impl Quaternion {
     }
 }
 
-impl PartialEq for Quaternion {
-    fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w }
-}
-
 impl ApproxEq for Quaternion {
     type Margin = F32Margin;
     fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {

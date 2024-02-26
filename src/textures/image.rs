@@ -1,6 +1,7 @@
-use std::ffi::CStr;
+use std::{ffi::CStr, collections::HashSet};
 
 use ffi::{PixelFormat, Color, Rectangle};
+use half::f16;
 
 use crate::{ffi, prelude::Raylib, cstr, math::color::get_pixel_data_size};
 
@@ -30,43 +31,61 @@ impl Image {
     pub fn from_ffi(image: ffi::Image) -> Option<Self> {
         if !image.is_valid() { return None }
         let format = image.format.try_into().unwrap();
+        let size = image.compute_size();
 
         Some(Image {
             image,
             format,
-            size: get_pixel_data_size(image.width, image.height, format) as usize 
+            size
         })
     }
 
-    /// Get access to the underlying image data buffer
+    /// Recomputes size and format after modifying the underlying image handle.
+    fn recompute(&mut self) {
+        self.format = self.image.format.try_into().unwrap();
+        self.size = self.image.compute_size();
+    }
+
+    /// Get access to the underlying image data buffer.
+    /// Note that this contains the data for all mipmap levels.
     pub fn data(&self) -> &[u8] {
         unsafe { std::slice::from_raw_parts(self.image.data as *const u8, self.size) }
     }
 
-    /// Get mutable access to the underlying image data buffer
+    /// Get mutable access to the underlying image data buffer.
+    /// Note that this contains the data for all mipmap levels.
     pub fn data_mut(&mut self) -> &mut [u8] {
         unsafe { std::slice::from_raw_parts_mut(self.image.data as *mut u8, self.size) }
     }
 
-    /// Size in bytes of the image data buffer
+    /// Size in bytes of the image data buffer.
     pub fn size(&self) -> usize {
         self.size
     }
 
-    /// The underlying image width
+    /// The underlying image width.
     pub fn width(&self) -> u32 {
         self.image.width as u32
     }
 
-    /// The underlying image height
+    /// The underlying image height.
     pub fn height(&self) -> u32 {
         self.image.height as u32
     }
 
+    /// The pixel format of the image.
     pub fn format(&self) -> PixelFormat {
         self.format
     }
 
+    /// Get the number of mipmap levels in the image.
+    /// 1 by default.
+    pub fn mipmaps(&self) -> u32 {
+        // image validity checks for mipmaps above 0.
+        self.image.mipmaps as u32
+    }
+
+    /// Get a copy of the raw raylib image handle.
     pub unsafe fn get_ffi_image(&self) -> ffi::Image {
         self.image
     }
@@ -81,12 +100,45 @@ impl ffi::Image {
         let ready = unsafe { ffi::IsImageReady(*self) };
         ready && PixelFormat::try_from(self.format).is_ok()
     }
-}
 
+    /// Computes the size of the `data` buffer.
+    /// # Panics
+    /// Panics if `format` is not a valid PixelFormat.
+    #[inline]
+    pub fn compute_size(&self) -> usize {
+        let format = self.format.try_into().unwrap();
+        let mut size = 0;
+
+        let mut width = self.width;
+        let mut height = self.height;
+        for _ in 0..self.mipmaps {
+            size += get_pixel_data_size(width, height, format) as usize;
+            width /= 2;
+            height /= 2;
+        }
+
+        size
+    }
+}
 
 impl Drop for Image {
     fn drop(&mut self) {
         unsafe { ffi::UnloadImage(self.image) }
+    }
+}
+
+impl PixelFormat {
+    pub fn is_compressed(&self) -> bool {
+        use PixelFormat as P;
+        matches!(
+            self,
+            P::CompressedDxt1Rgb | P::CompressedDxt1Rgba |
+            P::CompressedDxt3Rgba | P::CompressedDxt5Rgba |
+            P::CompressedEtc1Rgb | P::CompressedEtc2Rgb |
+            P::CompressedEtc2EacRgba | P::CompressedPvrtRgb |
+            P::CompressedPvrtRgba | P::CompressedAstc4X4Rgba |
+            P::CompressedAstc8X8Rgba
+        )
     }
 }
 
@@ -370,6 +422,7 @@ impl Raylib {
 impl Raylib {
     /// Duplicates the given image to a new memory buffer.
     /// Needs a reference to the raylib object since it allocates memory using raylib's allocator.
+    #[inline]
     pub fn image_copy(&mut self, image: &Image) -> Image {
         let other = unsafe { ffi::ImageCopy(image.image) };
         Image::from_ffi(other).unwrap()
@@ -377,6 +430,7 @@ impl Raylib {
 
     /// Duplicates part of the given image to a new memory buffer.
     /// Needs a reference to the raylib object since it allocates memory using raylib's allocator.
+    #[inline]
     pub fn image_from_image(&mut self, rec: Rectangle, image: &Image) -> Image {
         let other = unsafe { ffi::ImageFromImage(image.image, rec) };
         Image::from_ffi(other).unwrap()
@@ -384,4 +438,369 @@ impl Raylib {
 
     // TODO: Font support
     // pub fn image_text_ex(&mut self, font: Font, color: Color) -> Image;
+
+    /// Convert image data to the desired format.
+    /// Clears mipmap levels.
+    /// Doesn't do anything for compressed data formats.
+    pub fn image_format(&mut self, image: &mut Image, new_format: PixelFormat) {
+        unsafe { ffi::ImageFormat(&mut image.image as *mut _, new_format as i32) }
+        image.recompute();
+    }
+
+    /// Makes the image's size a power of two.
+    /// Fills the created pixels with the given color.
+    /// Clears mipmap levels.
+    pub fn image_to_pot(&mut self, image: &mut Image, fill: Color) {
+        unsafe { ffi::ImageToPOT(&mut image.image as *mut _, fill) }
+        image.recompute();
+    }
+
+    /// Crops the image to the given rectangle.
+    /// Clamps the rectangle to the image's bounds if it is too big.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_crop(&mut self, image: &mut Image, crop: Rectangle) {
+        unsafe { ffi::ImageCrop(&mut image.image as *mut _, crop) }
+        image.recompute();
+    }
+
+    /// Removes the edges of the image whose alpha value go lower than the threshold.
+    /// `threshold` should be between 0 and 1.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_alpha_crop(&mut self, image: &mut Image, threshold: f32) {
+        unsafe { ffi::ImageAlphaCrop(&mut image.image as *mut _, threshold) }
+        image.recompute();
+    }
+
+    /// Replace pixels with alpha values lower than `threshold` by the given color.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_alpha_clear(&mut self, image: &mut Image, color: Color, threshold: f32) {
+        unsafe { ffi::ImageAlphaClear(&mut image.image as *mut _, color, threshold) }
+        image.recompute();
+    }
+
+    /// Applies an alpha mask to `image`.
+    /// - `mask` should be in `PixelFormat::UncompressedGrayscale`.
+    /// - Clears mipmap levels.
+    /// - Does nothing for compressed images.
+    /// - Does nothing if `image` and `mask` do not have the same size.
+    /// 
+    /// The resulting image is either `PixelFormat::UncompressedGrayAlpha` or `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_alpha_mask(&mut self, mut image: Image, mask: &Image) -> Image {
+        unsafe { ffi::ImageAlphaMask(&mut image.image as *mut _, mask.image) };
+        image.recompute();
+        image
+    }
+
+    /// Multiplies the given image's color components by their respective alpha value.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_alpha_premultiply(&mut self, mut image: Image) -> Image {
+        unsafe { ffi::ImageAlphaPremultiply(&mut image.image as *mut _) };
+        image.recompute();
+        image
+    }
+
+    /// Approximates a gaussian blur using a box blur.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_blur_gaussian(&mut self, mut image: Image, blur_size: i32) -> Image {
+        unsafe { ffi::ImageBlurGaussian(&mut image.image as *mut _, blur_size) };
+        image.recompute();
+        image
+    }
+
+    /// Resize an image using the bicubic scaling algorithm.
+    /// - Clears mipmap levels.
+    /// - Does nothing for compressed images.
+    /// - The image format stays unchanged if it is one of:
+    ///   `UncompressedGrayscale`, `UncompressedGrayAlpha`, `UncompressedR8G8B8`, or `UncompressedR8G8B8A8`.
+    /// - Otherwise, the image is converted to `PixelFormat::UncompressedR8G8B8A8`.
+    ///   Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_resize_bicubic(&mut self, mut image: Image, new_width: u32, new_height: u32) -> Image {
+        unsafe { ffi::ImageResize(&mut image.image as *mut _, new_width as i32, new_height as i32) };
+        image.recompute();
+        image
+    }
+
+    /// Resize an image using the nearest neighbour algorithm.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_resize_nn(&mut self, mut image: Image, new_width: u32, new_height: u32) -> Image {
+        unsafe { ffi::ImageResizeNN(&mut image.image as *mut _, new_width as i32, new_height as i32) };
+        image.recompute();
+        image
+    }
+
+    /// Crops part of the image and fills out of bounds part with the given color.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_resize_canvas(&mut self, image: &mut Image, new_width: u32, new_height: u32, offset_x: i32, offset_y: i32, fill: Color) {
+        unsafe { ffi::ImageResizeCanvas(&mut image.image as *mut _, new_width as i32, new_height as i32, offset_x, offset_y, fill) }
+        image.recompute();
+    }
+
+    /// Computes all mipmap levels of an image (until the resulting mipmap size is 1).
+    /// Supports POT and non POT images.
+    /// The resulting image format is unchanged.
+    pub fn image_mipmaps(&mut self, image: &mut Image) {
+        unsafe { ffi::ImageMipmaps(&mut image.image as *mut _) };
+        image.recompute();
+    }
+
+    /// Dither image data to a format with 16 bits per pixels (Floyd-Steinberg dithering).
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// `target` must be `UncompressedR5G6B5`, `UncompressedR5G5B5A1` or `UncompressedR4G4B4A4`, otherwise the image is returned unmodified.
+    /// The resulting dithered image is of the target format.
+    pub fn image_dither(&mut self, mut image: Image, target: PixelFormat) -> Image {
+        let (r, g, b, a) = match target {
+            PixelFormat::UncompressedR5G6B5 => (5, 6, 5, 0),
+            PixelFormat::UncompressedR5G5B5A1 => (5, 5, 5, 1),
+            PixelFormat::UncompressedR4G4B4A4 => (4, 4, 4, 4),
+            _ => return image
+        };
+
+        unsafe { ffi::ImageDither(&mut image.image as *mut _, r, g, b, a) };
+        image.recompute();
+        image
+    }
+
+    /// Flips image vertically.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_flip_vertical(&mut self, image: &mut Image) {
+        unsafe { ffi::ImageFlipVertical(&mut image.image as *mut _) };
+        image.recompute();
+    }
+
+    /// Flips image horizontally.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_flip_horizontal(&mut self, image: &mut Image) {
+        unsafe { ffi::ImageFlipHorizontal(&mut image.image as *mut _) };
+        image.recompute();
+    }
+
+    /// Rotates an image clockwise in radians.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_rotate(&mut self, image: &mut Image, degrees: f32) {
+        unsafe { ffi::ImageRotate(&mut image.image as *mut _, degrees.to_radians() as i32)  };
+        image.recompute();
+    }
+    
+    /// Rotates an image clockwise 90 degrees.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_rotate_cw(&mut self, image: &mut Image) {
+        unsafe { ffi::ImageRotateCW(&mut image.image as *mut _) }
+        image.recompute()
+    }
+
+    /// Rotates an image counter-clockwise 90 degrees.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    pub fn image_rotate_ccw(&mut self, image: &mut Image) {
+        unsafe { ffi::ImageRotateCCW(&mut image.image as *mut _) }
+        image.recompute()
+    }
+
+    /// Tints the image in the given color (multiplies every pixel's colors by the tint).
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_color_tint(&mut self, mut image: Image, tint: Color) -> Image {
+        unsafe { ffi::ImageColorTint(&mut image.image as *mut _, tint) }
+        image.recompute();
+        image
+    }
+
+    /// Inverts the color of the image (1-color)
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_color_invert(&mut self, mut image: Image) -> Image {
+        unsafe { ffi::ImageColorInvert(&mut image.image as *mut _) }
+        image.recompute();
+        image
+    }
+
+    /// Makes the image grayscale.
+    /// Equivalent to `rl.image_format(&mut image, PixelFormat::UncompressedGrayscale)`.
+    /// The resulting image is thus `PixelFormat::UncompressedGrayscale`.
+    /// Clears mipmap levels.
+    pub fn image_color_grayscale(&mut self, image: &mut Image) {
+        unsafe { ffi::ImageColorGrayscale(&mut image.image as *mut _) };
+        image.recompute();
+    }
+
+    /// Modifies the image's contrast.
+    /// The contrast value should be between `0.0` (no contrast) and `1.0` (full contrast).
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_color_contrast(&mut self, mut image: Image, contrast: f32) -> Image {
+        unsafe { ffi::ImageColorContrast(&mut image.image as *mut _, contrast*200.0 - 100.0) };
+        image.recompute();
+        image
+    }
+
+    /// Modifies the image's brightness.
+    /// The brightness value should be between `0.0` (completely dark) and `1.0` (completely white).
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_color_brightness(&mut self, mut image: Image, brightness: f32) -> Image {
+        unsafe { ffi::ImageColorBrightness(&mut image.image as *mut _, (brightness*510.0 - 255.0) as i32) }
+        image.recompute();
+        image
+    }
+
+    /// Replaces a color in the image by another one.
+    /// Only replaces exact matches.
+    /// Clears mipmap levels.
+    /// Does nothing for compressed images.
+    /// The resulting image is always `PixelFormat::UncompressedR8G8B8A8`.
+    /// Since the pixel format might get changed, unlike the original raylib function, it returns a new image.
+    pub fn image_color_replace(&mut self, mut image: Image, color: Color, replacement: Color) -> Image {
+        unsafe { ffi::ImageColorReplace(&mut image.image as *mut _, color, replacement) }
+        image.recompute();
+        image
+    }
+}
+
+impl Image {
+    /// Get data from the image as a color iterator.
+    /// Equivalent to `LoadImageColors`, but does not allocate any memory.
+    /// Returns an empty iterator if the image is in a compressed format.
+    /// Colors will be compressed into 8 bits for formats with more than 8 bits per pixel.
+    pub fn colors<'a>(&'a self) -> impl Iterator<Item = Color> + 'a {
+        let num = if self.format.is_compressed() {
+            0..0
+        } else {
+            0..self.height()
+        };
+
+        let width = 0..self.width();
+        num.flat_map(move |x|
+            width.clone().map(move |y|
+                // SAFETY:
+                // - x and y are garanteed to be in bounds
+                // - the format is checked to not be compressed
+                unsafe { self.get_color(x, y).unwrap_unchecked() }
+            )
+        )
+    }
+
+    /// Creates a color palette from the given image
+    /// Returns a hash set of all the different colors present in the image, up to the specified maximum.
+    /// Does not count transparent pixels.
+    /// Returns the empty set for compressed images.
+    pub fn palette(&self, max_size: usize) -> HashSet<Color> {
+        let mut set = HashSet::new();
+        for color in self.colors() {
+            if color.a == 0 { continue }
+
+            if set.insert(color) {
+                if set.len() >= max_size {
+                    break
+                }
+            }
+        }
+        set
+    }
+
+    /// Get image pixel color at the given position.
+    /// - Returns `None` if the coordinate is out of bounds.
+    /// - Returns `None` if the image is in a compressed format.
+    #[inline]
+    pub fn get_color(&self, x: u32, y: u32) -> Option<Color> {
+        if self.format.is_compressed() { return None }
+        if x >= self.width() || y >= self.height() { return None }
+
+        use PixelFormat as P;
+        let data = self.data();
+        let i = y as usize*self.height() as usize + x as usize;
+        let color = match self.format {
+            P::UncompressedGrayscale => Color::gray(data[i]),
+            P::UncompressedGrayAlpha => Color::graya(data[i], data[i+1]),
+            P::UncompressedR5G5B5A1 => {
+                let pixel = u16::from_ne_bytes([data[i*2], data[i*2+1]]);
+                Color::rgba(
+                    (((pixel & 0b11111000000000) >> 11)*(255/31)) as u8,
+                    (((pixel & 0b0000011111000000) >>  6)*(255/31)) as u8,
+                    (((pixel & 0b0000000000111110) >>  1)*(255/31)) as u8,
+                    ((pixel & 0b1)*255) as u8
+                )
+            }
+            P::UncompressedR5G6B5 => {
+                let pixel = u16::from_ne_bytes([data[i*2], data[i*2+1]]);
+                Color::rgb(
+                    (((pixel & 0b1111100000000000) >> 11)*(255/31)) as u8,
+                    (((pixel & 0b0000011111100000) >>  5)*(255/63)) as u8,
+                    (((pixel & 0b0000000000011111))*(255/31)) as u8,
+                )
+            }
+            P::UncompressedR4G4B4A4 => {
+                let pixel = u16::from_ne_bytes([data[i*2], data[i*2+1]]);
+                Color::rgba(
+                    (((pixel & 0b1111000000000000) >> 12)*(255/15)) as u8,
+                    (((pixel & 0b0000111100000000) >>  8)*(255/15)) as u8,
+                    (((pixel & 0b0000000011110000) >>  4)*(255/15)) as u8,
+                    (((pixel & 0b0000000000001111))*(255/15)) as u8
+                )
+            }
+            P::UncompressedR8G8B8A8 => Color::rgba(data[i*4], data[i*4+1], data[i*4+2], data[i*4+3]),
+            P::UncompressedR8G8B8 => Color::rgb(data[i*3], data[i*3+1], data[i*3+2]),
+            P::UncompressedR32 => Color::rgb(
+                (f32::from_ne_bytes([data[i*4], data[i*4+1], data[i*4+2], data[i*4+3]])*255.0) as u8,
+                0,
+                0
+            ),
+            P::UncompressedR32G32B32 => Color::rgb(
+                (f32::from_ne_bytes([data[i*12], data[i*12+1], data[i*12+2], data[i*12+3]])*255.0) as u8,
+                (f32::from_ne_bytes([data[i*12+4], data[i*12+5], data[i*12+6], data[i*12+7]])*255.0) as u8,
+                (f32::from_ne_bytes([data[i*12+8], data[i*12+9], data[i*12+10], data[i*12+11]])*255.0) as u8,
+            ),
+            P::UncompressedR32G32B32A32 => Color::rgba(
+                (f32::from_ne_bytes([data[i*16], data[i*16+1], data[i*16+2], data[i*16+3]])*255.0) as u8,
+                (f32::from_ne_bytes([data[i*16+4], data[i*16+5], data[i*16+6], data[i*16+7]])*255.0) as u8,
+                (f32::from_ne_bytes([data[i*16+8], data[i*16+9], data[i*16+10], data[i*16+11]])*255.0) as u8,
+                (f32::from_ne_bytes([data[i*16+12], data[i*16+13], data[i*16+14], data[i*16+15]])*255.0) as u8,
+            ),
+            P::UncompressedR16 => Color::rgb(
+                (f16::from_ne_bytes([data[i*2], data[i*2+1]]).to_f32()*255.0) as u8,
+                0,
+                0
+            ),
+            P::UncompressedR16G16B16 => Color::rgb(
+                (f16::from_ne_bytes([data[i*6], data[i*6+1]]).to_f32()*255.0) as u8,
+                (f16::from_ne_bytes([data[i*6+2], data[i*6+3]]).to_f32()*255.0) as u8,
+                (f16::from_ne_bytes([data[i*6+4], data[i*6+5]]).to_f32()*255.0) as u8,
+            ),
+            P::UncompressedR16G16B16A16 => Color::rgba(
+                (f16::from_ne_bytes([data[i*8], data[i*8+1]]).to_f32()*255.0) as u8,
+                (f16::from_ne_bytes([data[i*8+2], data[i*8+3]]).to_f32()*255.0) as u8,
+                (f16::from_ne_bytes([data[i*8+4], data[i*8+5]]).to_f32()*255.0) as u8,
+                (f16::from_ne_bytes([data[i*8+6], data[i*8+7]]).to_f32()*255.0) as u8,
+            ),
+            _ => unreachable!()
+        };
+
+        Some(color)
+    }
 }

@@ -1,4 +1,4 @@
-use std::{io::{Write, self}, fmt::Display};
+use std::{io::{Write, self}, fmt::Display, collections::HashSet};
 
 use crate::structure::*;
 
@@ -48,7 +48,7 @@ impl Display for Type<'_> {
     }
 }
 
-fn generate_structs(out: &mut impl Write, structs: Vec<Struct>) -> io::Result<()> {
+fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, hashable: &HashSet<String>) -> io::Result<()> {
     for s in structs {
         if s.name == "AudioStream" {
             writeln!(out, "type rAudioBuffer = ffi::c_void;")?;
@@ -61,7 +61,11 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>) -> io::Result<()
         }
 
         writeln!(out, "#[repr(C)]")?;
-        writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
+        write!(out, "#[derive(Debug, Clone, Copy, PartialEq")?;
+        if hashable.contains(s.name) {
+            write!(out, ", Eq, Hash")?;
+        }
+        writeln!(out, ")]")?;
         writeln!(out, "pub struct {} {{", s.name)?;
         for field in s.fields {
             if !field.desc.is_empty() {
@@ -82,7 +86,7 @@ fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>) -> io::Result<()>
         if a.name == "Quaternion" { 
             writeln!(out, "/// Quaternion, 4 float components")?;
             writeln!(out, "#[repr(C)]")?;
-            writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
+            writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq)]")?;
             writeln!(out, "pub struct Quaternion {{")?;
             writeln!(out, "    /// Imaginary `i` part of the quaternion")?;
             writeln!(out, "    pub x: f32,")?;
@@ -155,7 +159,7 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
             writeln!(out, "/// {}", e.desc)?;
         }
         writeln!(out, "#[repr(C)]")?;
-        writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
+        writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Hash)]")?;
         writeln!(out, "pub enum {} {{", e.name)?;
         for (name, value) in &e.values {
             writeln!(out, "    {} = {},", name, value)?;
@@ -191,8 +195,10 @@ fn generate_defines(out: &mut impl Write, defines: Vec<Define>) -> io::Result<()
 }
 
 pub fn generate(out: &mut impl Write, raylib: Raylib) -> io::Result<()> {
+    let hashable = HashSet::from(["Color".to_string()]);
+
     generate_defines(out, raylib.defines)?;
-    generate_structs(out, raylib.structs)?;
+    generate_structs(out, raylib.structs, &hashable)?;
     generate_aliases(out, raylib.aliases)?;
     generate_callbacks(out, raylib.callbacks)?;
     generate_functions(out, raylib.functions)?;

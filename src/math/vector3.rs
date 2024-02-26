@@ -225,10 +225,6 @@ impl Vector3 {
     pub fn invert(self) -> Self { 1.0 / self }
 }
 
-impl PartialEq for Vector3 {
-    fn eq(&self, other: &Self) -> bool { self.x == other.x && self.y == other.y && self.z == other.z }
-}
-
 impl ApproxEq for Vector3 {
     type Margin = F32Margin;
     fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
