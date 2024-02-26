@@ -1,6 +1,6 @@
 use std::{ffi::CStr, collections::HashSet};
 
-use ffi::{PixelFormat, Color, Rectangle};
+use ffi::{PixelFormat, Color, Rectangle, Vector2};
 use half::f16;
 
 use crate::{ffi, prelude::Raylib, cstr, math::color::get_pixel_data_size};
@@ -803,4 +803,126 @@ impl Image {
 
         Some(color)
     }
+}
+
+/// # Image drawing functions (software rendering)
+///
+/// ---
+impl Image {
+    /// Clear image with the given color.
+    /// Only clears base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn clear_background(&mut self, color: Color) {
+        unsafe { ffi::ImageClearBackground(&mut self.image as *mut _, color) } 
+    }
+
+    /// Draw a single pixel.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_pixel(&mut self, pos_x: f32, pos_y: f32, color: Color) {
+        self.draw_pixel_v(Vector2::new(pos_x, pos_y), color)
+    }
+    /// Draw a single pixel.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_pixel_v(&mut self, pos: Vector2, color: Color) {
+        unsafe { ffi::ImageDrawPixelV(&mut self.image as *mut _, pos, color) }
+    }
+    /// Draw a line.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_line(&mut self, start_x: f32, start_y: f32, end_x: f32, end_y: f32, color: Color) {
+        unsafe { ffi::ImageDrawLine(&mut self.image as *mut _, start_x as i32, start_y as i32, end_x as i32, end_y as i32, color) }
+    }
+    /// Draw a line.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_line_v(&mut self, start: Vector2, end: Vector2, color: Color) {
+        self.draw_line(start.x, start.y, end.x, end.y, color)
+    }
+    /// Draw a filled circle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_circle(&mut self, center_x: f32, center_y: f32, radius: f32, color: Color) {
+        self.draw_circle_v(Vector2::new(center_x, center_y), radius, color)
+    }
+    /// Draw a filled circle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_circle_v(&mut self, center: Vector2, radius: f32, color: Color) {
+        unsafe { ffi::ImageDrawCircleV(&mut self.image as *mut _, center, radius as i32, color) }
+    }
+    /// Draw the outline of a circle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_circle_lines(&mut self, center_x: f32, center_y: f32, radius: f32, color: Color) {
+        self.draw_circle_lines_v(Vector2::new(center_x, center_y), radius, color)
+    }
+    /// Draw the outline of a circle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_circle_lines_v(&mut self, center: Vector2, radius: f32, color: Color) {
+        unsafe { ffi::ImageDrawCircleLinesV(&mut self.image as *mut _, center, radius as i32, color) }
+    }
+    /// Draw a filled rectangle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_rectangle(&mut self, pos_x: f32, pos_y: f32, width: f32, height: f32, color: Color) {
+        self.draw_rectangle_v(Vector2::new(pos_x, pos_y), Vector2::new(width, height), color)
+    }
+    /// Draw a filled rectangle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_rectangle_v(&mut self, pos: Vector2, size: Vector2, color: Color) {
+        unsafe { ffi::ImageDrawRectangleV(&mut self.image as *mut _, pos, size, color) }
+    }
+    /// Draw a filled rectangle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_rectangle_rec(&mut self, rec: Rectangle, color: Color) {
+        unsafe { ffi::ImageDrawRectangleRec(&mut self.image as *mut _, rec, color) }
+    }
+    /// Draw the outline of a rectangle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_rectangle_lines(&mut self, pos_x: f32, pos_y: f32, width: f32, height: f32, thickness: f32, color: Color) {
+        self.draw_rectangle_lines_rec(Rectangle { x: pos_x, y: pos_y, width, height }, thickness, color)
+    }
+    /// Draw the outline of a rectangle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_rectangle_lines_v(&mut self, pos: Vector2, size: Vector2, thickness: f32, color: Color) {
+        self.draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, color)
+    }
+    /// Draw the outline of a rectangle.
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_rectangle_lines_rec(&mut self, rec: Rectangle, thickness: f32, color: Color) {
+        unsafe { ffi::ImageDrawRectangleLines(&mut self.image as *mut _, rec, thickness as i32, color) }
+    }
+    /// Draw an other image within this image
+    /// Only changes base image, does not update mipmap levels.
+    /// Does not support compressed images.
+    #[inline]
+    pub fn draw_image(&mut self, src: &Image, src_rec: Rectangle, dst_rec: Rectangle, tint: Color) {
+        unsafe { ffi::ImageDraw(&mut self.image as *mut _, src.image, src_rec, dst_rec, tint) };
+    }
+
+    // TODO: Implement text support
+    // pub fn image_draw_text(&mut self) {}
 }
