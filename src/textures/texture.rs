@@ -1,6 +1,8 @@
-use ffi::{CubemapLayout, Rectangle, TextureFilter, TextureWrap, Color, Vector2, NPatchInfo};
+use std::ffi::c_void;
 
-use crate::{ffi, prelude::{Raylib, DrawHandle}};
+use ffi::{CubemapLayout, Rectangle, TextureFilter, TextureWrap, Color, Vector2, NPatchInfo, PixelFormat};
+
+use crate::{ffi, prelude::{Raylib, DrawHandle}, math::color::get_pixel_data_size};
 
 use super::image::Image;
 
@@ -25,6 +27,14 @@ impl Texture {
     pub fn from_ffi(texture: ffi::Texture) -> Option<Self> {
         if !texture.is_valid() { return None }
         Some(Texture(texture))
+    }
+    #[inline]
+    pub fn width(&self) -> u32 {
+        self.0.width as u32
+    }
+    #[inline]
+    pub fn height(&self) -> u32 {
+        self.0.height as u32
     }
 
     #[inline]
@@ -127,6 +137,20 @@ impl Raylib {
         Texture::from_ffi(texture)
     }
 
+    /// Loads an empty texture in the given format.
+    /// Returns `None` if there was an error creating the texture.
+    pub fn load_texture_empty(&mut self, width: u32, height: u32, format: PixelFormat) -> Option<Texture> {
+        let empty_image = ffi::Image {
+            data: std::ptr::null_mut(),
+            width: width as i32, height: height as i32,
+            format: format as i32,
+            mipmaps: 1
+        };
+
+        let texture = unsafe { ffi::LoadTextureFromImage(empty_image) };
+        Texture::from_ffi(texture)
+    }
+
     /// Load a cubemap texture from an image.
     /// Returns `None` if there was an error loading the texture.
     #[inline]
@@ -142,14 +166,26 @@ impl Raylib {
         let texture = unsafe { ffi::LoadRenderTexture(width as i32, height as i32) };
         RenderTexture::from_ffi(texture)
     }
+}
 
+impl Texture {
     /// Updates the texture with the given image.
     /// Returns `Err(())` if the image's format or size does not correspond to the texture.
-    pub fn update_texture(&mut self, texture: &mut Texture, image: &Image) -> Result<(), ()> {
-        if texture.0.format != image.format() as i32 { return Err(()) }
-        if texture.0.width as u32 != image.width() || texture.0.height as u32 != image.height() { return Err(()) }
+    pub fn update(&mut self, image: &Image) -> Result<(), ()> {
+        if self.0.format != image.format() as i32 { return Err(()) }
+        if self.0.width as u32 != image.width() || self.0.height as u32 != image.height() { return Err(()) }
 
-        unsafe { ffi::UpdateTexture(texture.0, image.get_ffi_image().data) };
+        unsafe { ffi::UpdateTexture(self.0, image.get_ffi_image().data) };
+        Ok(())
+    }
+
+    /// Updates the texture with the given raw image data.
+    /// The data must be in the same format as the texture.
+    /// Returns `Err(())` if the buffer's size does not correspond to the texture.
+    pub fn update_raw(&mut self, buffer: &[u8]) -> Result<(), ()> {
+        if get_pixel_data_size(self.0.width, self.0.height, self.0.format.try_into().unwrap()) as usize != buffer.len() { return Err(()) }
+
+        unsafe { ffi::UpdateTexture(self.0, buffer.as_ptr() as *const c_void) };
         Ok(())
     }
 
@@ -158,14 +194,29 @@ impl Raylib {
     /// - The image's format does not correspond to the texture
     /// - The image's size does not correspond to `rec`.
     /// - `rec` is out of texture bounds.
-    pub fn update_texture_rec(&mut self, texture: &mut Texture, rec: Rectangle, image: &Image) -> Result<(), ()> {
-        if texture.0.format != image.format() as i32 { return Err(()) }
+    pub fn update_rec(&mut self, rec: Rectangle, image: &Image) -> Result<(), ()> {
+        if self.0.format != image.format() as i32 { return Err(()) }
         if rec.width as u32 != image.width() || rec.height as u32 != image.height() { return Err(()) }
-        if rec.x < 0.0 || rec.y < 0.0 || (rec.x + rec.width) as u32 > texture.0.width as u32 || (rec.y + rec.height) as u32 >= texture.0.height as u32 {
+        if rec.x < 0.0 || rec.y < 0.0 || (rec.x + rec.width) as u32 > self.0.width as u32 || (rec.y + rec.height) as u32 >= self.0.height as u32 {
             return Err(())
         }
 
-        unsafe { ffi::UpdateTextureRec(texture.0, rec, image.get_ffi_image().data) };
+        unsafe { ffi::UpdateTextureRec(self.0, rec, image.get_ffi_image().data) };
+        Ok(())
+    }
+
+    /// Updates part of a texture with the given raw image data.
+    /// The data must be in the same format as the texture.
+    /// Returns `Err(())` if:
+    /// - The buffer's size does not correspond to `rec`.
+    /// - `rec` is out of texture bounds.
+    pub fn update_rec_raw(&mut self, rec: Rectangle, buffer: &[u8]) -> Result<(), ()> {
+        if get_pixel_data_size(rec.width as i32, rec.height as i32, self.0.format.try_into().unwrap()) as usize != buffer.len() { return Err(()) }
+        if rec.x < 0.0 || rec.y < 0.0 || (rec.x + rec.width) as u32 > self.0.width as u32 || (rec.y + rec.height) as u32 >= self.0.height as u32 {
+            return Err(())
+        }
+
+        unsafe { ffi::UpdateTextureRec(self.0, rec, buffer.as_ptr() as *const c_void) };
         Ok(())
     }
 }
