@@ -43,6 +43,23 @@ impl Color {
         Color::rgba(v, v, v, a)
     }
 
+    /// Creates a color from floating point values between 0.0 and 1.0.
+    pub fn rgba_f32(r: f32, g: f32, b: f32, a: f32) -> Self {
+        Color::rgba((r*255.0) as u8, (g*255.0) as u8, (b*255.0) as u8, (a*255.0) as u8)
+    }
+    /// Creates a color from floating point values between 0.0 and 1.0.
+    pub fn rgb_f32(r: f32, g: f32, b: f32) -> Self {
+        Color::rgba_f32(r, g, b, 1.0)
+    }
+    /// Multiplies color's components with factor from 0.0 to 1.0.
+    /// Does not multiply alpha channel.
+    pub fn scale(self, value: f32) -> Self {
+        Color::rgba((self.r as f32 * value) as u8, (self.g as f32 * value) as u8, (self.b as f32 * value) as u8, self.a)
+    }
+    pub fn with_alpha(self, alpha: u8) -> Self {
+        Color::rgba(self.r, self.g, self.b, alpha)
+    }
+
     /// Get Color structure from hexadecimal value
     /// Equivalent to raylib `GetColor`
     pub const fn hex(hex: u32) -> Self {

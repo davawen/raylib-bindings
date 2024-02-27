@@ -203,7 +203,7 @@ impl<P> DrawHandle<'_, P> {
     }
     /// Draw a texture.
     #[inline]
-    pub fn draw_texture_v(&mut self, texture: &Texture, pos: Vector2, tint: Color) {
+    pub fn texture_v(&mut self, texture: &Texture, pos: Vector2, tint: Color) {
         self.texture_ex(texture, pos, 0.0, 1.0, tint);
     }
     /// Draw a rotated and scaled texture.
