@@ -124,6 +124,7 @@ dependencies = [
  "float-cmp",
  "fontdue",
  "half",
+ "hashbrown",
  "va_list",
 ]
 

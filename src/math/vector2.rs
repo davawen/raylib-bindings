@@ -1,6 +1,8 @@
-///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
+//! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
-use crate::ffi::{Vector2, Vector3, Vector4, Matrix};
+pub use crate::ffi::Vector2;
+
+use crate::ffi::{Vector3, Vector4, Matrix};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 use float_cmp::{ApproxEq, F32Margin};

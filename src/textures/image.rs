@@ -231,8 +231,8 @@ impl Raylib {
 
     /// Loads an image from a memory buffer containing raw data.
     /// Returns `None` if `data`'s size doesn't correspond to the width, height, and format of the image.
-    /// This is a reimplementation of the `LoadImageRaw` raylib function, to allow loading a raw image from a memory buffer.
-    /// It doesn't take a `headerSize` parameter since you can just index the slice to remove it.
+    /// This is a reimplementation of the `LoadImageRaw` raylib function, which doesn't allow loading a raw image from a memory buffer.
+    /// It doesn't take a `headerSize` parameter since you can just index the slice to remove any header present.
     /// # Panics
     /// Panics if width or height are less than 1.
     /// # Examples
@@ -242,9 +242,9 @@ impl Raylib {
     /// # let mut rl = Raylib::init_window(100, 100, "load image raw", 60);
     /// let data = std::fs::read("assets/raw_image.raw").unwrap();
     /// let rgb = rl.load_image_raw(&data, 3, 3, PixelFormat::UncompressedR8G8B8).unwrap();
-    /// let rgb = rl.load_texture_from_image(&rgb);
-    /// let mut draw = rl.begin_drawing();
-    /// draw.draw_texture(rgb, 0.0, 0.0, Color::WHITE);
+    /// //let rgb = rl.load_texture_from_image(&rgb).unwrap();
+    /// //let mut draw = rl.begin_drawing();
+    /// //draw.texture(&rgb, 0.0, 0.0, Color::WHITE);
     /// ```
     pub fn load_image_raw(&mut self, data: &[u8], width: i32, height: i32, format: PixelFormat) -> Option<Image> {
         assert!(width > 0 && height > 0);

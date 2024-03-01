@@ -6,10 +6,11 @@ pub mod vr;
 pub mod automation;
 pub mod input;
 pub mod other;
+mod default_font;
 
 use std::{ptr::NonNull, ffi::c_void};
 
-use crate::ffi;
+use crate::{ffi, text::bitmap::BitmapFontAtlas};
 
 pub struct Raylib {
     /// Keeps track of wether an automation event list is currently set
@@ -20,6 +21,8 @@ pub struct Raylib {
     /// See `core::automation`
     #[allow(unused)]
     automation_event_recording: bool,
+    /// Keeps hold of the default raylib font.
+    default_font: Option<BitmapFontAtlas>,
     // disallows initialization from outside
     _private: ()
 }

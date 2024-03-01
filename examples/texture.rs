@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use raylib::{prelude::*, cstr};
+use raylib::prelude::*;
 
 fn main() {
     let width = 800;
@@ -21,15 +21,15 @@ fn main() {
     ];
     let textures = images.map(|image| rl.load_texture_from_image(&image).unwrap());
     let names = [
-        (cstr!("VERTICAL GRADIENT"), Color::RAYWHITE), 
-        (cstr!("HORIZONTAL GRADIENT"), Color::RAYWHITE), 
-        (cstr!("DIAGONAL GRADIENT"), Color::RAYWHITE), 
-        (cstr!("RADIAL GRADIENT"), Color::LIGHTGRAY), 
-        (cstr!("SQUARE GRADIENT"), Color::LIGHTGRAY), 
-        (cstr!("CHECKED"), Color::RAYWHITE), 
-        (cstr!("WHITE NOISE"), Color::RED), 
-        (cstr!("PERLIN NOISE"), Color::RED), 
-        (cstr!("CELLULAR"), Color::RAYWHITE), 
+        ("VERTICAL GRADIENT", Color::RAYWHITE), 
+        ("HORIZONTAL GRADIENT", Color::RAYWHITE), 
+        ("DIAGONAL GRADIENT", Color::RAYWHITE), 
+        ("RADIAL GRADIENT", Color::LIGHTGRAY), 
+        ("SQUARE GRADIENT", Color::LIGHTGRAY), 
+        ("CHECKED", Color::RAYWHITE), 
+        ("WHITE NOISE", Color::RED), 
+        ("PERLIN NOISE", Color::RED), 
+        ("CELLULAR", Color::RAYWHITE), 
     ];
 
     let mut current = 0;
@@ -44,6 +44,6 @@ fn main() {
 
         let mut draw = rl.begin_drawing();
         draw.texture(&textures[current], 0.0, 0.0, Color::WHITE);
-        unsafe { raylib::ffi::DrawText(names[current].0.as_ptr(), 10, 10, 20, names[current].1) };
+        draw.text(rl.default_font(), names[current].0, Vector2::new(10.0, 10.0), names[current].1);
     }
 }

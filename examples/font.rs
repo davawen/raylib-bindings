@@ -1,13 +1,11 @@
-use raylib::{prelude::*, text::Font};
+use raylib::prelude::*;
 
 fn main() {
     let mut rl = Raylib::init_window(1800, 1100, "Rust text!", 60);
     rl.set_window_state(ConfigFlags::FLAG_WINDOW_RESIZABLE);
 
-    let font = fontdue::Font::from_bytes(include_bytes!("/usr/share/fonts/TTF/iosevka-medium.ttc").as_slice(), Default::default()).unwrap();
-    // let font = fontdue::Font::from_bytes(include_bytes!("/home/davawen/Downloads/symbola-font/Symbola-AjYx.ttf").as_slice(), fontdue::FontSettings::default()).unwrap();
-    let font = Font::new(font);
-
+    // let font = TrueTypeFont::from_bytes(include_bytes!("/usr/share/fonts/TTF/iosevka-medium.ttc").as_slice()).unwrap();
+    let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
     let mut rendered = rl.atlas_font(&font, 20.0);
 
     let mut scroll = 0;
@@ -37,7 +35,7 @@ fn main() {
         let (w, h) = (rl.get_render_width() as i32, rl.get_render_height() as i32);
         let (nw, nh) = ((w - 100)/(offset as i32), (h-100)/(offset as i32));
 
-        for i in 0..font.glyph_count() as u16 {
+        for i in 0..rendered.glyph_count() as u16 {
             let x = i as i32 % nw;
             let y = (i as i32 / nw) + scroll;
 

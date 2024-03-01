@@ -23,3 +23,8 @@ pub use crate::textures::{
     image::*,
     texture::*,
 };
+
+pub use crate::text::{
+    font::*,
+    atlas::*
+};
