@@ -48,22 +48,17 @@ pub struct TrueTypeFontAtlas<'f> {
 impl Raylib {
     /// Creates a texture to hold the rendered font
     pub fn atlas_font<'a, 'f>(&'a mut self, font: &'f TrueTypeFont, size: f32) -> TrueTypeFontAtlas<'f> {
-        let recs = vec![];
-        let texture = self.load_texture_empty(512, 512, PixelFormat::UncompressedGrayAlpha).unwrap();
-        let mut empty = TrueTypeFontAtlas { texture, size, recs, font: font.inner() };
-        empty.reatlas(self, size);
-        empty
+        let (texture_size, recs) = TrueTypeFontAtlas::map_texture(font.inner(), size);
+        let texture = self.load_texture_empty(texture_size as u32, texture_size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
+        TrueTypeFontAtlas { texture, size, recs, font: font.inner() }
     }
 }
 
 impl TrueTypeFontAtlas<'_> {
-    /// Recalculate texture size for a new font size.
-    /// This re-uses the already created texture if it is big enough. 
-    pub fn reatlas(&mut self, rl: &mut Raylib, size: f32) {
-        self.size = size;
-        self.recs.clear();
-
-        let mut size = self.texture.width() as usize;
+    /// Returns the size of the texture expected and the vec containing the position of the glyphs.
+    fn map_texture(font: &fontdue::Font, px: f32) -> (usize, Vec<(bool, Rectangle)>) {
+        let mut size = 128;
+        let mut recs = Vec::with_capacity(font.glyph_count().into());
 
         let mut offset_x = 0;
         let mut offset_y = 0;
@@ -73,8 +68,8 @@ impl TrueTypeFontAtlas<'_> {
 
         let mut pot_y = size;
 
-        for idx in 0..self.font.glyph_count() {
-            let metrics = self.font.metrics_indexed(idx, self.size);
+        for idx in 0..font.glyph_count() {
+            let metrics = font.metrics_indexed(idx, px);
             
             // went over the right-most edge, go back to the start of the line
             if offset_x + metrics.width >= size {
@@ -83,9 +78,10 @@ impl TrueTypeFontAtlas<'_> {
 
                 // went to the bottom of the screen, resize and use the new part to the right
                 if offset_y + metrics.height >= size {
+                    pot_y = max_y;
+
                     min_x = size;
                     max_y = 0;
-                    pot_y = size;
 
                     offset_x = size;
                     offset_y = 0;
@@ -105,15 +101,30 @@ impl TrueTypeFontAtlas<'_> {
 
             }
 
-            self.recs.push((false, Rectangle::new(offset_x as f32, offset_y as f32, metrics.width as f32, metrics.height as f32)));
+            recs.push((false, Rectangle::new(offset_x as f32, offset_y as f32, metrics.width as f32, metrics.height as f32)));
 
             offset_x += metrics.width;
             max_y = max_y.max(offset_y + metrics.height);
         }
 
+        (size, recs)
+    }
+
+    /// Recalculate texture size for a new font size.
+    /// This re-uses the already created texture if it is big enough. 
+    pub fn reatlas(&mut self, rl: &mut Raylib, px: f32) {
+        self.size = px;
+        let (size, recs) = Self::map_texture(self.font, px);
+        self.recs = recs;
+
         if size as u32 > self.texture.width() {
             self.texture = rl.load_texture_empty(size as u32, size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
         }
+    }
+
+    /// The size at which the font was rendered
+    pub fn size(&self) -> f32 {
+        self.size
     }
 
     // A reference to the font used to create this atlas.
@@ -125,24 +136,26 @@ impl TrueTypeFontAtlas<'_> {
 impl FontAtlas for TrueTypeFontAtlas<'_> {
     fn codepoints(&self) -> &HashMap<char, NonZeroU16> { self.font.chars() }
     fn glyph_count(&self) -> u16 { self.font.glyph_count() }
-    fn line_metrics(&self) -> Option<LineMetrics> {
-        self.font.horizontal_line_metrics(self.size).map(|m| LineMetrics {
+    fn line_metrics(&self, size: f32) -> Option<LineMetrics> {
+        self.font.horizontal_line_metrics(size).map(|m| LineMetrics {
             ascent: m.ascent, descent: m.descent, line_gap: m.line_gap
         })
     }
 
-    fn metrics_indexed(&self, index: u16) -> Metrics {
-        let m = self.font.metrics_indexed(index, self.size);
+    fn metrics_indexed(&self, index: u16, size: f32) -> Metrics {
+        let m = self.font.metrics_indexed(index, size);
         Metrics {
-            xmin: m.bounds.xmin, ymin: m.bounds.ymin, width: m.bounds.width, height: m.bounds.height,
+            xmin: m.xmin as f32,
+            ymin: m.ymin as f32,
+            width: m.width as f32,
+            height: m.height as f32,
             advance_width: m.advance_width
         }
     }
-    fn kern_indexed(&self, left: u16, right: u16) -> Option<f32> { self.font.horizontal_kern_indexed(left, right, self.size) }
+    fn kern_indexed(&self, left: u16, right: u16, size: f32) -> Option<f32> { self.font.horizontal_kern_indexed(left, right, size) }
 
     fn texture(&self) -> &Texture { &self.texture }
-    fn size(&self) -> f32 { self.size }
-    fn get_glyph(&mut self, index: u16) -> Rectangle {
+    fn get_glyph(&mut self, index: u16, _size: f32) -> Rectangle {
         let (rendered, rec) = &mut self.recs[index as usize];
         // skip if glyph was already rendered
         if *rendered { return *rec }

@@ -4,8 +4,8 @@ fn main() {
     let mut rl = Raylib::init_window(1800, 1100, "Rust text!", 60);
     rl.set_window_state(ConfigFlags::FLAG_WINDOW_RESIZABLE);
 
-    // let font = TrueTypeFont::from_bytes(include_bytes!("/usr/share/fonts/TTF/iosevka-medium.ttc").as_slice()).unwrap();
-    let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
+    let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
+    // let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
     let mut rendered = rl.atlas_font(&font, 20.0);
 
     let mut scroll = 0;
@@ -30,10 +30,12 @@ fn main() {
             continue
         }
 
+        let left_size = draw.measure_text(&mut rendered, "0x0000", size).x;
+
         let offset = size*1.5;
 
         let (w, h) = (rl.get_render_width() as i32, rl.get_render_height() as i32);
-        let (nw, nh) = ((w - 100)/(offset as i32), (h-100)/(offset as i32));
+        let (nw, nh) = ((w - 50 - left_size as i32 - 25)/(offset as i32), (h-100)/(offset as i32));
 
         for i in 0..rendered.glyph_count() as u16 {
             let x = i as i32 % nw;
@@ -43,9 +45,9 @@ fn main() {
             if y >= nh { break }
 
             if x == 0 {
-                draw.text(&mut rendered, &format!("0x{:04x}", i), Vector2::new(5.0, y as f32*offset + 50.0), Color::BLACK);
+                draw.text(&mut rendered, &format!("0x{:04x}", i), Vector2::new(5.0, y as f32*offset + 50.0), size, Color::BLACK);
             }
-            draw.glyph(&mut rendered, i, Vector2::new(x as f32*offset + 80.0, y as f32*offset + 50.0), Color::BLACK);
+            draw.glyph(&mut rendered, i, Vector2::new(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
         }
 
         draw.fps(Vector2::new(5.0, 5.0));

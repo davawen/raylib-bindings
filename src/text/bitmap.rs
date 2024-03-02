@@ -47,18 +47,17 @@ impl Raylib {
 impl FontAtlas for BitmapFontAtlas {
     fn codepoints(&self) -> &HashMap<char, NonZeroU16> { &self.codepoints }
     fn glyph_count(&self) -> u16 { self.glyph_count }
-    fn line_metrics(&self) -> Option<LineMetrics> {
-        Some(self.line_metrics)
+    fn line_metrics(&self, size: f32) -> Option<LineMetrics> {
+        Some(self.line_metrics.scaled(size/self.size))
     }
 
-    fn metrics_indexed(&self, index: u16) -> Metrics {
-        self.glyphs[index as usize].metrics
+    fn metrics_indexed(&self, index: u16, size: f32) -> Metrics {
+        self.glyphs[index as usize].metrics.scaled(size/self.size)
     }
-    fn kern_indexed(&self, _left: u16, _right: u16) -> Option<f32> { None }
+    fn kern_indexed(&self, _left: u16, _right: u16, _size: f32) -> Option<f32> { None }
 
     fn texture(&self) -> &Texture { &self.texture }
-    fn size(&self) -> f32 { self.size }
-    fn get_glyph(&mut self, index: u16) -> Rectangle {
+    fn get_glyph(&mut self, index: u16, _size: f32) -> Rectangle {
         self.glyphs[index as usize].rec
     }
 }

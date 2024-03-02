@@ -19,6 +19,16 @@ pub struct Metrics {
     pub advance_width: f32
 }
 
+impl Metrics {
+    pub fn scaled(self, s: f32) -> Self {
+        Self {
+            xmin: self.xmin * s, ymin: self.ymin * s,
+            width: self.width * s, height: self.height * s,
+            advance_width: self.advance_width * s
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct LineMetrics {
     /// The highest point that any glyph in the font extends to above the baseline.
@@ -27,6 +37,16 @@ pub struct LineMetrics {
     pub descent: f32,
     /// The gap between the descent of one line and the ascent of the next.
     pub line_gap: f32
+}
+
+impl LineMetrics {
+    pub fn scaled(self, s: f32) -> Self {
+        Self {
+            ascent: self.ascent * s,
+            descent: self.descent * s,
+            line_gap: self.line_gap * s
+        }
+    }
 }
 
 /// An atlas is a collection of glyphs rendered to a texture at a specific size.
@@ -49,69 +69,75 @@ pub trait FontAtlas {
 
     /// The metrics specifying how glyphs should be placed relative to the font baseline,
     /// and how to space lines apart.
-    fn line_metrics(&self) -> Option<LineMetrics>;
+    fn line_metrics(&self, size: f32) -> Option<LineMetrics>;
     /// Additional (or inverse) spacing between two characters specified by the font.
     /// Returns `None` if there was no information about it.
-    fn kern_indexed(&self, left: u16, right: u16) -> Option<f32>;
+    fn kern_indexed(&self, left: u16, right: u16, size: f32) -> Option<f32>;
     /// Information about the size of a specific glyph.
-    fn metrics_indexed(&self, index: u16) -> Metrics;
+    fn metrics_indexed(&self, index: u16, size: f32) -> Metrics;
 
-    /// The size at which the atlas was rendered
-    fn size(&self) -> f32;
     /// The texture used by the font atlas.
     fn texture(&self) -> &Texture;
     /// Get the rectangle in the texture associated to the given glyph index.
-    fn get_glyph(&mut self, index: u16) -> Rectangle;
+    fn get_glyph(&mut self, index: u16, size: f32) -> Rectangle;
 }
 
 impl<P> DrawHandle<'_, P> {
-    /// Returns the width and height occupied by the given text in the given font.
-    pub fn measure_text<F: FontAtlas>(&mut self, atlas: &mut F, text: &str) -> Vector2 {
-        let mut size = Vector2::ZERO;
+    /// Returns the width and height occupied by the given text in the given font, drawn at the given size.
+    pub fn measure_text<F: FontAtlas>(&mut self, atlas: &mut F, text: &str, size: f32) -> Vector2 {
+        let mut pos = Vector2::ZERO;
         let mut previous = None;
         for char in text.chars() {
             let glyph_index = atlas.glyph_index(char);
             if let Some(previous) = previous {
-                size.x += atlas.kern_indexed(previous, glyph_index).unwrap_or_default();
+                pos.x += atlas.kern_indexed(previous, glyph_index, size).unwrap_or_default();
             }
-            size.x += atlas.metrics_indexed(glyph_index).advance_width;
+            pos.x += atlas.metrics_indexed(glyph_index, size).advance_width;
             previous = Some(glyph_index);
         }
-        size
+        pos
     }
 
-    /// Draws some text at the specified location using the given font.
-    /// Returns the coordinates of the last characters 
-    pub fn text<F: FontAtlas>(&mut self, atlas: &mut F, text: &str, mut pos: Vector2, color: Color) -> Vector2 {
+    /// Draws some text at the specified location using the given font at the given size.
+    /// 
+    /// Using a [`TrueTypeFontAtlas`](super::font::TrueTypeFontAtlas) or a [`BitmapFontAtlas`](super::bitmap::BitmapFontAtlas), if the given size is different than the original render size,
+    /// the glyph will be scaled using interpolation.
+    /// For best text quality, prefer creating the font atlas at the same size that will be used for drawing.
+    /// 
+    /// Returns the coordinates of the last characters .
+    pub fn text<F: FontAtlas>(&mut self, atlas: &mut F, text: &str, mut pos: Vector2, size: f32, color: Color) -> Vector2 {
         let mut previous = None;
         for char in text.chars() {
             let glyph_index = atlas.glyph_index(char);
             if let Some(previous) = previous {
-                pos.x += atlas.kern_indexed(previous, glyph_index).unwrap_or_default();
+                pos.x += atlas.kern_indexed(previous, glyph_index, size).unwrap_or_default();
             }
-            self.glyph(atlas, glyph_index, pos, color);
-            pos.x += atlas.metrics_indexed(glyph_index).advance_width;
+            self.glyph(atlas, glyph_index, pos, size, color);
+            pos.x += atlas.metrics_indexed(glyph_index, size).advance_width;
             previous = Some(glyph_index);
         }
         pos
     }
 
     /// Draws a single character at the specified location.
-    pub fn codepoint<F: FontAtlas>(&mut self, atlas: &mut F, codepoint: char, pos: Vector2, color: Color) {
+    pub fn codepoint<F: FontAtlas>(&mut self, atlas: &mut F, codepoint: char, pos: Vector2, size: f32, color: Color) {
         let glyph_index = atlas.glyph_index(codepoint);
-        self.glyph(atlas, glyph_index, pos, color);
+        self.glyph(atlas, glyph_index, pos, size, color);
     }
 
     /// Draw a glyph of the given font.
     /// Caches the glyph if it wasn't previously rendered.
     #[inline]
-    pub fn glyph<F: FontAtlas>(&mut self, atlas: &mut F, glyph_index: u16, mut pos: Vector2, color: Color) {
-        let rec = atlas.get_glyph(glyph_index);
-        let metrics = atlas.metrics_indexed(glyph_index);
-        pos.y -= metrics.height + metrics.ymin;
-        pos.x = pos.x.floor();
-        pos.y = pos.y.floor();
-        self.texture_rec(atlas.texture(), rec, pos, color);
+    pub fn glyph<F: FontAtlas>(&mut self, atlas: &mut F, glyph_index: u16, pos: Vector2, size: f32, color: Color) {
+        let rec = atlas.get_glyph(glyph_index, size);
+        let metrics = atlas.metrics_indexed(glyph_index, size);
+        let line = atlas.line_metrics(size).unwrap_or_default();
+        let pos = Vector2::new((pos.x + metrics.xmin).floor(), (pos.y - metrics.ymin - metrics.height + line.ascent).floor());
+        let dest = Rectangle::new(
+            pos.x, pos.y,
+            metrics.width, metrics.height
+        );
+        self.texture_pro(atlas.texture(), rec, dest, Vector2::ZERO, 0.0, color);
     }
 
     pub fn fps(&mut self, pos: Vector2) {
