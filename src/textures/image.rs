@@ -1,7 +1,7 @@
 use std::{ffi::CStr, collections::HashSet};
 use half::f16;
 
-use crate::{ffi::{self, PixelFormat, Rectangle}, prelude::Raylib, cstr, math::{Vector2, Color, get_pixel_data_size}};
+use crate::{ffi, prelude::{PixelFormat, Rectangle, Raylib, Vector2, Color, get_pixel_data_size}, cstr};
 
 
 use super::texture::Texture;

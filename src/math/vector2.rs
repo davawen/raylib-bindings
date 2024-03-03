@@ -1,17 +1,11 @@
-use crate::ffi::Matrix;
-use super::{Vector3, Vector4};
+pub use crate::ffi::Vector2;
+
+use crate::prelude::{Matrix, Vector3, Vector4};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 use float_cmp::{ApproxEq, F32Margin};
 
 use super::MathUtils;
-
-#[derive(Debug, Clone, Copy, Default, PartialEq)]
-#[repr(C)]
-pub struct Vector2 {
-    pub x: f32,
-    pub y: f32
-}
 
 impl Vector2 {
     pub const ZERO: Self = Vector2::splat(0.0);

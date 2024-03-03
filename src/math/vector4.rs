@@ -1,17 +1,9 @@
 use float_cmp::{ApproxEq, F32Margin};
 
+pub use crate::ffi::Vector4;
 use crate::prelude::{Vector2, Vector3, Quaternion};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
-
-#[derive(Debug, Clone, Copy, Default, PartialEq)]
-#[repr(C)]
-pub struct Vector4 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-    pub w: f32
-}
 
 impl Vector4 {
     pub const ZERO: Self = Vector4::splat(0.0);

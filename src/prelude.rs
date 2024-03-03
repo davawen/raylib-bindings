@@ -1,7 +1,7 @@
-pub use crate::ffi::{Matrix, Ray, RayCollision, Rectangle, Camera, Camera2D, Camera3D, Transform};
-pub use crate::ffi::{AutomationEvent, BoneInfo, BoundingBox, GlyphInfo, MaterialMap, NPatchInfo, VrDeviceInfo, VrStereoConfig};
+pub use crate::ffi::{Ray, RayCollision, Transform};
+pub use crate::ffi::{AutomationEvent, BoneInfo, BoundingBox, GlyphInfo, MaterialMap, NPatchInfo};
 pub use crate::ffi::{
-    BlendMode, CameraMode, CameraProjection, CubemapLayout, FontType, GamepadAxis,
+    BlendMode, CubemapLayout, FontType, GamepadAxis,
     GamepadButton, Gesture, KeyboardKey, MaterialMapIndex, MouseButton, MouseCursor, NPatchLayout,
     PixelFormat, ShaderAttributeDataType, ShaderLocationIndex, ShaderUniformDataType, TextureFilter, TextureWrap, 
     TraceLogLevel
@@ -13,7 +13,7 @@ pub use crate::core::{
     // cursor::*,
     draw::*,
     shader::*,
-    // vr::*,
+    vr::*,
     automation::*,
     input::*,
     other::*
@@ -29,4 +29,13 @@ pub use crate::text::{
     atlas::*
 };
 
-pub use crate::math::*;
+pub use crate::math::{
+    vector2::*,
+    vector3::*,
+    vector4::*,
+    quaternion::*,
+    matrix::*,
+    color::*,
+    camera::*,
+    rectangle::*
+};

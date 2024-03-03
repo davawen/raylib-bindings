@@ -1,14 +1,6 @@
 use std::ffi::c_void;
+pub use crate::ffi::Color;
 use crate::{ffi::{self, PixelFormat}, prelude::{Vector3, Vector4}};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[repr(C)]
-pub struct Color {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
-    pub a: u8
-}
 
 impl Color {
     pub const LIGHTGRAY: Color = Color::rgb(200, 200, 200);

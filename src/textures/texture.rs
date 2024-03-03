@@ -2,7 +2,7 @@ use std::{ffi::c_void, marker::PhantomData};
 
 use ffi::{CubemapLayout, Rectangle, TextureFilter, TextureWrap, NPatchInfo, PixelFormat};
 
-use crate::{ffi, prelude::{Raylib, DrawHandle}, math::{get_pixel_data_size, Vector2, Color}};
+use crate::{ffi, prelude::{Raylib, DrawHandle, get_pixel_data_size, Vector2, Color}};
 
 use super::image::Image;
 

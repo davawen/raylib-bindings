@@ -1,5 +1,5 @@
-use crate::ffi::{self, VrDeviceInfo, VrStereoConfig};
-use super::Raylib;
+pub use crate::ffi::{VrDeviceInfo, VrStereoConfig};
+use crate::{ffi, core::Raylib};
 
 /// # Vr config functions (module: [rcore])
 ///

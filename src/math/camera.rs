@@ -1,4 +1,6 @@
-use crate::prelude::{Vector2, Camera, Ray, Matrix, Vector3, Camera2D, CameraMode};
+pub use crate::ffi::{Camera, Camera2D, Camera3D, CameraMode, CameraProjection};
+
+use crate::prelude::{Vector2, Ray, Matrix, Vector3};
 use crate::ffi;
 
 impl Camera {

@@ -1,8 +1,8 @@
 ///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
 use std::array;
-use crate::ffi::Matrix;
-use super::{Vector2, Vector3, Vector4};
+pub use crate::ffi::Matrix;
+use crate::prelude::{Vector2, Vector3, Vector4};
 
 use std::ops::{Add, Sub, Mul};
 

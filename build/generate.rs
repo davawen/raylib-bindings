@@ -48,7 +48,7 @@ impl Display for Type<'_> {
     }
 }
 
-fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, links: &HashMap<&str, &str>) -> io::Result<()> {
+fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, attributes: &HashMap<&str, &[&str]>) -> io::Result<()> {
     for s in structs {
         if s.name == "AudioStream" {
             writeln!(out, "type rAudioBuffer = ffi::c_void;")?;
@@ -60,13 +60,14 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, links: &HashMap<
             writeln!(out, "/// {}", s.desc)?;
         }
 
-        if let Some(l) = links.get(s.name) {
-            writeln!(out, "use {};", l)?;
-            continue
-        }
-
         writeln!(out, "#[repr(C)]")?;
-        write!(out, "#[derive(Debug, Clone, Copy, PartialEq)]")?;
+        write!(out, "#[derive(Debug, Clone, Copy, PartialEq")?;
+        if let Some(attributes) = attributes.get(s.name) {
+            for attr in attributes.iter() {
+                write!(out, ", {attr}")?;
+            }
+        }
+        writeln!(out, ")]")?;
         writeln!(out, "pub struct {} {{", s.name)?;
         for field in s.fields {
             if !field.desc.is_empty() {
@@ -81,17 +82,32 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, links: &HashMap<
     writeln!(out)
 }
 
-fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>, links: &HashMap<&str, &str>) -> io::Result<()> {
+fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>) -> io::Result<()> {
     for a in aliases {
+         // generate quaternion manually
+        if a.name == "Quaternion" { 
+            writeln!(out, "/// Quaternion, 4 float components")?;
+            writeln!(out, "#[repr(C)]")?;
+            writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq)]")?;
+            writeln!(out, "pub struct Quaternion {{")?;
+            writeln!(out, "    /// Imaginary `i` part of the quaternion")?;
+            writeln!(out, "    pub x: f32,")?;
+            writeln!(out, "    /// Imaginary `j` part of the quaternion")?;
+            writeln!(out, "    pub y: f32,")?;
+            writeln!(out, "    /// Imaginary `k` part of the quaternion")?;
+            writeln!(out, "    pub z: f32,")?;
+            writeln!(out, "    /// Real part of the quaternion")?;
+            writeln!(out, "    pub w: f32")?;
+            writeln!(out, "}}")?;
+
+            continue;
+        }
+
         if !a.desc.is_empty() {
             writeln!(out, "/// {}", a.desc)?;
         }
 
-        if let Some(l) = links.get(a.name) {
-            writeln!(out, "use {};", l)?;
-        } else {
-            writeln!(out, "pub type {} = {};", a.name, a.ty)?;
-        }
+        writeln!(out, "pub type {} = {};", a.name, a.ty)?;
     }
 
     writeln!(out)
@@ -181,18 +197,16 @@ fn generate_defines(out: &mut impl Write, defines: Vec<Define>) -> io::Result<()
 }
 
 pub fn generate(out: &mut impl Write, raylib: Raylib) -> io::Result<()> {
-    // allow defining types outside of the ffi module
-    let links = HashMap::from([
-        ("Vector2", "crate::math::Vector2"),
-        ("Vector3", "crate::math::Vector3"),
-        ("Vector4", "crate::math::Vector4"),
-        ("Quaternion", "crate::math::Quaternion"),
-        ("Color", "crate::math::Color")
+    let attributes = HashMap::from([
+        ("Color", ["Eq", "Hash"].as_slice()),
+        ("Vector2", ["Default"].as_slice()),
+        ("Vector3", ["Default"].as_slice()),
+        ("Vector4", ["Default"].as_slice()),
     ]);
 
     generate_defines(out, raylib.defines)?;
-    generate_structs(out, raylib.structs, &links)?;
-    generate_aliases(out, raylib.aliases, &links)?;
+    generate_structs(out, raylib.structs, &attributes)?;
+    generate_aliases(out, raylib.aliases)?;
     generate_callbacks(out, raylib.callbacks)?;
     generate_functions(out, raylib.functions)?;
     generate_enums(out, raylib.enums)?;

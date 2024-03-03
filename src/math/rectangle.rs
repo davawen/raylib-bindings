@@ -1,4 +1,5 @@
-use crate::prelude::{Rectangle, Vector2};
+pub use crate::ffi::Rectangle;
+use crate::prelude::Vector2;
 
 impl Rectangle {
     pub const fn new(x: f32, y: f32, width: f32, height: f32) -> Self {

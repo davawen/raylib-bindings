@@ -11,8 +11,6 @@ pub mod matrix;
 pub mod camera;
 pub mod rectangle;
 
-pub use self::{color::*, vector2::*, vector3::*, vector4::*, quaternion::*};
-
 /// Reimplementation of raylib math utils
 pub trait MathUtils: Copy {
     /// Calculate linear interpolation between two floats
