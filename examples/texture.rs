@@ -9,15 +9,15 @@ fn main() {
     let mut rl = Raylib::init_window(width as i32, height as i32, "Procedural textures", 60);
 
     let images = [
-        rl.gen_image_gradient_linear(width, height, 0.0, Color::RED, Color::BLUE),
-        rl.gen_image_gradient_linear(width, height, PI / 2.0, Color::RED, Color::BLUE),
-        rl.gen_image_gradient_linear(width, height, PI / 4.0, Color::RED, Color::BLUE),
-        rl.gen_image_gradient_radial(width, height, 0.0, Color::WHITE, Color::BLACK),
-        rl.gen_image_gradient_square(width, height, 0.0, Color::WHITE, Color::BLACK),
-        rl.gen_image_checked(width, height, 32, 32, Color::RED, Color::BLUE),
-        rl.gen_image_white_noise(width, height, 0.5),
-        rl.gen_image_perlin_noise(width, height, 50, 50, 4.0),
-        rl.gen_image_cellular(width, height, 32)
+        Image::gen_gradient_linear(&mut rl, width, height, 0.0, Color::RED, Color::BLUE),
+        Image::gen_gradient_linear(&mut rl, width, height, PI / 2.0, Color::RED, Color::BLUE),
+        Image::gen_gradient_linear(&mut rl, width, height, PI / 4.0, Color::RED, Color::BLUE),
+        Image::gen_gradient_radial(&mut rl, width, height, 0.0, Color::WHITE, Color::BLACK),
+        Image::gen_gradient_square(&mut rl, width, height, 0.0, Color::WHITE, Color::BLACK),
+        Image::gen_checked(&mut rl, width, height, 32, 32, Color::RED, Color::BLUE),
+        Image::gen_white_noise(&mut rl, width, height, 0.5),
+        Image::gen_perlin_noise(&mut rl, width, height, 50, 50, 4.0),
+        Image::gen_cellular(&mut rl, width, height, 32)
     ];
     let textures = images.map(|image| rl.load_texture_from_image(&image).unwrap());
     let names = [

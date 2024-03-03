@@ -73,7 +73,7 @@ impl Raylib {
             automation_event_set: false,
             automation_event_recording: false,
             default_font: None,
-            _private: () 
+            _private: std::marker::PhantomData
         }
     }
 

@@ -123,7 +123,7 @@ impl Raylib {
     /// or the input file is in an unknown file format.
     /// Otherwise, returns the loaded texture.
     pub fn load_texture(&mut self, filename: impl AsRef<std::path::Path>) -> std::io::Result<Option<Texture>> {
-        let image = self.load_image(filename)?;
+        let image = Image::load(self, filename)?;
         if let Some(image) = image {
             Ok(self.load_texture_from_image(&image))
         } else { Ok(None) }

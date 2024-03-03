@@ -328,7 +328,8 @@ impl Raylib {
     /// # let mut draw = rl.begin_drawing();
     /// for (idx, pos) in rl.get_touch_positions().enumerate() {
     ///     draw.circle_v(pos, 30.0, Color::ORANGE);
-    ///     draw.text(&format!("{idx}"), pos.x - 10.0, pos.y - 70.0, 40.0, Color::BLACK);
+    ///     let pos = pos - Vector2::new(10.0, 70.0);
+    ///     draw.text(rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
     /// }
     /// ```
     /// Get the identifier of every point:

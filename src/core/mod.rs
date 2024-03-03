@@ -23,8 +23,8 @@ pub struct Raylib {
     automation_event_recording: bool,
     /// Keeps hold of the default raylib font.
     default_font: Option<BitmapFontAtlas>,
-    // disallows initialization from outside
-    _private: ()
+    // disallows initialization from outside and makes raylib !Send and !Sync
+    _private: std::marker::PhantomData<*const c_void>
 }
 
 impl Drop for Raylib {

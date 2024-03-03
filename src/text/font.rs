@@ -20,7 +20,8 @@ impl TrueTypeFont {
     /// while !rl.window_should_close() {
     ///     let mut draw = rl.begin_drawing();
     ///     draw.clear_background(Color::RAYWHITE);
-    ///     draw.text(&mut atlas, "Hello, Terminus!", Vector2::new(20.0, 20.0), Color::BLACK);
+    ///     draw.text(&mut atlas, "Hello, Terminus!", Vector2::new(20.0, 20.0), 32.0, Color::BLACK);
+    ///     # break
     /// }
     /// ```
     pub fn from_bytes(bytes: impl std::ops::Deref<Target = [u8]>) -> Result<Self, &'static str> {

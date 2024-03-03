@@ -1,6 +1,6 @@
 use hashbrown::HashMap;
 
-use crate::{text::bitmap::{BitmapFontAtlas, BitmapGlyph}, prelude::{Color, PixelFormat, Rectangle, Metrics, LineMetrics}};
+use crate::{text::bitmap::{BitmapFontAtlas, BitmapGlyph}, prelude::{Color, PixelFormat, Rectangle, Metrics, LineMetrics, Image}};
 
 use super::Raylib;
 
@@ -20,8 +20,8 @@ impl Raylib {
         const HEIGHT: u32 = 10;
         const PADDING: u32 = 1;
 
-        let mut image = self.gen_image_color(128, 128, Color::BLANK);
-        self.image_format(&mut image, PixelFormat::UncompressedGrayAlpha);
+        let mut image = Image::gen_color(self, 128, 128, Color::BLANK);
+        image.convert_format(PixelFormat::UncompressedGrayAlpha);
         let num_pixels = image.width() as usize * image.height() as usize;
         let data = image.data_mut();
         for (count, i) in (0..num_pixels).step_by(8).enumerate() {
