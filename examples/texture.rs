@@ -19,7 +19,7 @@ fn main() {
         Image::gen_perlin_noise(&mut rl, width, height, 50, 50, 4.0),
         Image::gen_cellular(&mut rl, width, height, 32)
     ];
-    let textures = images.map(|image| rl.load_texture_from_image(&image).unwrap());
+    let textures = images.map(|image| Texture::load_from_image(&mut rl, &image).unwrap());
     let names = [
         ("VERTICAL GRADIENT", Color::RAYWHITE), 
         ("HORIZONTAL GRADIENT", Color::RAYWHITE), 

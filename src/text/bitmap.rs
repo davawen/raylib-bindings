@@ -35,9 +35,9 @@ pub struct BitmapGlyph {
     pub metrics: Metrics
 }
 
-impl Raylib {
-    pub fn load_bitmap_atlas(&mut self, image: &Image, codepoints: HashMap<char, NonZeroU16>, glyphs: Vec<BitmapGlyph>, line_metrics: LineMetrics, size: f32) -> BitmapFontAtlas {
-        let texture = self.load_texture_from_image(image).unwrap();
+impl BitmapFontAtlas {
+    pub fn load(rl: &mut Raylib, image: &Image, codepoints: HashMap<char, NonZeroU16>, glyphs: Vec<BitmapGlyph>, line_metrics: LineMetrics, size: f32) -> BitmapFontAtlas {
+        let texture = Texture::load_from_image(rl, image).unwrap();
         BitmapFontAtlas {
             texture, codepoints, glyph_count: glyphs.len() as u16, glyphs, line_metrics, size
         }

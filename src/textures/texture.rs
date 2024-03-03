@@ -1,4 +1,4 @@
-use std::ffi::c_void;
+use std::{ffi::c_void, marker::PhantomData};
 
 use ffi::{CubemapLayout, Rectangle, TextureFilter, TextureWrap, Color, Vector2, NPatchInfo, PixelFormat};
 
@@ -12,7 +12,7 @@ use super::image::Image;
 /// Textures are stored on the GPU in VRAM.
 /// If you need to interact with graphical data from the CPU, prefer using an `Image`.
 #[repr(C)]
-pub struct Texture(ffi::Texture);
+pub struct Texture(ffi::Texture, PhantomData<*const c_void>);
 
 impl Drop for Texture {
     fn drop(&mut self) {
@@ -26,7 +26,7 @@ impl Texture {
     #[inline]
     pub fn from_ffi(texture: ffi::Texture) -> Option<Self> {
         if !texture.is_valid() { return None }
-        Some(Texture(texture))
+        Some(Texture(texture, PhantomData))
     }
     #[inline]
     pub fn width(&self) -> u32 {
@@ -115,31 +115,31 @@ impl ffi::RenderTexture {
 /// # Texture loading functions
 /// 
 /// ---
-impl Raylib {
+impl Texture {
     /// Loads a texture from a file.
     /// Returns `Err` if there was an error when reading the file.
     /// Returns `Ok(None)` if the file was successfully read,
     /// but support for the given file extension was not compiled into raylib,
     /// or the input file is in an unknown file format.
     /// Otherwise, returns the loaded texture.
-    pub fn load_texture(&mut self, filename: impl AsRef<std::path::Path>) -> std::io::Result<Option<Texture>> {
-        let image = Image::load(self, filename)?;
+    pub fn load(rl: &mut Raylib, filename: impl AsRef<std::path::Path>) -> std::io::Result<Option<Texture>> {
+        let image = Image::load(rl, filename)?;
         if let Some(image) = image {
-            Ok(self.load_texture_from_image(&image))
+            Ok(Self::load_from_image(rl, &image))
         } else { Ok(None) }
     }
 
     /// Load texture from image data.
     /// Returns `None` if there was an error loading the texture.
     #[inline]
-    pub fn load_texture_from_image(&mut self, image: &Image) -> Option<Texture> {
+    pub fn load_from_image(_rl: &mut Raylib, image: &Image) -> Option<Texture> {
         let texture = unsafe { ffi::LoadTextureFromImage(image.get_ffi_image()) };
         Texture::from_ffi(texture)
     }
 
     /// Loads an empty texture in the given format.
     /// Returns `None` if there was an error creating the texture.
-    pub fn load_texture_empty(&mut self, width: u32, height: u32, format: PixelFormat) -> Option<Texture> {
+    pub fn load_empty(_rl: &mut Raylib, width: u32, height: u32, format: PixelFormat) -> Option<Texture> {
         let empty_image = ffi::Image {
             data: std::ptr::null_mut(),
             width: width as i32, height: height as i32,
@@ -154,15 +154,17 @@ impl Raylib {
     /// Load a cubemap texture from an image.
     /// Returns `None` if there was an error loading the texture.
     #[inline]
-    pub fn load_texture_cubmap(&mut self, image: &Image, layout: CubemapLayout) -> Option<Texture> {
+    pub fn load_cubmap(_rl: &mut Raylib, image: &Image, layout: CubemapLayout) -> Option<Texture> {
         let texture = unsafe { ffi::LoadTextureCubemap(image.get_ffi_image(), layout as i32) };
         Texture::from_ffi(texture)
     }
+}
 
+impl RenderTexture {
     /// Create a render texture of the given size.
     /// Returns `None` if there was an error when loading the texture.
     #[inline]
-    pub fn load_render_texture(&mut self, width: u32, height: u32) -> Option<RenderTexture> {
+    pub fn load(_rl: &mut Raylib, width: u32, height: u32) -> Option<RenderTexture> {
         let texture = unsafe { ffi::LoadRenderTexture(width as i32, height as i32) };
         RenderTexture::from_ffi(texture)
     }
@@ -224,22 +226,22 @@ impl Texture {
 /// # Texture configuration functions
 /// 
 /// ---
-impl Raylib {
+impl Texture {
     /// Generate GPU mipmaps for a texture.
     /// Most of the time, you should do this instead of generating mipmaps for `Image`s.
     #[inline]
-    pub fn gen_texture_mipmaps(&mut self, texture: &mut Texture) {
-        unsafe { ffi::GenTextureMipmaps(&mut texture.0 as *mut _) }
+    pub fn gen_texture_mipmaps(&mut self) {
+        unsafe { ffi::GenTextureMipmaps(&mut self.0 as *mut _) }
     }
     /// Set texture scaling filter mode
     #[inline]
-    pub fn set_texture_filter(&mut self, texture: &mut Texture, filter: TextureFilter) {
-        unsafe { ffi::SetTextureFilter(texture.0, filter as i32) }
+    pub fn set_texture_filter(&mut self, filter: TextureFilter) {
+        unsafe { ffi::SetTextureFilter(self.0, filter as i32) }
     }
     /// Set texture wrapping mode
     #[inline]
-    pub fn set_texture_wrap(&mut self, texture: &mut Texture, wrap: TextureWrap) {
-        unsafe { ffi::SetTextureWrap(texture.0, wrap as i32) }
+    pub fn set_texture_wrap(&mut self, wrap: TextureWrap) {
+        unsafe { ffi::SetTextureWrap(self.0, wrap as i32) }
     }
 }
 

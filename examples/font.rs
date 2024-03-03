@@ -6,7 +6,7 @@ fn main() {
 
     let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
     // let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
-    let mut rendered = rl.atlas_font(&font, 20.0);
+    let mut rendered = font.atlas(&mut rl, 20.0);
 
     let mut scroll = 0;
     let mut size = 20.0;

@@ -5,7 +5,7 @@ fn main() {
 
     let font = TrueTypeFont::from_bytes(include_bytes!("/usr/share/fonts/TTF/iosevka-medium.ttc").as_slice()).unwrap();
     // let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
-    let mut rendered = rl.atlas_font(&font, 40.0);
+    let mut rendered = font.atlas(&mut rl, 40.0);
 
     let mut pos = 0.0;
 

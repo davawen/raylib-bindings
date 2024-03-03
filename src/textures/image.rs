@@ -14,7 +14,7 @@ use super::texture::Texture;
 /// If you need to draw an image many times, or if you need to use them in shaders, prefer using a `Texture`.
 ///
 /// # Safety
-/// An (`ffi::Image`)[`crate::ffi::Image`] may have any data inside of it.
+/// An [`ffi::Image`](`crate::ffi::Image`) may have any data inside of it.
 /// An [`Image`] is garanteed to have valid data and well allocated memory.
 ///
 /// Images are neither `Send` not `Sync` and thus cannot leave the thread in which it was created.
@@ -245,7 +245,7 @@ impl Image {
     /// # let mut rl = Raylib::init_window(100, 100, "load image raw", 60);
     /// let data = std::fs::read("assets/raw_image.raw").unwrap();
     /// let rgb = Image::load_raw(&mut rl, &data, 3, 3, PixelFormat::UncompressedR8G8B8).unwrap();
-    /// let rgb = rl.load_texture_from_image(&rgb).unwrap();;
+    /// let rgb = Texture::load_from_image(&mut rl, &rgb).unwrap();;
     /// while !rl.window_should_close() {
     ///     let mut draw = rl.begin_drawing();
     ///     draw.texture(&rgb, 0.0, 0.0, Color::WHITE);

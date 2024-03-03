@@ -71,7 +71,7 @@ impl Raylib {
             line_gap: 15.0
         };
 
-        self.load_bitmap_atlas(&image, codepoints, glyphs, line_metrics, HEIGHT as f32)
+        BitmapFontAtlas::load(self, &image, codepoints, glyphs, line_metrics, HEIGHT as f32)
     }
 
     pub fn default_font(&mut self) -> &mut BitmapFontAtlas {

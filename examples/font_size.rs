@@ -4,7 +4,7 @@ fn main() {
     let mut rl = Raylib::init_window(800, 800, "Font size", 60);
 
     let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
-    let mut atlases: Vec<_> = (1..=20).map(|px| px as f32).map(|px| rl.atlas_font(&font, px)).collect();
+    let mut atlases: Vec<_> = (1..=20).map(|px| px as f32).map(|px| font.atlas(&mut rl, px)).collect();
 
     while !rl.window_should_close() {
         let mut draw = rl.begin_drawing();

@@ -3,7 +3,7 @@ use raylib::prelude::*;
 fn main() {
     let mut rl = Raylib::init_window(800, 800, "test", 60);
 
-    let mut texture = rl.load_texture_empty(500, 500, PixelFormat::UncompressedGrayAlpha).unwrap();
+    let mut texture = Texture::load_empty(&mut rl, 500, 500, PixelFormat::UncompressedGrayAlpha).unwrap();
 
     let mut b = vec![0; 100*100*2];
     for i in 0..100*100 {

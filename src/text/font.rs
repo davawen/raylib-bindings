@@ -16,7 +16,7 @@ impl TrueTypeFont {
     /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(800, 800, "Font rendering", 60);
     /// let font = TrueTypeFont::from_bytes(include_bytes!("../../assets/TerminusTTF.ttf").as_slice()).unwrap();
-    /// let mut atlas = rl.atlas_font(&font, 32.0);
+    /// let mut atlas = font.atlas(&mut rl, 32.0);
     /// while !rl.window_should_close() {
     ///     let mut draw = rl.begin_drawing();
     ///     draw.clear_background(Color::RAYWHITE);
@@ -37,6 +37,13 @@ impl TrueTypeFont {
     pub fn inner(&self) -> &fontdue::Font {
         &self.0
     }
+
+    /// Creates a texture to hold the font rendered at a certain size
+    pub fn atlas<'f, 'r>(&'f self, rl: &'r mut Raylib, size: f32) -> TrueTypeFontAtlas<'f> {
+        let (texture_size, recs) = TrueTypeFontAtlas::map_texture(self.inner(), size);
+        let texture = Texture::load_empty(rl, texture_size as u32, texture_size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
+        TrueTypeFontAtlas { texture, size, recs, font: self.inner() }
+    }
 }
 
 pub struct TrueTypeFontAtlas<'f> {
@@ -44,15 +51,6 @@ pub struct TrueTypeFontAtlas<'f> {
     size: f32,
     recs: Vec<(bool, Rectangle)>,
     font: &'f fontdue::Font
-}
-
-impl Raylib {
-    /// Creates a texture to hold the rendered font
-    pub fn atlas_font<'a, 'f>(&'a mut self, font: &'f TrueTypeFont, size: f32) -> TrueTypeFontAtlas<'f> {
-        let (texture_size, recs) = TrueTypeFontAtlas::map_texture(font.inner(), size);
-        let texture = self.load_texture_empty(texture_size as u32, texture_size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
-        TrueTypeFontAtlas { texture, size, recs, font: font.inner() }
-    }
 }
 
 impl TrueTypeFontAtlas<'_> {
@@ -119,7 +117,7 @@ impl TrueTypeFontAtlas<'_> {
         self.recs = recs;
 
         if size as u32 > self.texture.width() {
-            self.texture = rl.load_texture_empty(size as u32, size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
+            self.texture = Texture::load_empty(rl, size as u32, size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
         }
     }
 
