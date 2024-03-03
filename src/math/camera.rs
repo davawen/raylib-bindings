@@ -1,4 +1,5 @@
-use crate::ffi::{self, Vector2, Camera, Ray, Matrix, Vector3, Camera2D, CameraMode};
+use crate::prelude::{Vector2, Camera, Ray, Matrix, Vector3, Camera2D, CameraMode};
+use crate::ffi;
 
 impl Camera {
     /// Get a ray trace from mouse position

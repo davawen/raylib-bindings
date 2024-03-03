@@ -1,8 +1,8 @@
 use std::f32::consts::PI;
 
-use ffi::{Vector2, Rectangle};
+use ffi::Rectangle;
 
-use crate::{core::draw::DrawHandle, prelude::{Color, Raylib, Texture}, ffi};
+use crate::{core::draw::DrawHandle, prelude::{Color, Raylib, Texture, Vector2}, ffi};
 
 /// # Basic shapes drawing functions (module: [rshapes])
 ///

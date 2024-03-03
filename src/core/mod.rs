@@ -12,6 +12,13 @@ use std::{ptr::NonNull, ffi::c_void};
 
 use crate::{ffi, text::bitmap::BitmapFontAtlas};
 
+/// A handle to raylib's internal state.
+/// 
+/// This struct is passed when functions modify raylib's state, or to allocate objects that will need to modify raylib state.
+///
+/// Please that raylib is inherently single threaded, thus this object cannot be sent between threads safely
+/// (it doesn't implement [`Send`](`std::sync::Send`)).
+/// Raylib functions should NEVER be called in a multi threaded environment.
 pub struct Raylib {
     /// Keeps track of wether an automation event list is currently set
     /// See `core::automation`
@@ -33,7 +40,8 @@ impl Drop for Raylib {
     }
 }
 
-/// Represents memory alloced using the internal raylib allocator.
+/// Represents memory allocated using the internal raylib allocator.
+/// 
 /// Its drop implementation calls `ffi::MemFree` to free the memory safely.
 pub struct RaylibAlloc<T: ?Sized>(NonNull<T>);
 

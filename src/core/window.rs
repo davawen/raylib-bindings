@@ -1,5 +1,5 @@
 use std::ffi::{CStr, CString};
-use crate::ffi::{self, Image, Vector2, MouseCursor};
+use crate::{ffi::{self, Image, MouseCursor}, prelude::Vector2};
 
 use bitflags::bitflags;
 

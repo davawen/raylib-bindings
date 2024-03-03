@@ -2,7 +2,7 @@ use std::ffi::CStr;
 
 use bitflags::bitflags;
 
-use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture, Vector2}};
+use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture}, math::Vector2};
 
 /// # Keyboard input functions (module: [rcore])
 ///

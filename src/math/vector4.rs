@@ -1,8 +1,17 @@
 use float_cmp::{ApproxEq, F32Margin};
 
-use crate::ffi::{Vector2, Vector3, Vector4};
+use crate::prelude::{Vector2, Vector3, Quaternion};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[repr(C)]
+pub struct Vector4 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32
+}
 
 impl Vector4 {
     pub const ZERO: Self = Vector4::splat(0.0);
@@ -20,6 +29,7 @@ impl Vector4 {
 
     pub const fn vec2(self) -> Vector2 { Vector2::new(self.x, self.y) }
     pub const fn vec3(self) -> Vector3 { Vector3::new(self.x, self.y, self.z) }
+    pub const fn quat(self) -> Quaternion { Quaternion::new(self.x, self.y, self.z, self.w) }
 
     /// Calculate the length of the vector
     /// NOTE: If you need the length squared, consider using `Vector4::length_sqr`
@@ -91,8 +101,7 @@ impl Mul<f32> for Vector4 {
 }
 
 impl Mul<Vector4> for f32 {
-    type Output = Vector4;
-    fn mul(self, rhs: Vector4) -> Self::Output { rhs * self }
+    type Output = Vector4; fn mul(self, rhs: Vector4) -> Self::Output { rhs * self }
 }
 
 impl Div<f32> for Vector4 {

@@ -1,10 +1,20 @@
 use float_cmp::{ApproxEq, F32Margin};
 
-use crate::ffi::{Quaternion, Matrix, Vector3, Vector4};
+use crate::ffi::Matrix;
+use super::{Vector3, Vector4};
 
 use std::ops::{Add, Sub, Mul, Div};
 
 use super::MathUtils;
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[repr(C)]
+pub struct Quaternion {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32
+}
 
 impl Quaternion {
     pub const IDENTITY: Self = Quaternion::new(0.0, 0.0, 0.0, 1.0);

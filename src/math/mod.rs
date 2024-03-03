@@ -1,11 +1,17 @@
+//! Pure rust reimplementation of raymath.
+//! 
+//! Large inspiration taken from [https://github.com/raysan5/raylib/blob/master/src/raymath.h]
+
 pub mod color;
 pub mod vector2;
 pub mod vector3;
 pub mod vector4;
-pub mod matrix;
 pub mod quaternion;
+pub mod matrix;
 pub mod camera;
 pub mod rectangle;
+
+pub use self::{color::*, vector2::*, vector3::*, vector4::*, quaternion::*};
 
 /// Reimplementation of raylib math utils
 pub trait MathUtils: Copy {

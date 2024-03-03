@@ -22,7 +22,6 @@ pub mod shapes;
 pub mod textures;
 pub mod text;
 
-/// static cstr utility
-pub mod cstr;
+mod cstr_macro;
 
 pub mod prelude;

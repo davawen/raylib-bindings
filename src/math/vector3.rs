@@ -2,11 +2,20 @@ use float_cmp::{ApproxEq, F32Margin};
 
 ///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
 
-use crate::ffi::{Vector2, Vector3, Vector4, Matrix, Quaternion};
+use crate::ffi::Matrix;
+use super::{Vector2, Vector4, Quaternion};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 
 use super::MathUtils;
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[repr(C)]
+pub struct Vector3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32
+}
 
 impl Vector3 {
     pub const ZERO: Self = Vector3::splat(0.0);

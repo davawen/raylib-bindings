@@ -1,5 +1,5 @@
 use std::{ffi::{CString, CStr, c_void}, ptr::null};
-use crate::{ffi::{self, ShaderUniformDataType, Vector4, Matrix, Vector2, Vector3}, prelude::Texture};
+use crate::{ffi::{self, ShaderUniformDataType, Matrix}, prelude::{Vector2, Vector3, Vector4, Texture}};
 
 use super::Raylib;
 

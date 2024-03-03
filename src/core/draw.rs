@@ -1,4 +1,4 @@
-use crate::{ffi::{self, Color, Camera2D, Camera3D, VrStereoConfig, BlendMode}, core::shader::Shader, prelude::RenderTexture};
+use crate::{ffi::{self, Camera2D, Camera3D, VrStereoConfig, BlendMode}, core::shader::Shader, prelude::{Color, RenderTexture}};
 use super::Raylib;
 
 pub enum RenderMode {
