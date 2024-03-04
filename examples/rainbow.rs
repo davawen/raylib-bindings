@@ -3,7 +3,7 @@ use raylib::prelude::*;
 fn main() {
     let mut rl = Raylib::init_window(800, 800, "Window title", 60);
 
-    let shader = rl.load_shader::<&str>(None, Some("assets/sine.glsl")).unwrap();
+    let shader = Shader::load(&mut rl, None, Some("assets/sine.glsl")).unwrap();
     let time_uniform = shader.get_uniform("time");
 
     while !rl.window_should_close() {

@@ -18,6 +18,7 @@ pub struct DrawHandle<'a, P> {
 }
 
 /// # Drawing (module: `rcore`)
+/// See: [`DrawHandle`]
 ///
 /// ---
 impl Raylib {
@@ -27,7 +28,7 @@ impl Raylib {
         DrawHandle { mode: RenderMode::Drawing, _parent: None }
     }
 
-    // Begin drawing to render texture
+    /// Begin drawing to render texture
     pub fn begin_texture_mode(&mut self, target: RenderTexture) -> DrawHandle<'static, ()> {
         unsafe { ffi::BeginTextureMode(target.get_ffi_texture()) }
         DrawHandle { mode: RenderMode::TextureMode, _parent: None }

@@ -42,9 +42,6 @@ bitflags! {
     }
 }
 
-/// # Window functions (module: `rcore`)
-/// 
-/// ---
 impl Raylib {
     /// Initializes raylib.
     /// # Example
@@ -77,121 +74,128 @@ impl Raylib {
         }
     }
 
+}
+
+/// # Window functions (module: `rcore`)
+/// 
+/// ---
+pub trait RaylibWindowFunctions {
     /// Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
-    pub fn window_should_close(&self) -> bool { unsafe { ffi::WindowShouldClose() } }
+    fn window_should_close(&self) -> bool { unsafe { ffi::WindowShouldClose() } }
     /// Check if window has been initialized successfully
-    pub fn is_window_ready(&self) -> bool { unsafe { ffi::IsWindowReady() } }
+    fn is_window_ready(&self) -> bool { unsafe { ffi::IsWindowReady() } }
     /// Check if window is currently fullscreen
-    pub fn is_window_fullscreen(&self) -> bool { unsafe { ffi::IsWindowFullscreen() } }
+    fn is_window_fullscreen(&self) -> bool { unsafe { ffi::IsWindowFullscreen() } }
     /// Check if window is currently hidden (only PLATFORM_DESKTOP)
-    pub fn is_window_hidden(&self) -> bool { unsafe { ffi::IsWindowHidden() } }
+    fn is_window_hidden(&self) -> bool { unsafe { ffi::IsWindowHidden() } }
     /// Check if window is currently minimized (only PLATFORM_DESKTOP)
-    pub fn is_window_minimized(&self) -> bool { unsafe { ffi::IsWindowMinimized() } }
+    fn is_window_minimized(&self) -> bool { unsafe { ffi::IsWindowMinimized() } }
     /// Check if window is currently maximized (only PLATFORM_DESKTOP)
-    pub fn is_window_maximized(&self) -> bool { unsafe { ffi::IsWindowMaximized() } }
+    fn is_window_maximized(&self) -> bool { unsafe { ffi::IsWindowMaximized() } }
     /// Check if window is currently focused (only PLATFORM_DESKTOP)
-    pub fn is_window_focused(&self) -> bool { unsafe { ffi::IsWindowFocused() } }
+    fn is_window_focused(&self) -> bool { unsafe { ffi::IsWindowFocused() } }
     /// Check if window has been resized last frame
-    pub fn is_window_resized(&self) -> bool { unsafe { ffi::IsWindowResized() } }
+    fn is_window_resized(&self) -> bool { unsafe { ffi::IsWindowResized() } }
     /// Check if one specific window flag is enabled
-    pub fn is_window_state(&self, flag: ffi::ConfigFlags) -> bool { unsafe { ffi::IsWindowState(flag as u32) } }                      
+    fn is_window_state(&self, flag: ffi::ConfigFlags) -> bool { unsafe { ffi::IsWindowState(flag as u32) } }                      
     /// Set window configuration state using flags (only PLATFORM_DESKTOP)
-    pub fn set_window_state(&mut self, flags: ConfigFlags) { unsafe { ffi::SetWindowState(flags.bits()) } }
+    fn set_window_state(&mut self, flags: ConfigFlags) { unsafe { ffi::SetWindowState(flags.bits()) } }
     /// Clear the window configuration state flags.
     /// That is, set the given flags to false.
-    pub fn clear_window_state(&mut self, flags: ConfigFlags) { unsafe { ffi::ClearWindowState(flags.bits()) } }
+    fn clear_window_state(&mut self, flags: ConfigFlags) { unsafe { ffi::ClearWindowState(flags.bits()) } }
     /// Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
-    pub fn toggle_fullscreen(&mut self) { unsafe { ffi::ToggleFullscreen() } }
+    fn toggle_fullscreen(&mut self) { unsafe { ffi::ToggleFullscreen() } }
     /// Toggle window state: borderless windowed (only PLATFORM_DESKTOP)
-    pub fn toggle_borderless_windowed(&mut self) { unsafe { ffi::ToggleBorderlessWindowed() } }
+    fn toggle_borderless_windowed(&mut self) { unsafe { ffi::ToggleBorderlessWindowed() } }
     /// Set window state: maximized, if resizable (only PLATFORM_DESKTOP)
-    pub fn maximize_window(&mut self) { unsafe { ffi::MaximizeWindow() } }
+    fn maximize_window(&mut self) { unsafe { ffi::MaximizeWindow() } }
     /// Set window state: minimized, if resizable (only PLATFORM_DESKTOP)
-    pub fn minimize_window(&mut self) { unsafe { ffi::MinimizeWindow() } }
+    fn minimize_window(&mut self) { unsafe { ffi::MinimizeWindow() } }
     /// Set window state: not minimized/maximized (only PLATFORM_DESKTOP)
-    pub fn restore_window(&mut self) { unsafe { ffi::RestoreWindow() } }
+    fn restore_window(&mut self) { unsafe { ffi::RestoreWindow() } }
     /// Set icon for window (single image, RGBA 32bit, only PLATFORM_DESKTOP)
-    pub fn set_window_icon(&mut self, image: Image) { unsafe { ffi::SetWindowIcon(image) } }
+    fn set_window_icon(&mut self, image: Image) { unsafe { ffi::SetWindowIcon(image) } }
     /// Set icon for window (multiple images, RGBA 32bit, only PLATFORM_DESKTOP)
-    pub fn set_window_icons(&mut self, images: &[Image]) {
+    fn set_window_icons(&mut self, images: &[Image]) {
         unsafe { ffi::SetWindowIcons(images.as_ptr() as *mut Image, images.len() as i32) }
     }
     /// Set title for window (only PLATFORM_DESKTOP and PLATFORM_WEB)
-    pub fn set_window_title(&mut self, title: &CStr) { unsafe { ffi::SetWindowTitle(title.as_ptr()) } }
+    fn set_window_title(&mut self, title: &CStr) { unsafe { ffi::SetWindowTitle(title.as_ptr()) } }
     /// Set window position on screen (only PLATFORM_DESKTOP)
-    pub fn set_window_position(&mut self, x: i32, y: i32) { unsafe { ffi::SetWindowPosition(x, y) } }
+    fn set_window_position(&mut self, x: i32, y: i32) { unsafe { ffi::SetWindowPosition(x, y) } }
     /// TODO: Safer handling for monitor indices
     /// Set monitor for the current window
-    pub fn set_window_monitor(&mut self, monitor: i32) { unsafe { ffi::SetWindowMonitor(monitor) } }
+    fn set_window_monitor(&mut self, monitor: i32) { unsafe { ffi::SetWindowMonitor(monitor) } }
     /// Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
-    pub fn set_window_min_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowMinSize(width, height) } }
+    fn set_window_min_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowMinSize(width, height) } }
     /// Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
-    pub fn set_window_max_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowMaxSize(width, height) } }
+    fn set_window_max_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowMaxSize(width, height) } }
     /// Set window dimensions
-    pub fn set_window_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowSize(width, height) } }
+    fn set_window_size(&mut self, width: i32, height: i32) { unsafe { ffi::SetWindowSize(width, height) } }
     /// Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
-    pub fn set_window_opacity(&mut self, opacity: f32) { unsafe { ffi::SetWindowOpacity(opacity) } }
+    fn set_window_opacity(&mut self, opacity: f32) { unsafe { ffi::SetWindowOpacity(opacity) } }
 
 
     /// Set window focused (only PLATFORM_DESKTOP)
-    pub fn set_window_focused(&self) { unsafe { ffi::SetWindowFocused() } }
+    fn set_window_focused(&self) { unsafe { ffi::SetWindowFocused() } }
 
     // TODO:
     // /// Get native window handle
-    // pub fn GetWindowHandle(void) -> void * ;
+    // fn GetWindowHandle(void) -> void * ;
 
     /// Gets the current screen (window) width
     /// If you need to consider HiDPI, use `Raylib::get_render_width`
-    pub fn get_screen_width(&self) -> f32 { unsafe { ffi::GetScreenWidth() as f32 } }
+    fn get_screen_width(&self) -> f32 { unsafe { ffi::GetScreenWidth() as f32 } }
     /// Gets the current screen (window) height
     /// If you need to consider HiDPI, use `Raylib::get_render_width`
-    pub fn get_screen_height(&self) -> f32 { unsafe { ffi::GetScreenHeight() as f32 } }
+    fn get_screen_height(&self) -> f32 { unsafe { ffi::GetScreenHeight() as f32 } }
     /// Gets the current screen (window) size as a vector
     /// If you need to consider HiDPI, use `Raylib::get_render_size`
-    pub fn get_screen_size(&self) -> Vector2 { Vector2::new(self.get_screen_width(), self.get_screen_height()) }
+    fn get_screen_size(&self) -> Vector2 { Vector2::new(self.get_screen_width(), self.get_screen_height()) }
     /// Gets the current render width (considering HiDPI)
-    pub fn get_render_width(&self) -> f32 { unsafe { ffi::GetRenderWidth() as f32 } }
+    fn get_render_width(&self) -> f32 { unsafe { ffi::GetRenderWidth() as f32 } }
     /// Gets the current render height (considering HiDPI)
-    pub fn get_render_height(&self) -> f32 { unsafe { ffi::GetRenderHeight() as f32 } }
+    fn get_render_height(&self) -> f32 { unsafe { ffi::GetRenderHeight() as f32 } }
     /// Gets the current render size as vector (considering HiDPI)
-    pub fn get_render_size(&self) -> Vector2 { Vector2::new(self.get_render_width(), self.get_render_height()) }
+    fn get_render_size(&self) -> Vector2 { Vector2::new(self.get_render_width(), self.get_render_height()) }
 
     /// Get number of connected monitors
-    pub fn get_monitor_count(&self) -> i32 { unsafe { ffi::GetMonitorCount() } }
+    fn get_monitor_count(&self) -> i32 { unsafe { ffi::GetMonitorCount() } }
     /// Get current connected monitor
-    pub fn get_current_monitor(&self) -> i32 { unsafe { ffi::GetCurrentMonitor() } }
+    fn get_current_monitor(&self) -> i32 { unsafe { ffi::GetCurrentMonitor() } }
     /// Get specified monitor position
-    pub fn get_monitor_position(&self, monitor: i32) -> Vector2 { unsafe { ffi::GetMonitorPosition(monitor) } }
+    fn get_monitor_position(&self, monitor: i32) -> Vector2 { unsafe { ffi::GetMonitorPosition(monitor) } }
     /// Get specified monitor width (current video mode used by monitor)
-    pub fn get_monitor_width(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorWidth(monitor) } }
+    fn get_monitor_width(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorWidth(monitor) } }
     /// Get specified monitor height (current video mode used by monitor)
-    pub fn get_monitor_height(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorHeight(monitor) } }
+    fn get_monitor_height(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorHeight(monitor) } }
     /// Get specified monitor physical width in millimetres
-    pub fn get_monitor_physical_width(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorPhysicalWidth(monitor) } }
+    fn get_monitor_physical_width(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorPhysicalWidth(monitor) } }
     /// Get specified monitor physical height in millimetres
-    pub fn get_monitor_physical_height(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorPhysicalHeight(monitor) } }
+    fn get_monitor_physical_height(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorPhysicalHeight(monitor) } }
     /// Get specified monitor refresh rate
-    pub fn get_monitor_refresh_rate(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorRefreshRate(monitor) } }
+    fn get_monitor_refresh_rate(&self, monitor: i32) -> i32 { unsafe { ffi::GetMonitorRefreshRate(monitor) } }
     /// Get window position XY on monitor
-    pub fn get_window_position(&self) -> Vector2 { unsafe { ffi::GetWindowPosition() } }
+    fn get_window_position(&self) -> Vector2 { unsafe { ffi::GetWindowPosition() } }
     /// Get window scale DPI factor
-    pub fn get_window_scale_dpi(&self) -> Vector2 { unsafe { ffi::GetWindowScaleDPI() } }
+    fn get_window_scale_dpi(&self) -> Vector2 { unsafe { ffi::GetWindowScaleDPI() } }
     /// Get the human-readable, UTF-8 encoded name of the specified monitor
-    pub fn get_monitor_name(&self, monitor: i32) -> &CStr {
+    fn get_monitor_name(&self, monitor: i32) -> &CStr {
         unsafe { CStr::from_ptr(ffi::GetMonitorName(monitor)) }
     }
     /// Set clipboard text content   
-    pub fn set_clipboard_text(&self, text: &CStr) { unsafe { ffi::SetClipboardText(text.as_ptr()) } }
+    fn set_clipboard_text(&self, text: &CStr) { unsafe { ffi::SetClipboardText(text.as_ptr()) } }
     /// Get clipboard text content   
-    pub fn get_clipboard_text(&self) -> &'static CStr { 
+    fn get_clipboard_text(&self) -> &'static CStr { 
         unsafe { CStr::from_ptr(ffi::GetClipboardText()) }
     }
     /// Enable waiting for events on EndDrawing(), no automatic event polling   
-    pub fn enable_event_waiting(&self) { unsafe { ffi::EnableEventWaiting() } }
+    fn enable_event_waiting(&self) { unsafe { ffi::EnableEventWaiting() } }
     /// Disable waiting for events on EndDrawing(), automatic events polling   
-    pub fn disable_event_waiting(&self) { unsafe { ffi::DisableEventWaiting() } }
+    fn disable_event_waiting(&self) { unsafe { ffi::DisableEventWaiting() } }
 
     /// Set the current mouse cursor kind
-    pub fn set_mouse_cursor(&mut self, cursor: MouseCursor) { unsafe { ffi::SetMouseCursor(cursor as i32) } }
+    fn set_mouse_cursor(&mut self, cursor: MouseCursor) { unsafe { ffi::SetMouseCursor(cursor as i32) } }
 }
 
+impl RaylibWindowFunctions for Raylib {}

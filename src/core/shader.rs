@@ -1,12 +1,13 @@
 use std::{ffi::{CString, CStr, c_void}, ptr::null};
-use crate::{ffi::{self, ShaderUniformDataType, Matrix}, prelude::{Vector2, Vector3, Vector4, Texture}};
+use crate::{ffi::{self, ShaderUniformDataType, Matrix}, prelude::{Raylib, Vector2, Vector3, Vector4, Texture}};
 
-use super::Raylib;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Uniform(i32);
 
-/// # Shader creation functions (module: `rcore`)
-/// 
-/// ---
-impl Raylib {
+#[derive(Debug)]
+pub struct Shader(ffi::Shader);
+
+impl Shader {
     /// Reads code for a shader from the given files, and loads them into raylib.
     /// The default shader is used for `None`s.
     /// Returns an error if there is a problem with reading the given files.
@@ -31,19 +32,19 @@ impl Raylib {
     ///     # break
     /// }
     /// ```
-    pub fn load_shader<P: AsRef<std::path::Path>>(&self, vs_file_name: Option<P>, fs_file_name: Option<P>) -> std::io::Result<Shader> {
+    pub fn load<P: AsRef<std::path::Path>>(rl: &mut Raylib, vs_file_name: Option<P>, fs_file_name: Option<P>) -> std::io::Result<Self> {
         let vs = vs_file_name.map(std::fs::read).transpose()?;
         let fs = fs_file_name.map(std::fs::read).transpose()?;
 
         let vs = vs.map(CString::new).transpose().expect("a vertex shader file without nulls");
         let fs = fs.map(CString::new).transpose().expect("a fragment shader file without nulls");
 
-        Ok(self.load_shader_from_memory(vs.as_deref(), fs.as_deref()))
+        Ok(Self::load_from_memory(rl, vs.as_deref(), fs.as_deref()))
     }
 
     /// Loads the code for a shader from the given CStrings
     /// The default shader is used for `None`s.
-    pub fn load_shader_from_memory(&self, vs_code: Option<&CStr>, fs_code: Option<&CStr>) -> Shader {
+    pub fn load_from_memory(_: &mut Raylib, vs_code: Option<&CStr>, fs_code: Option<&CStr>) -> Self {
         let shader = unsafe {
             ffi::LoadShaderFromMemory(
                 vs_code.map_or(null(), |s| s.as_ptr()),
@@ -51,17 +52,9 @@ impl Raylib {
             )
         };
 
-        Shader(shader)
+        Self(shader)
     }
-}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Uniform(i32);
-
-#[derive(Debug, Clone)]
-pub struct Shader(ffi::Shader);
-
-impl Shader {
     pub fn is_ready(&self) -> bool {
         unsafe { ffi::IsShaderReady(self.0) }
     }
