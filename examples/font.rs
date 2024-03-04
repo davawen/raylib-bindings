@@ -45,11 +45,11 @@ fn main() {
             if y >= nh { break }
 
             if x == 0 {
-                draw.text(&mut rendered, &format!("0x{:04x}", i), Vector2::new(5.0, y as f32*offset + 50.0), size, Color::BLACK);
+                draw.text(&mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
             }
-            draw.glyph(&mut rendered, i, Vector2::new(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
+            draw.glyph(&mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
         }
 
-        draw.fps(Vector2::new(5.0, 5.0));
+        draw.fps(vec2(5.0, 5.0));
     }
 }

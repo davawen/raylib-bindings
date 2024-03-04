@@ -4,9 +4,9 @@ fn main() {
     let mut rl = Raylib::init_window(800, 800, "Shapes", 60);
 
     let camera = Camera3D {
-        position: Vector3::new(0.0, 10.0, 10.0),
-        target: Vector3::new(0.0, 0.0, 0.0),
-        up: Vector3::new(0.0, 1.0, 0.0),
+        position: vec3(0.0, 10.0, 10.0),
+        target: vec3(0.0, 0.0, 0.0),
+        up: vec3(0.0, 1.0, 0.0),
         fovy: 45.0,
         projection: CameraProjection::Perspective as i32
     };

@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use ffi::Rectangle;
 
-use crate::{core::draw::DrawHandle, prelude::{Color, Texture, Vector2}, ffi};
+use crate::{core::draw::DrawHandle, prelude::{Color, Texture, Vector2, vec2}, ffi};
 
 /// # Basic shapes drawing functions (module: `rshapes`)
 ///
@@ -17,7 +17,7 @@ impl<P> DrawHandle<'_, P> {
     /// Draw a single pixel.
     #[inline]
     pub fn pixel(&mut self, pos_x: f32, pos_y: f32, color: Color) {
-        self.pixel_v(Vector2::new(pos_x, pos_y), color)
+        self.pixel_v(vec2(pos_x, pos_y), color)
     }
     /// Draw a single pixel.
     #[inline]
@@ -27,7 +27,7 @@ impl<P> DrawHandle<'_, P> {
     /// Draw a line.
     #[inline]
     pub fn line(&mut self, start_x: f32, start_y: f32, end_x: f32, end_y: f32, color: Color) {
-        self.line_v(Vector2::new(start_x, start_y), Vector2::new(end_x, end_y), color)
+        self.line_v(vec2(start_x, start_y), vec2(end_x, end_y), color)
     }
     /// Draw a line.
     #[inline]
@@ -55,7 +55,7 @@ impl<P> DrawHandle<'_, P> {
     /// Draw a filled circle.
     #[inline]
     pub fn circle(&mut self, center_x: f32, center_y: f32, radius: f32, color: Color) {
-        self.circle_v(Vector2::new(center_x, center_y), radius, color)
+        self.circle_v(vec2(center_x, center_y), radius, color)
     }
     /// Draw part of a filled circle.
     /// Angles are in radians.
@@ -82,7 +82,7 @@ impl<P> DrawHandle<'_, P> {
     /// Draw the outline of a circle.
     #[inline]
     pub fn circle_lines(&mut self, center_x: f32, center_y: f32, radius: f32, color: Color) {
-        self.circle_lines_v(Vector2::new(center_x, center_y), radius, color)
+        self.circle_lines_v(vec2(center_x, center_y), radius, color)
     }
     /// Draw the outline of a circle.
     #[inline]
@@ -124,7 +124,7 @@ impl<P> DrawHandle<'_, P> {
     /// Draw a filled rectangle.
     #[inline]
     pub fn rectangle(&mut self, pos_x: f32, pos_y: f32, width: f32, height: f32, color: Color) {
-        self.rectangle_v(Vector2::new(pos_x, pos_y), Vector2::new(width, height), color)
+        self.rectangle_v(vec2(pos_x, pos_y), vec2(width, height), color)
     }
     /// Draw a filled rectangle.
     #[inline]

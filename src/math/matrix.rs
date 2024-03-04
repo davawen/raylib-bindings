@@ -2,7 +2,7 @@
 
 use std::array;
 pub use crate::ffi::Matrix;
-use crate::prelude::{Vector2, Vector3, Vector4};
+use crate::prelude::{Vector2, Vector3, Vector4, vec4};
 
 use std::ops::{Add, Sub, Mul};
 
@@ -63,20 +63,20 @@ impl Matrix {
     /// Get the current matrix as a list of columns
     pub const fn cols(self) -> [Vector4; 4] {
         [
-            Vector4::new(self.m0, self.m4, self.m8, self.m12),
-            Vector4::new(self.m1, self.m5, self.m9, self.m13),
-            Vector4::new(self.m2, self.m6, self.m10, self.m14),
-            Vector4::new(self.m3, self.m7, self.m11, self.m15),
+            vec4(self.m0, self.m4, self.m8, self.m12),
+            vec4(self.m1, self.m5, self.m9, self.m13),
+            vec4(self.m2, self.m6, self.m10, self.m14),
+            vec4(self.m3, self.m7, self.m11, self.m15),
         ]
     }
 
     /// Get the current matrix as a list of rows
     pub const fn rows(self) -> [Vector4; 4] {
         [
-            Vector4::new(self.m0, self.m1, self.m2, self.m3),
-            Vector4::new(self.m4, self.m5, self.m6, self.m7),
-            Vector4::new(self.m8, self.m9, self.m10, self.m11),
-            Vector4::new(self.m12, self.m13, self.m14, self.m15),
+            vec4(self.m0, self.m1, self.m2, self.m3),
+            vec4(self.m4, self.m5, self.m6, self.m7),
+            vec4(self.m8, self.m9, self.m10, self.m11),
+            vec4(self.m12, self.m13, self.m14, self.m15),
         ]
     }
 
@@ -351,6 +351,6 @@ impl Mul<Vector4> for Matrix {
     #[inline]
     fn mul(self, rhs: Vector4) -> Self::Output {
         let cols = self.rows();
-        Vector4::new(rhs.dot(cols[0]), rhs.dot(cols[1]), rhs.dot(cols[2]), rhs.dot(cols[3]))
+        vec4(rhs.dot(cols[0]), rhs.dot(cols[1]), rhs.dot(cols[2]), rhs.dot(cols[3]))
     }
 }

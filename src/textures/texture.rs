@@ -2,7 +2,7 @@ use std::{ffi::c_void, marker::PhantomData};
 
 use ffi::{CubemapLayout, Rectangle, TextureFilter, TextureWrap, NPatchInfo, PixelFormat};
 
-use crate::{ffi, prelude::{Raylib, DrawHandle, get_pixel_data_size, Vector2, Color}};
+use crate::{ffi, prelude::{Raylib, DrawHandle, get_pixel_data_size, Vector2, Color, vec2}};
 
 use super::image::Image;
 
@@ -252,7 +252,7 @@ impl<P> DrawHandle<'_, P> {
     /// Draw a texture.
     #[inline]
     pub fn texture(&mut self, texture: &Texture, x: f32, y: f32, tint: Color) {
-        self.texture_ex(texture, Vector2::new(x, y), 0.0, 1.0, tint);
+        self.texture_ex(texture, vec2(x, y), 0.0, 1.0, tint);
     }
     /// Draw a texture.
     #[inline]

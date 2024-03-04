@@ -44,6 +44,6 @@ fn main() {
 
         let mut draw = rl.begin_drawing();
         draw.texture(&textures[current], 0.0, 0.0, Color::WHITE);
-        draw.text(rl.default_font(), names[current].0, Vector2::new(10.0, 10.0), 20.0, names[current].1);
+        draw.text(rl.default_font(), names[current].0, vec2(10.0, 10.0), 20.0, names[current].1);
     }
 }

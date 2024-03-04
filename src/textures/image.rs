@@ -1,7 +1,7 @@
 use std::{ffi::CStr, collections::HashSet};
 use half::f16;
 
-use crate::{ffi, prelude::{PixelFormat, Rectangle, Raylib, Vector2, Color, get_pixel_data_size}, cstr};
+use crate::{ffi, prelude::{PixelFormat, Rectangle, Raylib, Vector2, Color, get_pixel_data_size, vec2}, cstr};
 
 
 use super::texture::Texture;
@@ -833,7 +833,7 @@ impl Image {
     /// Does not support compressed images.
     #[inline]
     pub fn draw_pixel(&mut self, pos_x: f32, pos_y: f32, color: Color) {
-        self.draw_pixel_v(Vector2::new(pos_x, pos_y), color)
+        self.draw_pixel_v(vec2(pos_x, pos_y), color)
     }
     /// Draw a single pixel.
     /// Only changes base image, does not update mipmap levels.
@@ -861,7 +861,7 @@ impl Image {
     /// Does not support compressed images.
     #[inline]
     pub fn draw_circle(&mut self, center_x: f32, center_y: f32, radius: f32, color: Color) {
-        self.draw_circle_v(Vector2::new(center_x, center_y), radius, color)
+        self.draw_circle_v(vec2(center_x, center_y), radius, color)
     }
     /// Draw a filled circle.
     /// Only changes base image, does not update mipmap levels.
@@ -875,7 +875,7 @@ impl Image {
     /// Does not support compressed images.
     #[inline]
     pub fn draw_circle_lines(&mut self, center_x: f32, center_y: f32, radius: f32, color: Color) {
-        self.draw_circle_lines_v(Vector2::new(center_x, center_y), radius, color)
+        self.draw_circle_lines_v(vec2(center_x, center_y), radius, color)
     }
     /// Draw the outline of a circle.
     /// Only changes base image, does not update mipmap levels.
@@ -889,7 +889,7 @@ impl Image {
     /// Does not support compressed images.
     #[inline]
     pub fn draw_rectangle(&mut self, pos_x: f32, pos_y: f32, width: f32, height: f32, color: Color) {
-        self.draw_rectangle_v(Vector2::new(pos_x, pos_y), Vector2::new(width, height), color)
+        self.draw_rectangle_v(vec2(pos_x, pos_y), vec2(width, height), color)
     }
     /// Draw a filled rectangle.
     /// Only changes base image, does not update mipmap levels.

@@ -12,7 +12,7 @@ fn main() {
         let mut y = 30.0;
         for atlas in atlases.iter_mut().rev() {
             let size = atlas.size();
-            draw.text(atlas, &format!("({size}) 0x012345 abcdefg Hello world! Test!"), Vector2::new(10.0, y), size, Color::BLACK);
+            draw.text(atlas, &format!("({size}) 0x012345 abcdefg Hello world! Test!"), vec2(10.0, y), size, Color::BLACK);
             y += size + 5.0;
         }
     }

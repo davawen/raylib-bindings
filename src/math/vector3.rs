@@ -1,27 +1,33 @@
 use float_cmp::{ApproxEq, F32Margin};
 
 pub use crate::ffi::Vector3;
-use crate::prelude::{Matrix, Vector2, Vector4, Quaternion};
+use crate::prelude::{Matrix, Vector2, vec2, Vector4, vec4, Quaternion};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 
 use super::MathUtils;
 
+pub const fn vec3(x: f32, y: f32, z: f32) -> Vector3 {
+    Vector3 { x, y, z }
+}
+
 impl Vector3 {
     pub const ZERO: Self = Vector3::splat(0.0);
     pub const ONE: Self = Vector3::splat(1.0);
-    pub const X: Self = Vector3::new(1.0, 0.0, 0.0);
-    pub const Y: Self = Vector3::new(0.0, 1.0, 0.0);
-    pub const Z: Self = Vector3::new(0.0, 0.0, 1.0);
+    pub const X: Self = vec3(1.0, 0.0, 0.0);
+    pub const Y: Self = vec3(0.0, 1.0, 0.0);
+    pub const Z: Self = vec3(0.0, 0.0, 1.0);
 
+    /// NOTE: You can also use the [`vec3`] function.
     pub const fn new(x: f32, y: f32, z: f32) -> Self { Vector3 { x, y, z } }
-    pub const fn splat(v: f32) -> Self { Vector3::new(v, v, v) }
+    /// Creates a new vector with all values set to `v`.
+    pub const fn splat(v: f32) -> Self { vec3(v, v, v) }
 
     pub const fn tuple(self) -> (f32, f32, f32) { (self.x, self.y, self.z) }
     pub const fn array(self) -> [f32; 3] { [self.x, self.y, self.z] }
 
-    pub const fn vec2(self) -> Vector2 { Vector2::new(self.x, self.y) }
-    pub const fn vec4(self, w: f32) -> Vector4 { Vector4::new(self.x, self.y, self.z, w) }
+    pub const fn vec2(self) -> Vector2 { vec2(self.x, self.y) }
+    pub const fn vec4(self, w: f32) -> Vector4 { vec4(self.x, self.y, self.z, w) }
 
     /// Calculate the length of the vector
     /// NOTE: If you need the length squared, consider using `Vector3::length_sqr`
@@ -51,15 +57,15 @@ impl Vector3 {
     }
     /// Calculate the 3d cross product between the two vectors
     pub fn cross(self, rhs: Self) -> Self {
-        Vector3::new(self.y*rhs.z - self.z*rhs.y, self.z*rhs.x - self.x*rhs.z, self.x*rhs.y - self.y*rhs.x)
+        vec3(self.y*rhs.z - self.z*rhs.y, self.z*rhs.x - self.x*rhs.z, self.x*rhs.y - self.y*rhs.x)
     }
     /// Component-wise multiplication of two vectors
     pub fn multiply(self, rhs: Self) -> Self {
-        Vector3::new(self.x*rhs.x, self.y*rhs.y, self.z*rhs.z)
+        vec3(self.x*rhs.x, self.y*rhs.y, self.z*rhs.z)
     }
     /// Component-wise division of two vectors
     pub fn divide(self, rhs: Self) -> Self {
-        Vector3::new(self.x/rhs.x, self.y/rhs.y, self.z/rhs.z)
+        vec3(self.x/rhs.x, self.y/rhs.y, self.z/rhs.z)
     }
 
     /// Normalizes this vector (make its length 1)
@@ -69,11 +75,11 @@ impl Vector3 {
     }
     /// Component-wise linear interpolation of two vectors
     pub fn lerp(self, rhs: Self, amount: f32) -> Self {
-        Vector3::new(self.x.lerp(rhs.x, amount), self.y.lerp(rhs.y, amount), self.z.lerp(rhs.z, amount))
+        vec3(self.x.lerp(rhs.x, amount), self.y.lerp(rhs.y, amount), self.z.lerp(rhs.z, amount))
     }
     /// Component-wise clamp of this vector between the values specified by min and max
     pub fn clamp(self, min: Self, max: Self) -> Self {
-        Vector3::new(self.x.clamp(min.x, max.x), self.y.clamp(min.y, max.y), self.z.clamp(min.z, max.z))
+        vec3(self.x.clamp(min.x, max.x), self.y.clamp(min.y, max.y), self.z.clamp(min.z, max.z))
     }
     /// Clamps the length of this vector between the specified values by stretching or squeezing it if needed
     /// Doesn't do anything if `self` is the null vector
@@ -182,15 +188,15 @@ impl Vector3 {
     /// ```
     /// use raylib::prelude::Vector3;
     /// use float_cmp::assert_approx_eq;
-    /// let a = Vector3::new(0.0, 0.0, 0.0);
-    /// let b = Vector3::new(1.0, 0.0, 0.0);
-    /// let c = Vector3::new(0.0, 1.0, 0.0);
+    /// let a = vec3(0.0, 0.0, 0.0);
+    /// let b = vec3(1.0, 0.0, 0.0);
+    /// let c = vec3(0.0, 1.0, 0.0);
     ///
     /// let p = a;
-    /// assert_eq!(p.barycenter(a, b, c), Vector3::new(1.0, 0.0, 0.0)); // only a
-    /// let p = Vector3::new(0.75, 0.0, 0.0);
-    /// assert_eq!(p.barycenter(a, b, c), Vector3::new(0.25, 0.75, 0.0)); // between a and b
-    /// let p = Vector3::new(1.0/3.0, 1.0/3.0, 0.0);
+    /// assert_eq!(p.barycenter(a, b, c), vec3(1.0, 0.0, 0.0)); // only a
+    /// let p = vec3(0.75, 0.0, 0.0);
+    /// assert_eq!(p.barycenter(a, b, c), vec3(0.25, 0.75, 0.0)); // between a and b
+    /// let p = vec3(1.0/3.0, 1.0/3.0, 0.0);
     /// assert_approx_eq!(Vector3, p.barycenter(a, b, c), Vector3::splat(1.0/3.0), ulps = 2) // center
     /// ```
     pub fn barycenter(self, a: Self, b: Self, c: Self) -> Self {
@@ -207,7 +213,7 @@ impl Vector3 {
         let y = (d11*d20 - d01*d21)/denom;
         let z = (d00*d21 - d01*d20)/denom;
         let x = 1.0 - z - y;
-        Vector3::new(x, y, z)
+        vec3(x, y, z)
     }
 
     /// Move vector towards the targets, moving by a maximum step of `max_distance`
@@ -234,27 +240,27 @@ impl ApproxEq for Vector3 {
 
 impl Add<Vector3> for Vector3 {
     type Output = Vector3;
-    fn add(self, rhs: Vector3) -> Self::Output { Vector3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z) }
+    fn add(self, rhs: Vector3) -> Self::Output { vec3(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z) }
 }
 
 impl Add<f32> for Vector3 {
     type Output = Vector3;
-    fn add(self, rhs: f32) -> Self::Output { Vector3::new(self.x + rhs, self.y + rhs, self.z + rhs) }
+    fn add(self, rhs: f32) -> Self::Output { vec3(self.x + rhs, self.y + rhs, self.z + rhs) }
 }
 
 impl Sub<Vector3> for Vector3 {
     type Output = Vector3;
-    fn sub(self, rhs: Vector3) -> Self::Output { Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z) }
+    fn sub(self, rhs: Vector3) -> Self::Output { vec3(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z) }
 }
 
 impl Sub<f32> for Vector3 {
     type Output = Vector3;
-    fn sub(self, rhs: f32) -> Self::Output { Vector3::new(self.x - rhs, self.y - rhs, self.z - rhs) }
+    fn sub(self, rhs: f32) -> Self::Output { vec3(self.x - rhs, self.y - rhs, self.z - rhs) }
 }
 
 impl Mul<f32> for Vector3 {
     type Output = Vector3;
-    fn mul(self, rhs: f32) -> Self::Output { Vector3::new(self.x * rhs, self.y * rhs, self.z * rhs) }
+    fn mul(self, rhs: f32) -> Self::Output { vec3(self.x * rhs, self.y * rhs, self.z * rhs) }
 }
 
 impl Mul<Vector3> for f32 {
@@ -264,23 +270,23 @@ impl Mul<Vector3> for f32 {
 
 impl Div<f32> for Vector3 {
     type Output = Vector3;
-    fn div(self, rhs: f32) -> Self::Output { Vector3::new(self.x / rhs, self.y / rhs, self.z / rhs) }
+    fn div(self, rhs: f32) -> Self::Output { vec3(self.x / rhs, self.y / rhs, self.z / rhs) }
 }
 
 impl Div<Vector3> for f32 {
     type Output = Vector3;
-    fn div(self, rhs: Vector3) -> Self::Output { Vector3::new(self / rhs.x, self / rhs.y, self / rhs.z) }
+    fn div(self, rhs: Vector3) -> Self::Output { vec3(self / rhs.x, self / rhs.y, self / rhs.z) }
 }
 
 impl Neg for Vector3 {
     type Output = Vector3;
-    fn neg(self) -> Self::Output { Vector3::new(-self.x, -self.y, -self.z) }
+    fn neg(self) -> Self::Output { vec3(-self.x, -self.y, -self.z) }
 }
 
 impl Mul<Quaternion> for Vector3 {
     type Output = Vector3;
     fn mul(self, q: Quaternion) -> Self::Output {
-        Vector3::new(
+        vec3(
             self.x*(q.x*q.x + q.w*q.w - q.y*q.y - q.z*q.z) + self.y*(2.0*q.x*q.y - 2.0*q.w*q.z) + self.z*(2.0*q.x*q.z + 2.0*q.w*q.y),
             self.x*(2.0*q.w*q.z + 2.0*q.x*q.y) + self.y*(q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z) + self.z*(-2.0*q.w*q.x + 2.0*q.y*q.z),
             self.x*(-2.0*q.w*q.y + 2.0*q.x*q.z) + self.y*(2.0*q.w*q.x + 2.0*q.y*q.z)+ self.z*(q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z),

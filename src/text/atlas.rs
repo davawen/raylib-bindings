@@ -1,7 +1,7 @@
 use std::num::NonZeroU16;
 use hashbrown::HashMap;
 
-use crate::{prelude::{DrawHandle, Vector2, Color, Texture, Rectangle}, ffi};
+use crate::{prelude::{DrawHandle, Vector2, Color, Texture, Rectangle, vec2}, ffi};
 
 // TODO: Support vertical text
 
@@ -132,7 +132,7 @@ impl<P> DrawHandle<'_, P> {
         let rec = atlas.get_glyph(glyph_index, size);
         let metrics = atlas.metrics_indexed(glyph_index, size);
         let line = atlas.line_metrics(size).unwrap_or_default();
-        let pos = Vector2::new((pos.x + metrics.xmin).floor(), (pos.y - metrics.ymin - metrics.height + line.ascent).floor());
+        let pos = vec2((pos.x + metrics.xmin).floor(), (pos.y - metrics.ymin - metrics.height + line.ascent).floor());
         let dest = Rectangle::new(
             pos.x, pos.y,
             metrics.width, metrics.height

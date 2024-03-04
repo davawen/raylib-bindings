@@ -1,7 +1,7 @@
 use float_cmp::{ApproxEq, F32Margin};
 
 pub use crate::ffi::Quaternion;
-use crate::prelude::{Matrix, Vector3, Vector4};
+use crate::prelude::{Matrix, Vector3, Vector4, vec4};
 
 use std::ops::{Add, Sub, Mul, Div};
 
@@ -16,7 +16,7 @@ impl Quaternion {
     pub const fn tuple(self) -> (f32, f32, f32, f32) { (self.x, self.y, self.z, self.w) }
     pub const fn array(self) -> [f32; 4] { [self.x, self.y, self.z, self.w] }
 
-    pub const fn vec4(self) -> Vector4 { Vector4::new(self.x, self.y, self.z, self.w) }
+    pub const fn vec4(self) -> Vector4 { vec4(self.x, self.y, self.z, self.w) }
 
     pub fn from_vec(xyz: Vector3, w: f32) -> Self {
         Quaternion::new(xyz.x, xyz.y, xyz.z, w)

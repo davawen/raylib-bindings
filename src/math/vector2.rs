@@ -1,26 +1,32 @@
 pub use crate::ffi::Vector2;
 
-use crate::prelude::{Matrix, Vector3, Vector4};
+use crate::prelude::{Matrix, Vector3, vec3, Vector4, vec4};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
 use float_cmp::{ApproxEq, F32Margin};
 
 use super::MathUtils;
 
+pub const fn vec2(x: f32, y: f32) -> Vector2 {
+    Vector2 { x, y }
+}
+
 impl Vector2 {
     pub const ZERO: Self = Vector2::splat(0.0);
     pub const ONE: Self = Vector2::splat(1.0);
-    pub const X: Self = Vector2::new(1.0, 0.0);
-    pub const Y: Self = Vector2::new(0.0, 1.0);
+    pub const X: Self = vec2(1.0, 0.0);
+    pub const Y: Self = vec2(0.0, 1.0);
 
+    /// NOTE: You can also use the [`vec2`] function.
     pub const fn new(x: f32, y: f32) -> Self { Vector2 { x, y } }
-    pub const fn splat(v: f32) -> Self { Vector2::new(v, v) }
+    /// Creates a new vector with all values set to `v`.
+    pub const fn splat(v: f32) -> Self { vec2(v, v) }
 
     pub const fn tuple(self) -> (f32, f32) { (self.x, self.y) }
     pub const fn array(self) -> [f32; 2] { [self.x, self.y] }
 
-    pub const fn vec3(self, z: f32) -> Vector3 { Vector3::new(self.x, self.y, z) }
-    pub const fn vec4(self, z: f32, w: f32) -> Vector4 { Vector4::new(self.x, self.y, z, w) }
+    pub const fn vec3(self, z: f32) -> Vector3 { vec3(self.x, self.y, z) }
+    pub const fn vec4(self, z: f32, w: f32) -> Vector4 { vec4(self.x, self.y, z, w) }
 
     /// Calculate the length of the vector
     /// NOTE: If you need the length squared, consider using `Vector2::length_sqr`
@@ -58,11 +64,11 @@ impl Vector2 {
     }
     /// Component-wise multiplication of two vectors
     pub fn multiply(self, rhs: Self) -> Self {
-        Vector2::new(self.x*rhs.x, self.y*rhs.y)
+        vec2(self.x*rhs.x, self.y*rhs.y)
     }
     /// Component-wise division of two vectors
     pub fn divide(self, rhs: Self) -> Self {
-        Vector2::new(self.x/rhs.x, self.y/rhs.y)
+        vec2(self.x/rhs.x, self.y/rhs.y)
     }
 
     /// Normalizes this vector (make its length 1)
@@ -77,11 +83,11 @@ impl Vector2 {
     }
     /// Component-wise linear interpolation of two vectors
     pub fn lerp(self, rhs: Self, amount: f32) -> Self {
-        Vector2::new(self.x.lerp(rhs.x, amount), self.y.lerp(rhs.y, amount))
+        vec2(self.x.lerp(rhs.x, amount), self.y.lerp(rhs.y, amount))
     }
     /// Component-wise clamp of this vector between the values specified by min and max
     pub fn clamp(self, min: Self, max: Self) -> Self {
-        Vector2::new(self.x.clamp(min.x, max.x), self.y.clamp(min.y, max.y))
+        vec2(self.x.clamp(min.x, max.x), self.y.clamp(min.y, max.y))
     }
     /// Clamp the length of this vector between the specified values by stretching or squeezing it if needed
     /// Doesn't do anything if `self` is the null vector
@@ -109,7 +115,7 @@ impl Vector2 {
     pub fn rotate(self, angle: f32) -> Self {
         let cos = angle.cos();
         let sin = angle.sin();
-        Vector2::new(self.x*cos - self.y*sin, self.x*sin + self.y*cos)
+        vec2(self.x*cos - self.y*sin, self.x*sin + self.y*cos)
     }
     /// Transforms this vector by the given matrix (with translation)
     /// Same as `mat * self`
@@ -140,27 +146,27 @@ impl ApproxEq for Vector2 {
 
 impl Add<Vector2> for Vector2 {
     type Output = Vector2;
-    fn add(self, rhs: Vector2) -> Self::Output { Vector2::new(self.x + rhs.x, self.y + rhs.y) }
+    fn add(self, rhs: Vector2) -> Self::Output { vec2(self.x + rhs.x, self.y + rhs.y) }
 }
 
 impl Add<f32> for Vector2 {
     type Output = Vector2;
-    fn add(self, rhs: f32) -> Self::Output { Vector2::new(self.x + rhs, self.y + rhs) }
+    fn add(self, rhs: f32) -> Self::Output { vec2(self.x + rhs, self.y + rhs) }
 }
 
 impl Sub<Vector2> for Vector2 {
     type Output = Vector2;
-    fn sub(self, rhs: Vector2) -> Self::Output { Vector2::new(self.x - rhs.x, self.y - rhs.y) }
+    fn sub(self, rhs: Vector2) -> Self::Output { vec2(self.x - rhs.x, self.y - rhs.y) }
 }
 
 impl Sub<f32> for Vector2 {
     type Output = Vector2;
-    fn sub(self, rhs: f32) -> Self::Output { Vector2::new(self.x - rhs, self.y - rhs) }
+    fn sub(self, rhs: f32) -> Self::Output { vec2(self.x - rhs, self.y - rhs) }
 }
 
 impl Mul<f32> for Vector2 {
     type Output = Vector2;
-    fn mul(self, rhs: f32) -> Self::Output { Vector2::new(self.x * rhs, self.y * rhs) }
+    fn mul(self, rhs: f32) -> Self::Output { vec2(self.x * rhs, self.y * rhs) }
 }
 
 impl Mul<Vector2> for f32 {
@@ -170,15 +176,15 @@ impl Mul<Vector2> for f32 {
 
 impl Div<f32> for Vector2 {
     type Output = Vector2;
-    fn div(self, rhs: f32) -> Self::Output { Vector2::new(self.x / rhs, self.y / rhs) }
+    fn div(self, rhs: f32) -> Self::Output { vec2(self.x / rhs, self.y / rhs) }
 }
 
 impl Div<Vector2> for f32 {
     type Output = Vector2;
-    fn div(self, rhs: Vector2) -> Self::Output { Vector2::new(self / rhs.x, self / rhs.y) }
+    fn div(self, rhs: Vector2) -> Self::Output { vec2(self / rhs.x, self / rhs.y) }
 }
 
 impl Neg for Vector2 {
     type Output = Vector2;
-    fn neg(self) -> Self::Output { Vector2::new(-self.x, -self.y) }
+    fn neg(self) -> Self::Output { vec2(-self.x, -self.y) }
 }

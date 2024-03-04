@@ -1,5 +1,5 @@
 use std::ffi::{CStr, CString};
-use crate::{ffi::{self, Image, MouseCursor}, prelude::Vector2};
+use crate::{ffi::{self, Image, MouseCursor}, prelude::{Vector2, vec2}};
 
 use bitflags::bitflags;
 
@@ -151,13 +151,13 @@ pub trait RaylibWindowFunctions {
     fn get_screen_height(&self) -> f32 { unsafe { ffi::GetScreenHeight() as f32 } }
     /// Gets the current screen (window) size as a vector
     /// If you need to consider HiDPI, use `Raylib::get_render_size`
-    fn get_screen_size(&self) -> Vector2 { Vector2::new(self.get_screen_width(), self.get_screen_height()) }
+    fn get_screen_size(&self) -> Vector2 { vec2(self.get_screen_width(), self.get_screen_height()) }
     /// Gets the current render width (considering HiDPI)
     fn get_render_width(&self) -> f32 { unsafe { ffi::GetRenderWidth() as f32 } }
     /// Gets the current render height (considering HiDPI)
     fn get_render_height(&self) -> f32 { unsafe { ffi::GetRenderHeight() as f32 } }
     /// Gets the current render size as vector (considering HiDPI)
-    fn get_render_size(&self) -> Vector2 { Vector2::new(self.get_render_width(), self.get_render_height()) }
+    fn get_render_size(&self) -> Vector2 { vec2(self.get_render_width(), self.get_render_height()) }
 
     /// Get number of connected monitors
     fn get_monitor_count(&self) -> i32 { unsafe { ffi::GetMonitorCount() } }

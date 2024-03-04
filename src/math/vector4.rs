@@ -1,26 +1,32 @@
 use float_cmp::{ApproxEq, F32Margin};
 
 pub use crate::ffi::Vector4;
-use crate::prelude::{Vector2, Vector3, Quaternion};
+use crate::prelude::{Vector2, vec2, Vector3, vec3, Quaternion};
 
 use std::ops::{Add, Sub, Mul, Neg, Div};
+
+pub const fn vec4(x: f32, y: f32, z: f32, w: f32) -> Vector4 {
+    Vector4 { x, y, z, w }
+}
 
 impl Vector4 {
     pub const ZERO: Self = Vector4::splat(0.0);
     pub const ONE: Self = Vector4::splat(1.0);
-    pub const X: Self = Vector4::new(1.0, 0.0, 0.0, 0.0);
-    pub const Y: Self = Vector4::new(0.0, 1.0, 0.0, 0.0);
-    pub const Z: Self = Vector4::new(0.0, 0.0, 1.0, 0.0);
-    pub const W: Self = Vector4::new(0.0, 0.0, 0.0, 1.0);
+    pub const X: Self = vec4(1.0, 0.0, 0.0, 0.0);
+    pub const Y: Self = vec4(0.0, 1.0, 0.0, 0.0);
+    pub const Z: Self = vec4(0.0, 0.0, 1.0, 0.0);
+    pub const W: Self = vec4(0.0, 0.0, 0.0, 1.0);
 
+    /// NOTE: You can also use the [`vec4`] function.
     pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self { Vector4 { x, y, z, w } }
-    pub const fn splat(v: f32) -> Self { Vector4::new(v, v, v, v) }
+    /// Creates a new vector with all values set to `v`.
+    pub const fn splat(v: f32) -> Self { vec4(v, v, v, v) }
 
     pub const fn tuple(self) -> (f32, f32, f32, f32) { (self.x, self.y, self.z, self.w) }
     pub const fn array(self) -> [f32; 4] { [self.x, self.y, self.z, self.w] }
 
-    pub const fn vec2(self) -> Vector2 { Vector2::new(self.x, self.y) }
-    pub const fn vec3(self) -> Vector3 { Vector3::new(self.x, self.y, self.z) }
+    pub const fn vec2(self) -> Vector2 { vec2(self.x, self.y) }
+    pub const fn vec3(self) -> Vector3 { vec3(self.x, self.y, self.z) }
     pub const fn quat(self) -> Quaternion { Quaternion::new(self.x, self.y, self.z, self.w) }
 
     /// Calculate the length of the vector
@@ -44,11 +50,11 @@ impl Vector4 {
     }
     /// Component-wise multiplication of two vectors
     pub fn multiply(self, rhs: Self) -> Self {
-        Vector4::new(self.x*rhs.x, self.y*rhs.y, self.z*rhs.z, self.w*self.w)
+        vec4(self.x*rhs.x, self.y*rhs.y, self.z*rhs.z, self.w*self.w)
     }
     /// Component-wise division of two vectors
     pub fn divide(self, rhs: Self) -> Self {
-        Vector4::new(self.x/rhs.x, self.y/rhs.y, self.z/rhs.z, self.w/rhs.w)
+        vec4(self.x/rhs.x, self.y/rhs.y, self.z/rhs.z, self.w/rhs.w)
     }
 
     /// Normalizes this vector (make its length 1)
@@ -69,27 +75,27 @@ impl ApproxEq for Vector4 {
 
 impl Add<Vector4> for Vector4 {
     type Output = Vector4;
-    fn add(self, rhs: Vector4) -> Self::Output { Vector4::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z, self.w + rhs.w) }
+    fn add(self, rhs: Vector4) -> Self::Output { vec4(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z, self.w + rhs.w) }
 }
 
 impl Add<f32> for Vector4 {
     type Output = Vector4;
-    fn add(self, rhs: f32) -> Self::Output { Vector4::new(self.x + rhs, self.y + rhs, self.z + rhs, self.w + rhs) }
+    fn add(self, rhs: f32) -> Self::Output { vec4(self.x + rhs, self.y + rhs, self.z + rhs, self.w + rhs) }
 }
 
 impl Sub<Vector4> for Vector4 {
     type Output = Vector4;
-    fn sub(self, rhs: Vector4) -> Self::Output { Vector4::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z, self.w - rhs.w) }
+    fn sub(self, rhs: Vector4) -> Self::Output { vec4(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z, self.w - rhs.w) }
 }
 
 impl Sub<f32> for Vector4 {
     type Output = Vector4;
-    fn sub(self, rhs: f32) -> Self::Output { Vector4::new(self.x - rhs, self.y - rhs, self.z - rhs, self.w - rhs) }
+    fn sub(self, rhs: f32) -> Self::Output { vec4(self.x - rhs, self.y - rhs, self.z - rhs, self.w - rhs) }
 }
 
 impl Mul<f32> for Vector4 {
     type Output = Vector4;
-    fn mul(self, rhs: f32) -> Self::Output { Vector4::new(self.x * rhs, self.y * rhs, self.z * rhs, self.w * rhs) }
+    fn mul(self, rhs: f32) -> Self::Output { vec4(self.x * rhs, self.y * rhs, self.z * rhs, self.w * rhs) }
 }
 
 impl Mul<Vector4> for f32 {
@@ -98,15 +104,15 @@ impl Mul<Vector4> for f32 {
 
 impl Div<f32> for Vector4 {
     type Output = Vector4;
-    fn div(self, rhs: f32) -> Self::Output { Vector4::new(self.x / rhs, self.y / rhs, self.z / rhs, self.w / rhs) }
+    fn div(self, rhs: f32) -> Self::Output { vec4(self.x / rhs, self.y / rhs, self.z / rhs, self.w / rhs) }
 }
 
 impl Div<Vector4> for f32 {
     type Output = Vector4;
-    fn div(self, rhs: Vector4) -> Self::Output { Vector4::new(self / rhs.x, self / rhs.y, self / rhs.z, self / rhs.w) }
+    fn div(self, rhs: Vector4) -> Self::Output { vec4(self / rhs.x, self / rhs.y, self / rhs.z, self / rhs.w) }
 }
 
 impl Neg for Vector4 {
     type Output = Vector4;
-    fn neg(self) -> Self::Output { Vector4::new(-self.x, -self.y, -self.z, -self.w) }
+    fn neg(self) -> Self::Output { vec4(-self.x, -self.y, -self.z, -self.w) }
 }

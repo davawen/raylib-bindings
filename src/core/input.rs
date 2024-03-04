@@ -2,7 +2,7 @@ use std::ffi::CStr;
 
 use bitflags::bitflags;
 
-use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture, Vector2}};
+use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture, Vector2}, prelude::vec2};
 
 /// Keyboard input functions (module: `rcore`)
 pub trait RaylibKeyboardFunctions {
@@ -192,7 +192,7 @@ pub trait RaylibGamepadFunctions {
             GamepadAxis::Trigger => (ffi::GamepadAxis::LeftTrigger, ffi::GamepadAxis::RightTrigger),
         };
 
-        Vector2::new(
+        vec2(
             unsafe { ffi::GetGamepadAxisMovement(gamepad.0, x as i32) },
             unsafe { ffi::GetGamepadAxisMovement(gamepad.0, y as i32) },
         )
@@ -330,7 +330,7 @@ pub trait RaylibTouchFunctions {
     /// # let mut draw = rl.begin_drawing();
     /// for (idx, pos) in rl.get_touch_positions().enumerate() {
     ///     draw.circle_v(pos, 30.0, Color::ORANGE);
-    ///     let pos = pos - Vector2::new(10.0, 70.0);
+    ///     let pos = pos - vec2(10.0, 70.0);
     ///     draw.text(rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
     /// }
     /// ```
