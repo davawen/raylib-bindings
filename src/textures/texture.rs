@@ -248,7 +248,7 @@ impl Texture {
 /// # Texture drawing functions
 /// 
 /// ---
-impl<P> DrawHandle<'_, P> {
+impl DrawHandle {
     /// Draw a texture.
     #[inline]
     pub fn texture(&mut self, texture: &Texture, x: f32, y: f32, tint: Color) {

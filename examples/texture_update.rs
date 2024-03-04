@@ -18,10 +18,10 @@ fn main() {
     texture.update_rec_raw(rec, &b).unwrap();
 
     while !rl.window_should_close() {
-        let mut draw = rl.begin_drawing();
-
-        draw.clear_background(Color::GRAY);
-        draw.circle(300.0, 300.0, 20.0, Color::RED);
-        draw.texture(&texture, 100.0, 100.0, Color::WHITE);
+        rl.begin_drawing(|_, draw| {
+            draw.clear_background(Color::GRAY);
+            draw.circle(300.0, 300.0, 20.0, Color::RED);
+            draw.texture(&texture, 100.0, 100.0, Color::WHITE);
+        });
     }
 }

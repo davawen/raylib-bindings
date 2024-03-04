@@ -7,11 +7,11 @@ fn main() {
     let time_uniform = shader.get_uniform("time");
 
     while !rl.window_should_close() {
-        let mut draw = rl.begin_drawing();
-        draw.clear_background(Color::WHITE);
+        rl.begin_drawing(|rl, draw| {
+            draw.clear_background(Color::WHITE);
 
-        shader.set_uniform_value(time_uniform, unsafe { raylib::ffi::GetTime() as f32 });
-        let mut shader = draw.begin_shader_mode(&shader);
-        shader.rectangle(50.0, 50.0, 700.0, 700.0, Color::WHITE);
+            shader.set_uniform_value(time_uniform, rl.get_time());
+            draw.begin_shader_mode(&shader, |draw| draw.rectangle(50.0, 50.0, 700.0, 700.0, Color::WHITE));
+        });
     }
 }

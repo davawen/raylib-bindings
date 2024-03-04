@@ -54,23 +54,22 @@ fn main() {
             }
         }
 
-        let mut draw = rl.begin_drawing();
-        draw.clear_background(Color::RAYWHITE);
+        rl.begin_drawing(|rl, draw| {
+            draw.clear_background(Color::RAYWHITE);
 
-        let c = std::ffi::CString::new(s.as_str()).unwrap();
-        unsafe { raylib::ffi::DrawText(c.as_ptr(), 20, 20, 20, Color::BLACK) };
-        let mut c = c.into_bytes();
-        c.truncate(cursor_pos);
-        let c = std::ffi::CString::new(c).unwrap();
+            let c = std::ffi::CString::new(s.as_str()).unwrap();
+            unsafe { raylib::ffi::DrawText(c.as_ptr(), 20, 20, 20, Color::BLACK) };
+            let mut c = c.into_bytes();
+            c.truncate(cursor_pos);
+            let c = std::ffi::CString::new(c).unwrap();
 
-        let bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };
+            let bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };
 
-        let time = rl.get_time();
-        let color = ((time*2.0*std::f32::consts::PI).sin()*128.0 + 128.0) as u8;
-        let color = Color::rgba(0, 0, 0, color);
+            let time = rl.get_time();
+            let color = ((time*2.0*std::f32::consts::PI).sin()*128.0 + 128.0) as u8;
+            let color = Color::rgba(0, 0, 0, color);
 
-        unsafe { raylib::ffi::DrawRectangle(22 + bounds, 20, 2, 20, color) };
-
-        draw.end();
+            unsafe { raylib::ffi::DrawRectangle(22 + bounds, 20, 2, 20, color) };
+        });
     }
 }

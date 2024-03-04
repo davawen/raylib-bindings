@@ -23,10 +23,11 @@ fn main() {
             pos -= 0.05;
         }
 
-        let mut draw = rl.begin_drawing();
-        draw.clear_background(Color::RAYWHITE);
+        rl.begin_drawing(|_, draw| {
+            draw.clear_background(Color::RAYWHITE);
 
-        draw.text(&mut rendered, &format!("Pos: {pos}"), vec2(20.0, 40.0), size, Color::BLACK);
-        draw.circle(20.0, 40.0, 5.0, Color::RED);
+            draw.text(&mut rendered, &format!("Pos: {pos}"), vec2(20.0, 40.0), size, Color::BLACK);
+            draw.circle(20.0, 40.0, 5.0, Color::RED);
+        });
     }
 }

@@ -12,44 +12,45 @@ fn main() {
     let mut size = 20.0;
 
     while !rl.window_should_close() {
-        let mut draw = rl.begin_drawing();
-        draw.clear_background(Color::RAYWHITE);
+        rl.begin_drawing(|rl, draw| {
+            draw.clear_background(Color::RAYWHITE);
 
-        if rl.is_key_down(KeyboardKey::LeftShift) {
-            size += rl.get_mouse_wheel_move();
-            size = size.max(1.0);
-            if size != rendered.size() {
-                rendered.reatlas(&mut rl, size);
+            if rl.is_key_down(KeyboardKey::LeftShift) {
+                size += rl.get_mouse_wheel_move();
+                size = size.max(1.0);
+                if size != rendered.size() {
+                    rendered.reatlas(rl, size);
+                }
+            } else {
+                scroll += rl.get_mouse_wheel_move() as i32;
             }
-        } else {
-            scroll += rl.get_mouse_wheel_move() as i32;
-        }
 
-        if rl.is_key_down(KeyboardKey::A) {
-            draw.texture(rendered.texture(), 0.0, 0.0, Color::BLACK);
-            continue
-        }
-
-        let left_size = draw.measure_text(&mut rendered, "0x0000", size).x;
-
-        let offset = size*1.5;
-
-        let (w, h) = (rl.get_render_width() as i32, rl.get_render_height() as i32);
-        let (nw, nh) = ((w - 50 - left_size as i32 - 25)/(offset as i32), (h-100)/(offset as i32));
-
-        for i in 0..rendered.glyph_count() as u16 {
-            let x = i as i32 % nw;
-            let y = (i as i32 / nw) + scroll;
-
-            if y < 0 { continue }
-            if y >= nh { break }
-
-            if x == 0 {
-                draw.text(&mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
+            if rl.is_key_down(KeyboardKey::A) {
+                draw.texture(rendered.texture(), 0.0, 0.0, Color::BLACK);
+                return
             }
-            draw.glyph(&mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
-        }
 
-        draw.fps(vec2(5.0, 5.0));
+            let left_size = draw.measure_text(&mut rendered, "0x0000", size).x;
+
+            let offset = size*1.5;
+
+            let (w, h) = (rl.get_render_width() as i32, rl.get_render_height() as i32);
+            let (nw, nh) = ((w - 50 - left_size as i32 - 25)/(offset as i32), (h-100)/(offset as i32));
+
+            for i in 0..rendered.glyph_count() as u16 {
+                let x = i as i32 % nw;
+                let y = (i as i32 / nw) + scroll;
+
+                if y < 0 { continue }
+                if y >= nh { break }
+
+                if x == 0 {
+                    draw.text(&mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
+                }
+                draw.glyph(&mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
+            }
+
+            draw.fps(vec2(5.0, 5.0));
+        });
     }
 }

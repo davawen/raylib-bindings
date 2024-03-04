@@ -2,31 +2,21 @@ use ffi::Camera3D;
 
 use crate::{prelude::{Ray, Vector2, Vector3, Color, DrawHandle}, ffi};
 
-pub struct DrawHandle3D<'a, P> {
-    parent: Option<&'a mut P>
+pub struct DrawHandle3D {
+    _private: ()
 }
 
-impl<P> DrawHandle<'_, P> {
+impl DrawHandle {
     // Begin 3D mode with custom camera (3D)
-    pub fn begin_mode3d(&mut self, camera: Camera3D) -> DrawHandle3D<Self> {
+    pub fn begin_mode3d(&mut self, camera: Camera3D, f: impl FnOnce(&mut DrawHandle3D)) {
         unsafe { ffi::BeginMode3D(camera) }
-        DrawHandle3D { parent: Some(self) }
-    }
-}
-
-impl<'a, P> DrawHandle3D<'a, P> {
-    pub fn end(mut self) -> &'a mut P {
-        self.parent.take().unwrap()
-    }
-}
-
-impl<P> Drop for DrawHandle3D<'_, P> {
-    fn drop(&mut self) {
+        let mut d = DrawHandle3D { _private: () };
+        f(&mut d);
         unsafe { ffi::EndMode3D() }
     }
 }
 
-impl<P> DrawHandle3D<'_, P> {
+impl DrawHandle3D {
     /// Draw a line in 3D world space.
     #[inline]
     pub fn line(&mut self, start: Vector3, end: Vector3, color: Color) {

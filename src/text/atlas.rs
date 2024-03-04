@@ -82,7 +82,7 @@ pub trait FontAtlas {
     fn get_glyph(&mut self, index: u16, size: f32) -> Rectangle;
 }
 
-impl<P> DrawHandle<'_, P> {
+impl DrawHandle {
     /// Returns the width and height occupied by the given text in the given font, drawn at the given size.
     pub fn measure_text<F: FontAtlas>(&mut self, atlas: &mut F, text: &str, size: f32) -> Vector2 {
         let mut pos = Vector2::ZERO;

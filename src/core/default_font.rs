@@ -1,3 +1,5 @@
+use std::mem::ManuallyDrop;
+
 use hashbrown::HashMap;
 
 use crate::{text::bitmap::{BitmapFontAtlas, BitmapGlyph}, prelude::{Color, PixelFormat, Rectangle, Metrics, LineMetrics, Image}};
@@ -77,7 +79,7 @@ impl Raylib {
     pub fn default_font(&mut self) -> &mut BitmapFontAtlas {
         if self.default_font.is_none() {
             let default_font = self.load_default_font();
-            self.default_font = Some(default_font);
+            self.default_font = ManuallyDrop::new(Some(default_font));
         }
         self.default_font.as_mut().unwrap()
     }

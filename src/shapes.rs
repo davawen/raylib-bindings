@@ -7,7 +7,7 @@ use crate::{core::draw::DrawHandle, prelude::{Color, Texture, Vector2, vec2}, ff
 /// # Basic shapes drawing functions (module: `rshapes`)
 ///
 /// ---
-impl<P> DrawHandle<'_, P> {
+impl DrawHandle {
     /// Set texture and rectangle to be used on shapes drawing.
     #[inline]
     pub fn set_shapes_texture(&mut self, texture: Texture, source: Rectangle) {
@@ -272,7 +272,7 @@ impl<P> DrawHandle<'_, P> {
 /// # Spline drawing functions (module: `rshapes`)
 ///
 /// ---
-impl<P> DrawHandle<'_, P> {
+impl DrawHandle {
     /// Draw a linear spline. Draws nothing if less than 2 points are given.
     #[inline]
     pub fn draw_spline_linear(&mut self, points: &mut [Vector2], thickness: f32, color: Color) {

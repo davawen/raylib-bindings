@@ -8,7 +8,7 @@ pub mod input;
 pub mod other;
 mod default_font;
 
-use std::{ptr::NonNull, ffi::c_void};
+use std::{ptr::NonNull, ffi::c_void, mem::ManuallyDrop};
 
 use crate::{ffi, text::bitmap::BitmapFontAtlas};
 
@@ -29,13 +29,16 @@ pub struct Raylib {
     #[allow(unused)]
     automation_event_recording: bool,
     /// Keeps hold of the default raylib font.
-    default_font: Option<BitmapFontAtlas>,
+    /// NOTE: The default font needs to be dropped before raylib itself closes, which is why the `ManuallyDrop` is needed.
+    default_font: ManuallyDrop<Option<BitmapFontAtlas>>,
     // disallows initialization from outside and makes raylib !Send and !Sync
     _private: std::marker::PhantomData<*const c_void>
 }
 
 impl Drop for Raylib {
     fn drop(&mut self) {
+        // Drop default font (and free texture) before raylib exits
+        unsafe { ManuallyDrop::drop(&mut self.default_font) }
         unsafe { ffi::CloseWindow() }
     }
 }

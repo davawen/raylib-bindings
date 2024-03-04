@@ -1,4 +1,4 @@
-use std::ffi::{CStr, CString};
+use std::{ffi::{CStr, CString}, mem::ManuallyDrop};
 use crate::{ffi::{self, Image, MouseCursor}, prelude::{Vector2, vec2}};
 
 use bitflags::bitflags;
@@ -69,7 +69,7 @@ impl Raylib {
         Self { 
             automation_event_set: false,
             automation_event_recording: false,
-            default_font: None,
+            default_font: ManuallyDrop::new(None),
             _private: std::marker::PhantomData
         }
     }

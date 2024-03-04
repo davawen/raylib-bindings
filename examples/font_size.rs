@@ -7,13 +7,14 @@ fn main() {
     let mut atlases: Vec<_> = (1..=20).map(|px| px as f32).map(|px| font.atlas(&mut rl, px)).collect();
 
     while !rl.window_should_close() {
-        let mut draw = rl.begin_drawing();
-        draw.clear_background(Color::RAYWHITE);
-        let mut y = 30.0;
-        for atlas in atlases.iter_mut().rev() {
-            let size = atlas.size();
-            draw.text(atlas, &format!("({size}) 0x012345 abcdefg Hello world! Test!"), vec2(10.0, y), size, Color::BLACK);
-            y += size + 5.0;
-        }
+        rl.begin_drawing(|_, draw| {
+            draw.clear_background(Color::RAYWHITE);
+            let mut y = 30.0;
+            for atlas in atlases.iter_mut().rev() {
+                let size = atlas.size();
+                draw.text(atlas, &format!("({size}) 0x012345 abcdefg Hello world! Test!"), vec2(10.0, y), size, Color::BLACK);
+                y += size + 5.0;
+            }
+        });
     }
 }

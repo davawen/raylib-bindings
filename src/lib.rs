@@ -1,14 +1,16 @@
 //! Safe language bindings for raylib.
 //! 
 //! # Examples
-//! Minimal window example:
+//! Minimal hello world example:
 //! ```
 //! use raylib::prelude::*;
 //! fn main() {
 //!     let mut rl = Raylib::init_window(800, 800, "Rusty Raylib", 60);
 //!     while !rl.window_should_close() {
-//!         let mut draw = rl.begin_drawing();
-//!         draw.clear_background(Color::RAYWHITE);
+//!         rl.begin_drawing(|rl, draw| {
+//!             draw.clear_background(Color::RAYWHITE);
+//!             draw.text(rl.default_font(), "Hello, world!", vec2(20.0, 20.0), 20.0, Color::BLACK);
+//!         });
 //!         # break
 //!     }
 //! }
