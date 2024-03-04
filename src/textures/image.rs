@@ -127,7 +127,7 @@ impl Drop for Image {
     fn drop(&mut self) {
         unsafe { ffi::UnloadImage(self.image) }
         let s = format!("IMAGE: Unloaded image successfully ({}x{} {:?})\0", self.width(), self.height(), self.format());
-        unsafe { ffi::TraceLog(ffi::TraceLogLevel::LogInfo as i32, CStr::from_bytes_with_nul_unchecked(s.as_bytes()).as_ptr()) };
+        unsafe { ffi::TraceLog(ffi::TraceLogLevel::Info as i32, CStr::from_bytes_with_nul_unchecked(s.as_bytes()).as_ptr()) };
     }
 }
 

@@ -21,6 +21,7 @@ pub mod math;
 pub mod shapes;
 pub mod textures;
 pub mod text;
+pub mod model;
 
 mod cstr_macro;
 

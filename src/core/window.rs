@@ -8,37 +8,37 @@ use super::Raylib;
 bitflags! {
     pub struct ConfigFlags: u32 {
         /// Set to try enabling V-Sync on GPU
-        const FLAG_VSYNC_HINT = ffi::ConfigFlags::FlagVsyncHint as u32;
+        const FLAG_VSYNC_HINT = ffi::ConfigFlags::VsyncHint as u32;
         /// Set to run program in fullscreen
-        const FLAG_FULLSCREEN_MODE= ffi::ConfigFlags::FlagFullscreenMode as u32;
+        const FLAG_FULLSCREEN_MODE= ffi::ConfigFlags::FullscreenMode as u32;
         /// Set to allow resizable window
-        const FLAG_WINDOW_RESIZABLE = ffi::ConfigFlags::FlagWindowResizable as u32;
+        const FLAG_WINDOW_RESIZABLE = ffi::ConfigFlags::WindowResizable as u32;
         /// Set to disable window decoration (frame and buttons)
-        const FLAG_WINDOW_UNDECORATED = ffi::ConfigFlags::FlagWindowUndecorated as u32;
+        const FLAG_WINDOW_UNDECORATED = ffi::ConfigFlags::WindowUndecorated as u32;
         /// Set to hide window
-        const FLAG_WINDOW_HIDDEN= ffi::ConfigFlags::FlagWindowHidden as u32;
+        const FLAG_WINDOW_HIDDEN= ffi::ConfigFlags::WindowHidden as u32;
         /// Set to minimize window (iconify)
-        const FLAG_WINDOW_MINIMIZED = ffi::ConfigFlags::FlagWindowMinimized as u32;
+        const FLAG_WINDOW_MINIMIZED = ffi::ConfigFlags::WindowMinimized as u32;
         /// Set to maximize window (expanded to monitor)
-        const FLAG_WINDOW_MAXIMIZED = ffi::ConfigFlags::FlagWindowMaximized as u32;
+        const FLAG_WINDOW_MAXIMIZED = ffi::ConfigFlags::WindowMaximized as u32;
         /// Set to window non focused
-        const FLAG_WINDOW_UNFOCUSED = ffi::ConfigFlags::FlagWindowUnfocused as u32;
+        const FLAG_WINDOW_UNFOCUSED = ffi::ConfigFlags::WindowUnfocused as u32;
         /// Set to window always on top
-        const FLAG_WINDOW_TOPMOST = ffi::ConfigFlags::FlagWindowTopmost as u32;
+        const FLAG_WINDOW_TOPMOST = ffi::ConfigFlags::WindowTopmost as u32;
         /// Set to allow windows running while minimized
-        const FLAG_WINDOW_ALWAYS_RUN= ffi::ConfigFlags::FlagWindowAlwaysRun as u32;
+        const FLAG_WINDOW_ALWAYS_RUN= ffi::ConfigFlags::WindowAlwaysRun as u32;
         /// Set to allow transparent framebuffer
-        const FLAG_WINDOW_TRANSPARENT = ffi::ConfigFlags::FlagWindowTransparent as u32;
+        const FLAG_WINDOW_TRANSPARENT = ffi::ConfigFlags::WindowTransparent as u32;
         /// Set to support HighDPI
-        const FLAG_WINDOW_HIGHDPI = ffi::ConfigFlags::FlagWindowHighdpi as u32;
+        const FLAG_WINDOW_HIGHDPI = ffi::ConfigFlags::WindowHighdpi as u32;
         /// Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
-        const FLAG_WINDOW_MOUSE_PASSTHROUGH = ffi::ConfigFlags::FlagWindowMousePassthrough as u32;
+        const FLAG_WINDOW_MOUSE_PASSTHROUGH = ffi::ConfigFlags::WindowMousePassthrough as u32;
         /// Set to run program in borderless windowed mode
-        const FLAG_BORDERLESS_WINDOWED_MODE = ffi::ConfigFlags::FlagBorderlessWindowedMode as u32;
+        const FLAG_BORDERLESS_WINDOWED_MODE = ffi::ConfigFlags::BorderlessWindowedMode as u32;
         /// Set to try enabling MSAA 4X
-        const FLAG_MSAA_4X_HINT = ffi::ConfigFlags::FlagMsaa4XHint as u32;
+        const FLAG_MSAA_4X_HINT = ffi::ConfigFlags::Msaa4XHint as u32;
         /// Set to try enabling interlaced video format (for V3D)
-        const FLAG_INTERLACED_HINT= ffi::ConfigFlags::FlagInterlacedHint as u32;
+        const FLAG_INTERLACED_HINT= ffi::ConfigFlags::InterlacedHint as u32;
     }
 }
 
