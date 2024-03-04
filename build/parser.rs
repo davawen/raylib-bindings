@@ -162,29 +162,12 @@ fn parse_enum<'a>(stream: &mut Stream<'a>) -> Enum<'a> {
 
     let name = stream.unwrapped().split_once(':').unwrap().1.trim();
     let desc = stream.unwrapped().split_once(':').unwrap().1.trim();
-    let values = (0..num_values)
+    let mut values: Vec<_> = (0..num_values)
         .map(|_| stream.unwrapped())
         .map(|line| {
             // convert enum variant to pascal case
             let variant = &line[line.find('[').unwrap()+1..line.find(']').unwrap()];
-            let mut variant = snake_to_pascal(variant);
-
-            // special case for PixelFormat enum,
-            // because enum variants are named PIXELFORMAT_* instead of PIXEL_FORMAT_*
-            if name == "PixelFormat" {
-                variant = variant.strip_prefix("Pixelformat").unwrap().to_string();
-            }
-
-            // remove common prefix between enum name and enum variant
-            let idx = variant.char_indices().zip(name.chars())
-                .take_while(|((_, x), y)| x == y)
-                .map(|((idx, _), _)| idx)
-                .last()
-                .unwrap_or(0);
-
-            if idx > 0 {
-                variant.drain(..=idx);
-            }
+            let variant = snake_to_pascal(variant);
 
             // get discriminant
             let value: i32 = line.split_once(':').unwrap().1.trim().parse().unwrap();
@@ -192,6 +175,24 @@ fn parse_enum<'a>(stream: &mut Stream<'a>) -> Enum<'a> {
             (variant, value)
         })
         .collect();
+
+    // find and remove the common prefix between all enum values
+    // you cannot simply remove the enum's name: some variants have a shortened prefix, and some casing is not consistent
+    let mut iter = values.iter();
+    if let Some((first, _)) = iter.next() {
+        let (_, common_prefix_len) = iter.fold((first.as_str(), first.len()), |(acc, _), (v, _)| {
+            let len = v.char_indices().zip(acc.chars())
+                .take_while(|((_, x), y)| x == y)
+                .map(|((idx, _), _)| idx+1)
+                .last()
+                .unwrap_or(0);
+            (&v[0..len], len)
+        });
+
+        for (value, _) in &mut values {
+            value.drain(0..common_prefix_len);
+        }
+    }
 
     Enum { name, desc, values }
 }
