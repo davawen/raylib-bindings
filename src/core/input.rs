@@ -342,7 +342,7 @@ pub trait RaylibTouchFunctions {
     ///     println!("At {pos:?}: {id}");
     /// }
     /// ```
-    fn get_touch_positions(&self) -> impl Iterator<Item = Vector2> {
+    fn get_touch_positions<'a, 'b>(&'a self) -> impl Iterator<Item = Vector2> + 'b {
         (0..self.get_touch_point_count()).map(|index| {
             unsafe { ffi::GetTouchPosition(index as i32) }
         })

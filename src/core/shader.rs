@@ -19,7 +19,7 @@ impl Shader {
     /// ```
     /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(500, 500, "shader test", 60);
-    /// let shader = rl.load_shader(None, Some("assets/mandelbrot.glsl")).unwrap();
+    /// let shader = Shader::load(&mut rl, None, Some("assets/mandelbrot.glsl")).unwrap();
     /// let resolution_uniform = shader.get_uniform("resolution");
     /// let camera_pos_uniform = shader.get_uniform("camera_pos");
     /// let camera_pos = Vector2::ZERO;
