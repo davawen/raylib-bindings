@@ -1,7 +1,7 @@
 pub use crate::ffi::{VrDeviceInfo, VrStereoConfig};
 use crate::{ffi, core::Raylib};
 
-/// # Vr config functions (module: [rcore])
+/// # Vr config functions (module: `rcore`)
 ///
 /// ---
 impl Raylib {

@@ -1,6 +1,6 @@
 //! Pure rust reimplementation of raymath.
 //! 
-//! Large inspiration taken from [https://github.com/raysan5/raylib/blob/master/src/raymath.h]
+//! Large inspiration taken from <https://github.com/raysan5/raylib/blob/master/src/raymath.h>
 
 pub mod color;
 pub mod vector2;

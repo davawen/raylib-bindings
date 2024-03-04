@@ -48,6 +48,15 @@ impl Display for Type<'_> {
     }
 }
 
+/// Write documentation comment and escape links
+fn generate_doc(out: &mut impl Write, desc: &str, prepend: &str) -> io::Result<()> {
+    if !desc.is_empty() {
+        // escape special rustdoc characters
+        let desc = desc.replace('[', "\\[").replace(']', "\\]").replace('<', "\\<").replace('>', "\\>");
+        writeln!(out, "{prepend}/// {desc}")
+    } else { Ok(()) }
+}
+
 fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, attributes: &HashMap<&str, &[&str]>) -> io::Result<()> {
     for s in structs {
         if s.name == "AudioStream" {
@@ -56,9 +65,7 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, attributes: &Has
             writeln!(out)?;
         }
 
-        if !s.desc.is_empty() {
-            writeln!(out, "/// {}", s.desc)?;
-        }
+        generate_doc(out, s.desc, "")?;
 
         writeln!(out, "#[repr(C)]")?;
         write!(out, "#[derive(Debug, Clone, Copy, PartialEq")?;
@@ -70,10 +77,7 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, attributes: &Has
         writeln!(out, ")]")?;
         writeln!(out, "pub struct {} {{", s.name)?;
         for field in s.fields {
-            if !field.desc.is_empty() {
-                writeln!(out, "    /// {}", field.desc)?;
-            }
-
+            generate_doc(out, field.desc, "    ")?;
             writeln!(out, "    pub {}: {},", escape_name(field.name), field.ty)?;
         }
         writeln!(out, "}}")?;
@@ -103,10 +107,7 @@ fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>) -> io::Result<()>
             continue;
         }
 
-        if !a.desc.is_empty() {
-            writeln!(out, "/// {}", a.desc)?;
-        }
-
+        generate_doc(out, a.desc, "")?;
         writeln!(out, "pub type {} = {};", a.name, a.ty)?;
     }
 
@@ -115,9 +116,7 @@ fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>) -> io::Result<()>
 
 fn generate_callbacks(out: &mut impl Write, callbacks: Vec<Callback>) -> io::Result<()> {
     for callback in callbacks {
-        if !callback.desc.is_empty() {
-            writeln!(out, "/// {}", callback.desc)?;
-        }
+        generate_doc(out, callback.desc, "")?;
         write!(out, "pub type {} = extern fn(", callback.name)?;
         for param in callback.params {
             write!(out, "{}, ", param.ty)?;
@@ -137,10 +136,7 @@ fn generate_functions(out: &mut impl Write, functions: Vec<Function>) -> io::Res
     writeln!(out, "extern \"C\" {{")?;
 
     for f in functions {
-        if !f.desc.is_empty() {
-            writeln!(out, "/// {}", f.desc)?;
-        }
-
+        generate_doc(out, f.desc, "")?;
         write!(out, "pub fn {}(", f.name)?;
         for param in f.params {
             write!(out, "{}: {}, ", escape_name(param.name), param.ty)?;
@@ -157,9 +153,7 @@ fn generate_functions(out: &mut impl Write, functions: Vec<Function>) -> io::Res
 
 fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
     for e in enums {
-        if !e.desc.is_empty() {
-            writeln!(out, "/// {}", e.desc)?;
-        }
+        generate_doc(out, e.desc, "")?;
         writeln!(out, "#[repr(C)]")?;
         writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Hash)]")?;
         writeln!(out, "pub enum {} {{", e.name)?;

@@ -4,7 +4,7 @@ use ffi::Rectangle;
 
 use crate::{core::draw::DrawHandle, prelude::{Color, Raylib, Texture, Vector2}, ffi};
 
-/// # Basic shapes drawing functions (module: [rshapes])
+/// # Basic shapes drawing functions (module: `rshapes`)
 ///
 /// ---
 impl<P> DrawHandle<'_, P> {
@@ -269,7 +269,7 @@ impl<P> DrawHandle<'_, P> {
     }
 }
 
-/// # Spline drawing functions (module: [rshapes])
+/// # Spline drawing functions (module: `rshapes`)
 ///
 /// ---
 impl<P> DrawHandle<'_, P> {
@@ -328,7 +328,7 @@ impl<P> DrawHandle<'_, P> {
     }
 }
 
-/// # Spline segment point evaluation functions (module: [rshapes])
+/// # Spline segment point evaluation functions (module: `rshapes`)
 /// 
 /// ---
 impl Raylib {
@@ -359,7 +359,7 @@ impl Raylib {
     }
 }
 
-/// # Shape collision detection functions (module: [rshapes])
+/// # Shape collision detection functions (module: `rshapes`)
 impl Raylib {
     #[inline]
     pub fn check_collision_recs(&self, rec1: Rectangle, rec2: Rectangle) -> bool {

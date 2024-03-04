@@ -1,7 +1,5 @@
 use float_cmp::{ApproxEq, F32Margin};
 
-///! Large inspiration taken from https://github.com/raysan5/raylib/blob/master/src/raymath.h
-
 pub use crate::ffi::Vector3;
 use crate::prelude::{Matrix, Vector2, Vector4, Quaternion};
 

@@ -4,7 +4,7 @@ use bitflags::bitflags;
 
 use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture, Vector2}};
 
-/// # Keyboard input functions (module: [rcore])
+/// # Keyboard input functions (module: `rcore`)
 ///
 /// ---
 impl Raylib {
@@ -73,7 +73,7 @@ pub enum GamepadAxis {
     Trigger
 }
 
-/// # Gamepad input functions (module: [rcore])
+/// # Gamepad input functions (module: `rcore`)
 /// 
 /// ---
 impl Raylib {
@@ -382,7 +382,7 @@ bitflags! {
     }
 }
 
-/// # Gestures and touch handling functions (module: [rgesture])
+/// # Gestures and touch handling functions (module: `rgesture`)
 /// 
 /// ---
 impl Raylib {

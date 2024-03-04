@@ -17,7 +17,7 @@ use crate::{ffi, text::bitmap::BitmapFontAtlas};
 /// This struct is passed when functions modify raylib's state, or to allocate objects that will need to modify raylib state.
 ///
 /// Please that raylib is inherently single threaded, thus this object cannot be sent between threads safely
-/// (it doesn't implement [`Send`](`std::sync::Send`)).
+/// (it doesn't implement [`Send`]).
 /// Raylib functions should NEVER be called in a multi threaded environment.
 pub struct Raylib {
     /// Keeps track of wether an automation event list is currently set

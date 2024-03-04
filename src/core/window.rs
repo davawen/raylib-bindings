@@ -42,7 +42,7 @@ bitflags! {
     }
 }
 
-/// # Window functions (module: [rcore])
+/// # Window functions (module: `rcore`)
 /// 
 /// ---
 impl Raylib {

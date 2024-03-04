@@ -3,7 +3,7 @@ use crate::{ffi::{self, ShaderUniformDataType, Matrix}, prelude::{Vector2, Vecto
 
 use super::Raylib;
 
-/// # Shader creation functions (module: [rcore])
+/// # Shader creation functions (module: `rcore`)
 /// 
 /// ---
 impl Raylib {

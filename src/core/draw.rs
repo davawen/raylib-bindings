@@ -17,7 +17,7 @@ pub struct DrawHandle<'a, P> {
     _parent: Option<&'a mut P>
 }
 
-/// # Drawing (module: [rcore])
+/// # Drawing (module: `rcore`)
 ///
 /// ---
 impl Raylib {
@@ -34,7 +34,7 @@ impl Raylib {
     }
 }
 
-/// # Begin modes (module: [rcore])
+/// # Begin modes (module: `rcore`)
 /// 
 /// ---
 impl<P> DrawHandle<'_, P> {

@@ -4,7 +4,7 @@ use crate::{core::Raylib, ffi::{self, TraceLogLevel}};
 
 use super::RaylibAlloc;
 
-/// # Timing related functions (module: [rcore])
+/// # Timing related functions (module: `rcore`)
 ///
 /// ---
 impl Raylib {
@@ -59,7 +59,7 @@ impl Raylib {
 
 pub struct RandomSequence<'a>(&'a mut [i32]);
 
-/// # Random value generation functions (module: [rcore])
+/// # Random value generation functions (module: `rcore`)
 ///
 /// ---
 impl Raylib {
@@ -107,7 +107,7 @@ impl Drop for RandomSequence<'_> {
     }
 }
 
-/// # Misc functions (module: [rcore])
+/// # Misc functions (module: `rcore`)
 ///
 /// ---
 impl Raylib {
@@ -135,7 +135,7 @@ impl Raylib {
     }
 }
 
-/// # Util functions (module: [rcore])
+/// # Util functions (module: `rcore`)
 ///
 /// ---
 impl Raylib {
