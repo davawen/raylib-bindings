@@ -21,6 +21,7 @@ pub mod ffi;
 pub mod core;
 pub mod math;
 pub mod shapes;
+pub mod collisions;
 pub mod textures;
 pub mod text;
 pub mod model;

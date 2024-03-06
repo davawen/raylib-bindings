@@ -39,3 +39,5 @@ pub use crate::math::{
     camera::*,
     rectangle::*
 };
+
+pub use crate::collisions::*;
