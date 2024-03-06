@@ -12,6 +12,7 @@ use super::image::Image;
 /// Textures are stored on the GPU in VRAM.
 /// If you need to interact with graphical data from the CPU, prefer using an `Image`.
 #[repr(C)]
+#[derive(Debug)]
 pub struct Texture(ffi::Texture, PhantomData<*const c_void>);
 
 impl Drop for Texture {
@@ -37,9 +38,16 @@ impl Texture {
         self.0.height as u32
     }
 
+    /// Consumes self and returns the internal `ffi::Texture` without freeing it
+    pub unsafe fn unwrap(self) -> ffi::Texture {
+        let this = std::mem::ManuallyDrop::new(self);
+        this.0
+    }
+
+    /// Get a reference to the underlying ffi texture type
     #[inline]
-    pub unsafe fn get_ffi_texture(&self) -> ffi::Texture {
-        self.0
+    pub fn get_ffi(&self) -> &ffi::Texture {
+        &self.0
     }
 }
 

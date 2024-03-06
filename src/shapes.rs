@@ -11,7 +11,7 @@ impl DrawHandle {
     /// Set texture and rectangle to be used on shapes drawing.
     #[inline]
     pub fn set_shapes_texture(&mut self, texture: Texture, source: Rectangle) {
-        unsafe { ffi::SetShapesTexture(texture.get_ffi_texture(), source) }
+        unsafe { ffi::SetShapesTexture(*texture.get_ffi(), source) }
     }
 
     /// Draw a single pixel.

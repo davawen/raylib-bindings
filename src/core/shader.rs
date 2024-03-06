@@ -188,8 +188,8 @@ unsafe impl ShaderValue<Matrix> for Shader {
     }
 }
 
-unsafe impl ShaderValue<Texture> for Shader {
-    fn set_uniform_value(&self, uniform: Uniform, v: Texture) {
-        unsafe { ffi::SetShaderValueTexture(self.0, uniform.0, v.get_ffi_texture()) }
+unsafe impl ShaderValue<&Texture> for Shader {
+    fn set_uniform_value(&self, uniform: Uniform, v: &Texture) {
+        unsafe { ffi::SetShaderValueTexture(self.0, uniform.0, *v.get_ffi()) }
     }
 }

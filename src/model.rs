@@ -1,6 +1,6 @@
-use ffi::Camera3D;
+use ffi::{Camera3D, MaterialMapIndex};
 
-use crate::{prelude::{Ray, Vector2, Vector3, Color, DrawHandle}, ffi};
+use crate::{prelude::{Ray, Vector2, Vector3, Color, DrawHandle, Raylib, Texture}, ffi};
 
 pub struct DrawHandle3D {
     _private: ()
@@ -129,5 +129,46 @@ impl DrawHandle3D {
     #[inline]
     pub fn grid(&mut self, slices: i32, spacing: f32) {
         unsafe { ffi::DrawGrid(slices, spacing) }
+    }
+}
+
+pub struct Model(ffi::Model);
+
+pub struct Mesh(ffi::Mesh);
+
+#[derive(Debug)]
+pub struct Material(ffi::Material);
+
+impl Material {
+    /// Load default material (supports: `MaterialMapIndex::{Albedo, Metalness, Normal}`)
+    pub fn load_default(_: &mut Raylib) -> Self {
+        let mat = unsafe { ffi::LoadMaterialDefault() };
+        Material(mat)
+    }
+
+    /// Sets the texture for a material map kind.
+    /// 
+    /// The textures are moved into the material and unloaded by it. If you wish to get them back, use [`Material::get_material_texture`].
+    pub fn set_material_texture(&mut self, index: MaterialMapIndex, texture: Texture) {
+        unsafe { ffi::SetMaterialTexture(&mut self.0 as *mut _, index as i32, texture.unwrap()) };
+    }
+
+    /// Gets a mutable reference to a texture used in the material.
+    /// 
+    /// Returns `None` if no textures were set for the specified map index.
+    pub fn get_material_texture_mut(&mut self, index: MaterialMapIndex) -> Option<&mut Texture> {
+        // SAFETY: `maps` is an array of size `MAX_MATERIAL_MAPS` which is smaller than the biggest `MaterialMapIndex`.
+        let mut map = unsafe { self.0.maps.add(index as usize).read() };
+
+        if !map.texture.is_valid() { return None }
+        // SAFETY: `Texture` has the same in-memory representation as `ffi::Texture`, and its lifetime is tied to self.
+        // SAFETY: The texture has been checked to be valid
+        Some(unsafe { std::mem::transmute(&mut map.texture) })
+    }
+}
+
+impl Drop for Material {
+    fn drop(&mut self) {
+        unsafe { ffi::UnloadMaterial(self.0) }
     }
 }
