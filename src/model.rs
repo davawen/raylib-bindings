@@ -2,7 +2,7 @@ use std::ffi::CStr;
 
 use ffi::{Camera3D, MaterialMapIndex};
 
-use crate::{prelude::{Ray, Vector2, Vector3, Matrix, Color, DrawHandle, Raylib, Texture, Image}, ffi};
+use crate::{prelude::{Ray, Vector2, Vector3, Matrix, Color, DrawHandle, Raylib, Texture, Image, Shader}, ffi};
 
 pub struct DrawHandle3D {
     _private: ()
@@ -222,7 +222,7 @@ impl DrawHandle3D {
 }
 
 #[derive(Debug)]
-pub struct Material(ffi::Material);
+pub struct Material<'a>(ffi::Material, std::marker::PhantomData<&'a Shader>);
 
 impl ffi::Material {
     pub fn is_valid(&self) -> bool {
@@ -230,7 +230,7 @@ impl ffi::Material {
     }
 }
 
-impl Material {
+impl<'a> Material<'a> {
     /// Loads all materials from a model (`.mtl`) file.
     /// Returns `None` if raylib was not compiled with `mtl` support, if the given file is not an `mtl` file,
     /// or if the given file is invalid.
@@ -278,7 +278,7 @@ impl Material {
     /// 
     /// Returns `None` if the material is not valid.
     pub fn from_ffi(mat: ffi::Material) -> Option<Self> {
-        mat.is_valid().then(|| Material(mat))
+        mat.is_valid().then(|| Material(mat, std::marker::PhantomData))
     }
 
     fn get_map(&self, index: MaterialMapIndex) -> &ffi::MaterialMap {
@@ -342,10 +342,33 @@ impl Material {
         map.texture = ffi::Texture { id: 0, width: 0, height: 0, format: 0, mipmaps: 0 };
         texture
     }
+
+    /// Sets the color of a specified map.
+    pub fn set_color(&mut self, index: MaterialMapIndex, color: Color) {
+        let map = self.get_map_mut(index);
+        map.color = color;
+    }
+
+    /// Sets the shader on this material.
+    /// 
+    /// The shader must live longer than the material.
+    pub fn set_shader(&mut self, shader: &'a Shader) {
+        self.0.shader = unsafe { *shader.get_ffi() };
+    }
 }
 
-impl Drop for Material {
+impl Drop for Material<'_> {
+    /// manually unload material, knowing its shaders aren't owned
     fn drop(&mut self) {
-        unsafe { ffi::UnloadMaterial(self.0) }
+        const MAX_MATERIAL_MAPS: usize = 12;
+
+        for idx in 0..MAX_MATERIAL_MAPS {
+            let map = unsafe { self.0.maps.add(idx).as_mut().unwrap() };
+            // don't unload default texture
+            if map.texture.id != 1 {
+                unsafe { ffi::UnloadTexture(map.texture) }
+            }
+        }
+        unsafe { ffi::MemFree(self.0.maps as *mut _) }
     }
 }

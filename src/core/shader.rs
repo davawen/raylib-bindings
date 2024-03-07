@@ -83,9 +83,21 @@ impl Shader {
         Uniform( unsafe { ffi::GetShaderLocationAttrib(self.0, name.as_ptr()) } )
     }
 
-    /// Returns the inner C raylib shader object
-    pub unsafe fn get_ffi_shader(&self) -> ffi::Shader {
-        self.0
+    /// Consumes the safe shader struct and returned an owned C raylib shader object.
+    /// 
+    /// The returned handle needs to be manually freed.
+    pub unsafe fn unwrap(self) -> ffi::Shader {
+        let this = std::mem::ManuallyDrop::new(self);
+        this.0
+    }
+
+    /// Get a reference to the inner C raylib shader object.
+    /// 
+    /// # Safety
+    /// The returned handle may not copied and used outside of the lifetime of `self`,
+    /// as its destruction is still handled by the `Shader` object.
+    pub unsafe fn get_ffi(&self) -> &ffi::Shader {
+        &self.0
     }
 
     /// Sets a single shader value without checking for type.
@@ -111,11 +123,14 @@ impl Drop for Shader {
     }
 }
 
+/// Links a type with its shader representation.
+/// # Safety
+/// `DATA_TYPE` and `T` should have the same size and representation between cpu and shader.
 pub unsafe trait ShaderDataType<T> {
     const DATA_TYPE: ShaderUniformDataType;
 }
 
-pub unsafe trait ShaderValue<T> {
+pub trait ShaderValue<T> {
     fn set_uniform_value(&self, uniform: Uniform, v: T);
 }
 
@@ -166,7 +181,7 @@ unsafe impl ShaderDataType<[i32; 4]> for Shader {
 }
 
 // Generic impls and other types
-unsafe impl<T> ShaderValue<T> for Shader where Shader: ShaderDataType<T> {
+impl<T> ShaderValue<T> for Shader where Shader: ShaderDataType<T> {
     fn set_uniform_value(&self, uniform: Uniform, v: T) {
         unsafe {
             self.set_value_unchecked(uniform, &v as *const T as *const c_void, <Self as ShaderDataType<T>>::DATA_TYPE)
@@ -174,7 +189,7 @@ unsafe impl<T> ShaderValue<T> for Shader where Shader: ShaderDataType<T> {
     }
 }
 
-unsafe impl<T> ShaderValue<&[T]> for Shader where Shader: ShaderDataType<T> {
+impl<T> ShaderValue<&[T]> for Shader where Shader: ShaderDataType<T> {
     fn set_uniform_value(&self, uniform: Uniform, v: &[T]) {
         unsafe {
             self.set_value_unchecked_v(uniform, v.as_ptr() as *const c_void, <Self as ShaderDataType<T>>::DATA_TYPE, v.len() as i32) 
@@ -182,13 +197,13 @@ unsafe impl<T> ShaderValue<&[T]> for Shader where Shader: ShaderDataType<T> {
     }
 }
 
-unsafe impl ShaderValue<Matrix> for Shader {
+impl ShaderValue<Matrix> for Shader {
     fn set_uniform_value(&self, uniform: Uniform, v: Matrix) {
         unsafe { ffi::SetShaderValueMatrix(self.0, uniform.0, v) }
     }
 }
 
-unsafe impl ShaderValue<&Texture> for Shader {
+impl ShaderValue<&Texture> for Shader {
     fn set_uniform_value(&self, uniform: Uniform, v: &Texture) {
         unsafe { ffi::SetShaderValueTexture(self.0, uniform.0, *v.get_ffi()) }
     }

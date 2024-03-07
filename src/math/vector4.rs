@@ -46,7 +46,7 @@ impl Vector4 {
 
     /// Calculate the dot product between the two vectors
     pub fn dot(self, rhs: Self) -> f32 {
-        self.x*rhs.x + self.y*rhs.y + self.z*self.z + self.w*self.w
+        self.x*rhs.x + self.y*rhs.y + self.z*rhs.z + self.w*rhs.w
     }
     /// Component-wise multiplication of two vectors
     pub fn multiply(self, rhs: Self) -> Self {
