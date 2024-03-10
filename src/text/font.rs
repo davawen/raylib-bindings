@@ -18,9 +18,10 @@ impl TrueTypeFont {
     /// let font = TrueTypeFont::from_bytes(include_bytes!("../../assets/TerminusTTF.ttf").as_slice()).unwrap();
     /// let mut atlas = font.atlas(&mut rl, 32.0);
     /// while !rl.window_should_close() {
-    ///     let mut draw = rl.begin_drawing();
-    ///     draw.clear_background(Color::RAYWHITE);
-    ///     draw.text(&mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
+    ///     rl.begin_drawing(|_, draw| {
+    ///         draw.clear_background(Color::RAYWHITE);
+    ///         draw.text(&mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
+    ///     });
     ///     # break
     /// }
     /// ```

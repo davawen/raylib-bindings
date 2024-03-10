@@ -186,7 +186,7 @@ impl Vector3 {
     /// NOTE: Assume `self` is on the plane of the triangle
     ///
     /// ```
-    /// use raylib::prelude::Vector3;
+    /// use raylib::prelude::{vec3, Vector3};
     /// use float_cmp::assert_approx_eq;
     /// let a = vec3(0.0, 0.0, 0.0);
     /// let b = vec3(1.0, 0.0, 0.0);

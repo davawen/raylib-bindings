@@ -24,11 +24,11 @@ impl Shader {
     /// let camera_pos_uniform = shader.get_uniform("camera_pos");
     /// let camera_pos = Vector2::ZERO;
     /// while !rl.window_should_close() {
-    ///     let mut draw = rl.begin_drawing();
     ///     shader.set_uniform_value(resolution_uniform, rl.get_screen_size());
     ///     shader.set_uniform_value(camera_pos_uniform, camera_pos);
-    ///     let mut draw = draw.begin_shader_mode(&shader);
-    ///     unsafe { raylib::ffi::DrawRectangle(0, 0, rl.get_screen_width() as i32, rl.get_screen_height() as i32, Color::WHITE) }
+    ///     rl.begin_drawing(|rl, draw| draw.begin_shader_mode(&shader, |draw| {
+    ///         draw.rectangle_v(Vector2::ZERO, rl.get_screen_size(), Color::WHITE);
+    ///     }));
     ///     # break
     /// }
     /// ```
