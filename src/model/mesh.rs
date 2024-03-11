@@ -82,6 +82,8 @@ impl DrawHandle3D {
         unsafe { ffi::DrawMesh(mesh.0, *material.get_ffi(), transform) }
     }
     /// Draw multiple mesh instances with the same material and different transforms.
+    /// 
+    /// Note that shaders need to be made specifically for instanced rendering.
     #[inline]
     pub fn mesh_instanced(&mut self, mesh: &Mesh, material: &Material, transforms: &[Matrix]) {
         unsafe { ffi::DrawMeshInstanced(mesh.0, *material.get_ffi(), transforms.as_ptr(), transforms.len() as i32) }

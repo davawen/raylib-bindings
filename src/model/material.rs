@@ -62,12 +62,14 @@ impl<'a> Material<'a> {
         mat.is_valid().then(|| Material(mat, std::marker::PhantomData))
     }
 
-    fn get_map(&self, index: MaterialMapIndex) -> &ffi::MaterialMap {
+    /// Get an immutable reference to a [`ffi::MaterialMap`].
+    pub fn get_map(&self, index: MaterialMapIndex) -> &ffi::MaterialMap {
         // SAFETY: index is always in range of the `maps` array
         unsafe { self.0.maps.offset(index as isize).as_ref().unwrap_unchecked() }
     }
 
-    fn get_map_mut(&mut self, index: MaterialMapIndex) -> &mut ffi::MaterialMap {
+    /// Get a mutable reference to a [`ffi::MaterialMap`].
+    pub fn get_map_mut(&mut self, index: MaterialMapIndex) -> &mut ffi::MaterialMap {
         // SAFETY: index is always in range of the `maps` array
         unsafe { self.0.maps.offset(index as isize).as_mut().unwrap_unchecked() }
     }
@@ -128,6 +130,12 @@ impl<'a> Material<'a> {
     pub fn set_color(&mut self, index: MaterialMapIndex, color: Color) {
         let map = self.get_map_mut(index);
         map.color = color;
+    }
+
+    /// Gets the color of a specified map.
+    pub fn get_color(&self, index: MaterialMapIndex) -> Color {
+        let map = self.get_map(index);
+        map.color
     }
 
     /// Sets the shader on this material.
