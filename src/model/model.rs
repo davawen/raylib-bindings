@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use crate::{ffi, prelude::Vector3};
+use crate::{ffi, prelude::{Vector3, Color}};
 use super::DrawHandle3D;
 
 #[derive(Debug)]
@@ -34,7 +34,7 @@ impl Model {
 }
 
 impl DrawHandle3D {
-    pub fn draw_model(&mut self, pos: Vector3, scale: f32, model: &Model) {
-        unsafe { ffi::DrawModel(pos, scale, model.0) }
+    pub fn draw_model(&mut self, model: &Model, pos: Vector3, scale: f32, tint: Color) {
+        unsafe { ffi::DrawModel(model.0, pos, scale, tint) }
     }
 }
