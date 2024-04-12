@@ -3,8 +3,7 @@ use raylib::prelude::*;
 fn main() {
     let mut rl = Raylib::init_window(400, 400, "Subpixel positioning", 60);
 
-    let font = TrueTypeFont::from_bytes(include_bytes!("/usr/share/fonts/TTF/iosevka-medium.ttc").as_slice()).unwrap();
-    // let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
+    let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
     let mut rendered = font.atlas(&mut rl, 40.0);
 
     let mut pos = 0.0;

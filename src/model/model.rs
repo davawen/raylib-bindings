@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use crate::{ffi, prelude::{Vector3, Color}};
+use crate::{ffi, prelude::{Vector2, Vector3, Color, Texture, Camera, BoundingBox, Rectangle}};
 use super::DrawHandle3D;
 
 #[derive(Debug)]
@@ -34,7 +34,47 @@ impl Model {
 }
 
 impl DrawHandle3D {
+    /// Draw a model (with texture if set)
     pub fn draw_model(&mut self, model: &Model, pos: Vector3, scale: f32, tint: Color) {
         unsafe { ffi::DrawModel(model.0, pos, scale, tint) }
+    }
+
+    /// Draw a model (with texture if set) with extended parameters
+    pub fn draw_model_ex(&mut self, model: &Model, pos: Vector3, axis: Vector3, angle: f32, scale: Vector3, tint: Color) {
+        unsafe { ffi::DrawModelEx(model.0, pos, axis, angle, scale, tint) }
+    }
+
+    /// Draw a wireframe model (with texture if set)
+    pub fn draw_model_wires(&mut self, model: &Model, pos: Vector3, scale: f32, tint: Color) {
+        unsafe { ffi::DrawModelWires(model.0, pos, scale, tint) }
+    }
+
+    /// Draw a wireframe model (with texture if set) with extended parameters
+    pub fn draw_model_wires_ex(&mut self, model: &Model, pos: Vector3, axis: Vector3, angle: f32, scale: Vector3, tint: Color) {
+        unsafe { ffi::DrawModelWiresEx(model.0, pos, axis, angle, scale, tint) }
+    }
+
+    /// Draw a wireframe bounding box
+    pub fn draw_bounding_box(bounds: BoundingBox, color: Color) {
+        unsafe { ffi::DrawBoundingBox(bounds, color) }
+    }
+
+    /// Draw a billboard texture
+    pub fn draw_billboard(camera: Camera, texture: Texture, pos: Vector3, size: f32, tint: Color) {
+        unsafe { ffi::DrawBillboard(camera, *texture.get_ffi(), pos, size, tint) }
+    }
+
+    /// Draw part of a billboard texture
+    pub fn draw_billboard_rec(camera: Camera, texture: Texture, source: Rectangle, pos: Vector3, size: Vector2, tint: Color) {
+        unsafe { ffi::DrawBillboardRec(camera, *texture.get_ffi(), source, pos, size, tint) }
+    }
+
+    /// Draw part of a billboard texture with source and rotation
+    /// Angles are in a radians
+    pub fn draw_billboard_pro(
+        camera: Camera, texture: Texture, source: Rectangle,
+        pos: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: f32, tint: Color)
+    {
+        unsafe { ffi::DrawBillboardPro(camera, *texture.get_ffi(), source, pos, up, size, origin, rotation.to_degrees(), tint) }
     }
 }
