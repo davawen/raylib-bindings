@@ -1,7 +1,7 @@
 use super::{DrawHandle3D, Material};
 
 use crate::ffi;
-use crate::prelude::{Vector3, Image, Matrix};
+use crate::prelude::{Vector2, Vector3, Vector4, Color, Image, Matrix, BoundingBox};
 
 #[derive(Debug)]
 pub struct Mesh(ffi::Mesh);
@@ -69,9 +69,122 @@ impl Mesh {
     }
 }
 
+impl Mesh {
+    pub fn get_bounding_box(&self) -> BoundingBox {
+        unsafe { ffi::GetMeshBoundingBox(self.0) }
+    }
+}
+
 impl Drop for Mesh {
     fn drop(&mut self) {
         unsafe { ffi::UnloadMesh(self.0) }
+    }
+}
+
+pub struct MeshBuilder(ffi::Mesh);
+
+fn copy_slice_to_raylib_memory<T: Copy>(slice: &[T]) -> *mut T {
+    let mem = unsafe { ffi::MemAlloc((slice.len() * std::mem::size_of::<T>()) as u32) };
+    let mem = mem as *mut T;
+    let mem = unsafe { std::slice::from_raw_parts_mut(mem, slice.len()) };
+    mem.copy_from_slice(slice);
+    mem.as_mut_ptr()
+}
+
+impl MeshBuilder {
+    /// Creates a new mesh builder.
+    /// ```
+    /// # use raylib::prelude::*;
+    /// # let mut rl = Raylib::init_window(800, 800, "Test", 60);
+    /// let vertices = &[vec3(0.0, 0.0, 0.0), vec3(0.5, 1.0, 0.0), vec3(1.0, 0.0, 0.0)];
+    /// let texcoords = &[vec2(0.0, 0.0), vec2(0.5, 1.0), vec2(1.0, 0.0)];
+    /// let normals = &[vec3(-1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(1.0, 0.0, 0.0)];
+    /// 
+    /// let triangle = MeshBuilder::new(vertices, texcoords)
+    ///     .normals(normals)
+    ///     .build();
+    /// ```
+    /// 
+    /// # Panics
+    /// Panics if `vertices` and `texcoords` have different length, or if their length is bigger than `i32::MAX`.
+    pub fn new(vertices: &[Vector3], texcoords: &[Vector2]) -> Self {
+        assert_eq!(vertices.len(), texcoords.len());
+        assert!(vertices.len() < i32::MAX as usize);
+
+        Self(ffi::Mesh {
+            vertexCount: vertices.len() as i32,
+            triangleCount: vertices.len() as i32 / 3,
+            vertices: copy_slice_to_raylib_memory(vertices) as *mut f32,
+            texcoords: copy_slice_to_raylib_memory(texcoords) as *mut f32,
+            texcoords2: std::ptr::null_mut(),
+            normals: std::ptr::null_mut(),
+            tangents: std::ptr::null_mut(),
+            colors: std::ptr::null_mut(),
+            indices: std::ptr::null_mut(),
+            animVertices: std::ptr::null_mut(),
+            animNormals: std::ptr::null_mut(),
+            boneIds: std::ptr::null_mut(),
+            boneWeights: std::ptr::null_mut(),
+            vaoId: 0,
+            vboId: std::ptr::null_mut(),
+        })
+    }
+
+    /// Sets the second uv buffer.
+    /// 
+    /// # Panics
+    /// Panics if the given slice doesn't have the same length as the original vertex buffer.
+    pub fn texcoords2(mut self, texcoords2: &[Vector2]) -> Self {
+        assert_eq!(self.0.vertexCount as usize, texcoords2.len());
+
+        self.0.normals = copy_slice_to_raylib_memory(texcoords2) as *mut f32;
+        self
+    }
+
+    /// Sets the normal buffer.
+    /// 
+    /// # Panics
+    /// Panics if the given slice doesn't have the same length as the original vertex buffer.
+    pub fn normals(mut self, normals: &[Vector3]) -> Self {
+        assert_eq!(self.0.vertexCount as usize, normals.len());
+
+        self.0.normals = copy_slice_to_raylib_memory(normals) as *mut f32;
+        self
+    }
+
+    /// Set the tangents buffer.
+    /// 
+    /// # Panics
+    /// Panics if the given slice doesn't have the same length as the original vertex buffer.
+    pub fn tangents(mut self, tangents: &[Vector4]) -> Self {
+        assert_eq!(self.0.vertexCount as usize, tangents.len());
+
+        self.0.tangents = copy_slice_to_raylib_memory(tangents) as *mut f32;
+        self
+    }
+
+    /// Set the colors buffer.
+    /// 
+    /// # Panics
+    /// Panics if the given slice doesn't have the same length as the original vertex buffer.
+    pub fn colors(mut self, colors: &[Color]) -> Self {
+        assert_eq!(self.0.vertexCount as usize, colors.len());
+
+        self.0.colors = copy_slice_to_raylib_memory(colors) as *mut u8;
+        self
+    }
+
+    /// Make the mesh indexed.
+    /// Note that indexed mesh can't have more than `u16::MAX` vertices (raylib limitation).
+    pub fn indices(mut self, indices: &[[u16; 3]]) -> Self {
+        self.0.vertexCount = indices.len() as i32;
+        self.0.indices = copy_slice_to_raylib_memory(indices) as *mut u16;
+        self
+    }
+
+    pub fn build(mut self) -> Mesh {
+        unsafe { ffi::UploadMesh(&mut self.0 as *mut _, false) };
+        Mesh(self.0)
     }
 }
 
