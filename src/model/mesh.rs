@@ -3,7 +3,14 @@ use super::{DrawHandle3D, Material};
 use crate::ffi;
 use crate::prelude::{Vector2, Vector3, Vector4, Color, Image, Matrix, BoundingBox};
 
+/// A raylib mesh.
+/// 
+/// Unlike a [`ffi::Mesh`], a [`Mesh`] is garanteed to have been uploaded to the GPU and to be drawable.
+/// Note that to draw a mesh, you need to create a [`DrawHandle3D`].
+/// 
+/// To procedurally create a mesh, use the [`MeshBuilder`] struct (see the `mesh_generation` example).
 #[derive(Debug)]
+#[repr(transparent)]
 pub struct Mesh(ffi::Mesh);
 
 /// # Mesh generation functions
@@ -114,8 +121,8 @@ impl MeshBuilder {
         Self(ffi::Mesh {
             vertexCount: vertices.len() as i32,
             triangleCount: vertices.len() as i32 / 3,
-            vertices: copy_slice_to_raylib_memory(vertices) as *mut f32,
-            texcoords: copy_slice_to_raylib_memory(texcoords) as *mut f32,
+            vertices: copy_slice_to_raylib_memory(vertices) as *mut f32,   // SAFETY: Vector3 contains 3 floats and is repr(C)
+            texcoords: copy_slice_to_raylib_memory(texcoords) as *mut f32, // SAFETY: Vector2 contains 2 floats and is repr(C)
             texcoords2: std::ptr::null_mut(),
             normals: std::ptr::null_mut(),
             tangents: std::ptr::null_mut(),

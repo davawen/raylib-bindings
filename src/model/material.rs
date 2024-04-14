@@ -3,6 +3,7 @@ use crate::{ffi, prelude::{Raylib, Shader, MaterialMapIndex, Color, Texture}};
 use std::ffi::CStr;
 
 #[derive(Debug)]
+#[repr(transparent)]
 pub struct Material<'a>(ffi::Material, std::marker::PhantomData<&'a Shader>);
 
 impl ffi::Material {

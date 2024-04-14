@@ -1,8 +1,18 @@
 use std::ffi::CStr;
 
-use crate::{ffi, prelude::{Vector2, Vector3, Color, Texture, Camera, BoundingBox, Rectangle}};
-use super::DrawHandle3D;
+use crate::{ffi, prelude::{Vector2, Vector3, Matrix, Transform, Mesh, Color, Texture, Camera, BoundingBox, Rectangle}};
+use super::{DrawHandle3D, Material};
 
+/// A raylib model.
+///
+/// Models contain the following information:
+/// - Mesh(es) data
+/// - Material(s) data
+/// - What material each mesh uses
+/// - Transform data
+/// - Animation data (bones and bind poses)
+/// 
+/// To draw a model, you need to create a [`DrawHandle3D`].
 #[derive(Debug)]
 pub struct Model(ffi::Model);
 
@@ -30,6 +40,56 @@ impl Model {
         }
 
         Some(Model(model))
+    }
+}
+
+impl Model {
+    /// Returns a reference to this model's transform matrix
+    pub fn transform(&self) -> &Matrix {
+        &self.0.transform
+    }
+    /// Returns a mutable reference to this model's transform matrix
+    pub fn transform_mut(&mut self) -> &mut Matrix {
+        &mut self.0.transform
+    }
+    /// Returns a slice to this model's meshes 
+    pub fn meshes(&self) -> &[Mesh] {
+        unsafe { std::slice::from_raw_parts(self.0.meshes as *const Mesh, self.0.meshCount as usize) }
+    }
+    /// Returns a mutable slice to the model's meshes
+    pub fn meshes_mut(&mut self) -> &mut [Mesh] {
+        unsafe { std::slice::from_raw_parts_mut(self.0.meshes as *mut Mesh, self.0.meshCount as usize) }
+    }
+    /// Returns a slice to the model's materials
+    pub fn materials(&self) -> &[Material] {
+        unsafe { std::slice::from_raw_parts(self.0.materials as *const Material, self.0.materialCount as usize) }
+    }
+    /// Returns a mutable slice to the model's materials
+    pub fn materials_mut(&mut self) -> &mut [Material] {
+        unsafe { std::slice::from_raw_parts_mut(self.0.materials as *mut Material, self.0.materialCount as usize) }
+    }
+    /// Returns a slice to the model's mesh to material map.
+    pub fn mesh_materials(&self) -> &[i32] {
+        unsafe { std::slice::from_raw_parts(self.0.meshMaterial, self.0.meshCount as usize) }
+    }
+    /// Returns a mutable slice to the model's mesh to material map.
+    ///
+    /// # Safety
+    /// Modified values must be valid indices into the model's material slice.
+    pub unsafe fn mesh_materials_mut(&self) -> &mut [i32] {
+        std::slice::from_raw_parts_mut(self.0.meshMaterial, self.0.meshCount as usize)
+    }
+
+    // TODO: safe function to change meshMaterial
+    // TODO: function to get safe bone info
+
+    /// Returns a slice to the model's animation bind poses.
+    pub fn bind_poses(&self) -> &[Transform] {
+        unsafe { std::slice::from_raw_parts(self.0.bindPose, self.0.boneCount as usize) }
+    }
+    /// Returns a mutable slice to the model's animation bind poses.
+    pub fn bind_poses_mut(&mut self) -> &mut [Transform] {
+        unsafe { std::slice::from_raw_parts_mut(self.0.bindPose, self.0.boneCount as usize) }
     }
 }
 
