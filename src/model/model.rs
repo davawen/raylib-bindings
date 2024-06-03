@@ -76,11 +76,23 @@ impl Model {
     ///
     /// # Safety
     /// Modified values must be valid indices into the model's material slice.
-    pub unsafe fn mesh_materials_mut(&self) -> &mut [i32] {
+    pub unsafe fn mesh_materials_mut(&mut self) -> &mut [i32] {
         std::slice::from_raw_parts_mut(self.0.meshMaterial, self.0.meshCount as usize)
     }
 
-    // TODO: safe function to change meshMaterial
+    /// Sets the material index of the given mesh
+    /// 
+    /// # Panics
+    /// Panics if `mesh_index` or `material_index` are out of bounds.
+    pub fn set_mesh_material(&mut self, mesh_index: usize, material_index: i32) {
+        assert!(mesh_index < self.0.meshCount as usize);
+        assert!(material_index >= 0 && material_index < self.0.materialCount);
+
+        unsafe {
+            self.mesh_materials_mut()[mesh_index] = material_index;
+        }
+    }
+
     // TODO: function to get safe bone info
 
     /// Returns a slice to the model's animation bind poses.
