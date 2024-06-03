@@ -192,7 +192,7 @@ fn generate_defines(out: &mut impl Write, defines: Vec<Define>) -> io::Result<()
 
 pub fn generate(out: &mut impl Write, raylib: Raylib) -> io::Result<()> {
     let attributes = HashMap::from([
-        ("Color", ["Eq", "Hash"].as_slice()),
+        ("Color", ["Eq", "Hash", "Default"].as_slice()),
         ("Vector2", ["Default"].as_slice()),
         ("Vector3", ["Default"].as_slice()),
         ("Vector4", ["Default"].as_slice()),

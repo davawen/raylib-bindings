@@ -17,51 +17,52 @@ impl Matrix {
         0.0, 0.0, 0.0, 1.0
     );
 
-    /// Create a new matrix with coefficients given in row-major order
-    /// | m0,  m1,  m2,  m3  |
-    /// | m4,  m5,  m6,  m7  |
-    /// | m8,  m9,  m10, m11 |
-    /// | m12, m13, m14, m15 |
+    /// Create a new matrix with coefficients given in column-major order
+    /// | m0, m4,  m8, m12 |
+    /// | m1, m5,  m9, m13 |
+    /// | m2, m6, m10, m14 |
+    /// | m3, m7, m11, m15 |
     pub const fn from_coefs(m0: f32, m1: f32, m2: f32, m3: f32, m4: f32, m5: f32, m6: f32, m7: f32, m8: f32, m9: f32, m10: f32, m11: f32, m12: f32, m13: f32, m14: f32, m15: f32) -> Self {
         Self { m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15 }
     }
 
-    /// Create a new matrix with coefficients given in row-major order
-    /// | m0,  m1,  m2,  m3  |
-    /// | m4,  m5,  m6,  m7  |
-    /// | m8,  m9,  m10, m11 |
-    /// | m12, m13, m14, m15 |
+    /// Create a new matrix with coefficients given in column-major order
+    /// | m0, m4,  m8, m12 |
+    /// | m1, m5,  m9, m13 |
+    /// | m2, m6, m10, m14 |
+    /// | m3, m7, m11, m15 |
     pub const fn from_array(coefs: [f32; 16]) -> Self {
         let c = coefs;
         Matrix::from_coefs(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12], c[13], c[14], c[15])
     }
 
-    /// Create a new matrix with the given rows
-    pub const fn from_rows(rows: [Vector4; 4]) -> Self {
-        Self::from_array([
-            rows[0].x, rows[0].y, rows[0].z, rows[0].w,
-            rows[1].x, rows[1].y, rows[1].z, rows[1].w,
-            rows[2].x, rows[2].y, rows[2].z, rows[2].w,
-            rows[3].x, rows[3].y, rows[3].z, rows[3].w,
-        ])
-    }
-
     /// Create a new matrix with the given columns
     pub const fn from_cols(cols: [Vector4; 4]) -> Self {
         Self::from_array([
-            cols[0].x, cols[1].x, cols[2].x, cols[3].x,
-            cols[0].y, cols[1].y, cols[2].y, cols[3].y,
-            cols[0].z, cols[1].z, cols[2].z, cols[3].z,
-            cols[0].w, cols[1].w, cols[2].w, cols[3].w,
+            cols[0].x, cols[0].y, cols[0].z, cols[0].w,
+            cols[1].x, cols[1].y, cols[1].z, cols[1].w,
+            cols[2].x, cols[2].y, cols[2].z, cols[2].w,
+            cols[3].x, cols[3].y, cols[3].z, cols[3].w,
         ])
     }
 
+    /// Create a new matrix with the given rows
+    pub const fn from_rows(rows: [Vector4; 4]) -> Self {
+        Self::from_array([
+            rows[0].x, rows[1].x, rows[2].x, rows[3].x,
+            rows[0].y, rows[1].y, rows[2].y, rows[3].y,
+            rows[0].z, rows[1].z, rows[2].z, rows[3].z,
+            rows[0].w, rows[1].w, rows[2].w, rows[3].w,
+        ])
+    }
+
+    /// Get the current matrix as a list of coefficients (column-major)
     pub const fn array(self) -> [f32; 16] {
         [ self.m0, self.m1, self.m2, self.m3, self.m4, self.m5, self.m6, self.m7, self.m8, self.m9, self.m10, self.m11, self.m12, self.m13, self.m14, self.m15 ]
     }
 
-    /// Get the current matrix as a list of columns
-    pub const fn cols(self) -> [Vector4; 4] {
+    /// Get the current matrix as a list of rows
+    pub const fn rows(self) -> [Vector4; 4] {
         [
             vec4(self.m0, self.m4, self.m8, self.m12),
             vec4(self.m1, self.m5, self.m9, self.m13),
@@ -70,8 +71,8 @@ impl Matrix {
         ]
     }
 
-    /// Get the current matrix as a list of rows
-    pub const fn rows(self) -> [Vector4; 4] {
+    /// Get the current matrix as a list of columns
+    pub const fn cols(self) -> [Vector4; 4] {
         [
             vec4(self.m0, self.m1, self.m2, self.m3),
             vec4(self.m4, self.m5, self.m6, self.m7),
@@ -82,12 +83,12 @@ impl Matrix {
 
     /// Get a given translation matrix
     pub const fn translation(p: Vector3) -> Self {
-        Matrix::from_coefs(
-            1.0, 0.0, 0.0, p.x,
-            0.0, 1.0, 0.0, p.y,
-            0.0, 0.0, 1.0, p.z,
-            0.0, 0.0, 0.0, 1.0
-        )
+        Matrix::from_rows([
+            vec4(1.0, 0.0, 0.0, p.x),
+            vec4(0.0, 1.0, 0.0, p.y),
+            vec4(0.0, 0.0, 1.0, p.z),
+            vec4(0.0, 0.0, 0.0, 1.0)
+        ])
     }
 
     /// Get a rotation matrix from an axis angle rotation
@@ -252,7 +253,7 @@ impl Matrix {
 
     /// Computes the matrix transpose
     pub fn transpose(self) -> Self {
-        Matrix::from_cols(self.rows())
+        Matrix::from_rows(self.cols())
     }
 
     /// Computes the inverse of the given matrix
@@ -322,12 +323,12 @@ impl Mul<Matrix> for Matrix {
     fn mul(self, rhs: Matrix) -> Self::Output {
         let a = self.rows();
         let b = rhs.cols();
-        Matrix::from_coefs(
+        Matrix::transpose(Matrix::from_coefs(
             a[0].dot(b[0]), a[0].dot(b[1]), a[0].dot(b[2]), a[0].dot(b[3]), 
             a[1].dot(b[0]), a[1].dot(b[1]), a[1].dot(b[2]), a[1].dot(b[3]), 
             a[2].dot(b[0]), a[2].dot(b[1]), a[2].dot(b[2]), a[2].dot(b[3]), 
             a[3].dot(b[0]), a[3].dot(b[1]), a[3].dot(b[2]), a[3].dot(b[3]), 
-        )
+        ))
     }
 }
 

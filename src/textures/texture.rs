@@ -11,8 +11,16 @@ use super::image::Image;
 /// 
 /// Textures are stored on the GPU in VRAM.
 /// If you need to interact with graphical data from the CPU, prefer using an `Image`.
-#[repr(C)]
+#[repr(transparent)]
+#[derive(Debug)]
 pub struct Texture(ffi::Texture, PhantomData<*const c_void>);
+
+/// A weak reference to a raylib texture.
+/// Used when we need long-time read-only access to a texture, while allowing modifications to it, such as in [`crate::model::Material`].
+/// This reference offers no garantee that the texture will live for its whole lifetime.
+#[repr(transparent)]
+#[derive(Debug, Clone)]
+pub struct WeakTexture(ffi::Texture);
 
 impl Drop for Texture {
     fn drop(&mut self) {
@@ -36,10 +44,42 @@ impl Texture {
     pub fn height(&self) -> u32 {
         self.0.height as u32
     }
-
     #[inline]
-    pub unsafe fn get_ffi_texture(&self) -> ffi::Texture {
+    pub fn weak(&self) -> WeakTexture {
+        WeakTexture(self.0)
+    }
+
+    /// Consumes self and returns the internal `ffi::Texture` without freeing it
+    #[inline]
+    pub unsafe fn unwrap(self) -> ffi::Texture {
+        let this = std::mem::ManuallyDrop::new(self);
+        this.0
+    }
+
+    /// Get a reference to the underlying ffi texture type
+    #[inline]
+    pub fn get_ffi(&self) -> &ffi::Texture {
+        &self.0
+    }
+}
+
+impl WeakTexture {
+    /// Consumes self and returns the internal `ffi::Texture`
+    #[inline]
+    pub unsafe fn unwrap(self) -> ffi::Texture {
         self.0
+    }
+
+    /// Get a reference to the underlying ffi texture type
+    #[inline]
+    pub fn get_ffi(&self) -> &ffi::Texture {
+        &self.0
+    }
+}
+
+impl Into<WeakTexture> for &Texture {
+    fn into(self) -> WeakTexture {
+        self.weak()
     }
 }
 
@@ -251,25 +291,26 @@ impl Texture {
 impl DrawHandle {
     /// Draw a texture.
     #[inline]
-    pub fn texture(&mut self, texture: &Texture, x: f32, y: f32, tint: Color) {
+    pub fn texture(&mut self, texture: impl Into<WeakTexture>, x: f32, y: f32, tint: Color) {
         self.texture_ex(texture, vec2(x, y), 0.0, 1.0, tint);
     }
     /// Draw a texture.
     #[inline]
-    pub fn texture_v(&mut self, texture: &Texture, pos: Vector2, tint: Color) {
+    pub fn texture_v(&mut self, texture: impl Into<WeakTexture>, pos: Vector2, tint: Color) {
         self.texture_ex(texture, pos, 0.0, 1.0, tint);
     }
     /// Draw a rotated and scaled texture.
     /// The rotation is in radians.
     #[inline]
-    pub fn texture_ex(&mut self, texture: &Texture, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
+    pub fn texture_ex(&mut self, texture: impl Into<WeakTexture>, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
+        let texture = texture.into();
         let source = Rectangle::new(0.0, 0.0, texture.0.width as f32, texture.0.height as f32);
         let dest = Rectangle::new(pos.x, pos.y, texture.0.width as f32 * scale, texture.0.height as f32 * scale);
         self.texture_pro(texture, source, dest, Vector2::ZERO, rotation, tint)
     }
     /// Draw part of a texture.
     #[inline]
-    pub fn texture_rec(&mut self, texture: &Texture, source: Rectangle, pos: Vector2, tint: Color) {
+    pub fn texture_rec(&mut self, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector2, tint: Color) {
         let dest = Rectangle::new(pos.x, pos.y, source.width, source.height);
         self.texture_pro(texture, source, dest, Vector2::ZERO, 0.0, tint)
     }
@@ -277,13 +318,13 @@ impl DrawHandle {
     /// Origin is **relative** to the destination rectangle.
     /// The rotation is in radians.
     #[inline]
-    pub fn texture_pro(&mut self, texture: &Texture, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
-        unsafe { ffi::DrawTexturePro(texture.0, source, dest, origin, rotation.to_degrees(), tint) }
+    pub fn texture_pro(&mut self, texture: impl Into<WeakTexture>, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+        unsafe { ffi::DrawTexturePro(texture.into().0, source, dest, origin, rotation.to_degrees(), tint) }
     }
     /// Draws a texture that stretches and shrinks using n-patch info.
     /// The rotation is in radians.
     #[inline]
-    pub fn texture_npatch(&mut self, texture: &Texture, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
-        unsafe { ffi::DrawTextureNPatch(texture.0, info, dest, origin, rotation.to_degrees(), tint) }
+    pub fn texture_npatch(&mut self, texture: impl Into<WeakTexture>, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+        unsafe { ffi::DrawTextureNPatch(texture.into().0, info, dest, origin, rotation.to_degrees(), tint) }
     }
 }

@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use ffi::Rectangle;
 
-use crate::{core::draw::DrawHandle, prelude::{Color, Texture, Vector2, vec2}, ffi};
+use crate::{core::draw::DrawHandle, ffi, prelude::{vec2, Color, Vector2, WeakTexture}};
 
 /// # Basic shapes drawing functions (module: `rshapes`)
 ///
@@ -10,8 +10,8 @@ use crate::{core::draw::DrawHandle, prelude::{Color, Texture, Vector2, vec2}, ff
 impl DrawHandle {
     /// Set texture and rectangle to be used on shapes drawing.
     #[inline]
-    pub fn set_shapes_texture(&mut self, texture: Texture, source: Rectangle) {
-        unsafe { ffi::SetShapesTexture(texture.get_ffi_texture(), source) }
+    pub fn set_shapes_texture(&mut self, texture: impl Into<WeakTexture>, source: Rectangle) {
+        unsafe { ffi::SetShapesTexture(*texture.into().get_ffi(), source) }
     }
 
     /// Draw a single pixel.

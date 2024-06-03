@@ -3,8 +3,7 @@ pub use crate::ffi::{AutomationEvent, BoneInfo, BoundingBox, GlyphInfo, Material
 pub use crate::ffi::{
     BlendMode, CubemapLayout, FontType, GamepadAxis,
     GamepadButton, Gesture, KeyboardKey, MaterialMapIndex, MouseButton, MouseCursor, NPatchLayout,
-    PixelFormat, ShaderAttributeDataType, ShaderLocationIndex, ShaderUniformDataType, TextureFilter, TextureWrap, 
-    TraceLogLevel
+    PixelFormat, ShaderAttributeDataType, ShaderLocationIndex, ShaderUniformDataType, TextureFilter, TextureWrap, TraceLogLevel
 };
 
 pub use crate::core::{
@@ -41,3 +40,4 @@ pub use crate::math::{
 };
 
 pub use crate::collisions::*;
+pub use crate::model::*;

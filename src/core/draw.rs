@@ -39,7 +39,7 @@ impl DrawHandle {
     }
     // Begin custom shader drawing
     pub fn begin_shader_mode(&mut self, shader: &Shader, f: impl FnOnce(&mut DrawHandle)) {
-        unsafe { ffi::BeginShaderMode(shader.get_ffi_shader()) }
+        unsafe { ffi::BeginShaderMode(*shader.get_ffi()) }
         f(self);
         unsafe { ffi::EndShaderMode() }
     }

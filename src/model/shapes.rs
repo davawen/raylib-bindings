@@ -1,20 +1,7 @@
-use ffi::Camera3D;
+use super::DrawHandle3D;
 
-use crate::{prelude::{Ray, Vector2, Vector3, Color, DrawHandle}, ffi};
-
-pub struct DrawHandle3D {
-    _private: ()
-}
-
-impl DrawHandle {
-    // Begin 3D mode with custom camera (3D)
-    pub fn begin_mode3d(&mut self, camera: Camera3D, f: impl FnOnce(&mut DrawHandle3D)) {
-        unsafe { ffi::BeginMode3D(camera) }
-        let mut d = DrawHandle3D { _private: () };
-        f(&mut d);
-        unsafe { ffi::EndMode3D() }
-    }
-}
+use crate::ffi;
+use crate::prelude::{Vector2, Vector3, Ray, Color};
 
 impl DrawHandle3D {
     /// Draw a line in 3D world space.
@@ -131,3 +118,5 @@ impl DrawHandle3D {
         unsafe { ffi::DrawGrid(slices, spacing) }
     }
 }
+
+

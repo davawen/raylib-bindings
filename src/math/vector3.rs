@@ -53,7 +53,7 @@ impl Vector3 {
     
     /// Calculate the dot product between the two vectors
     pub fn dot(self, rhs: Self) -> f32 {
-        self.x*rhs.x + self.y*rhs.y + self.z*self.z
+        self.x*rhs.x + self.y*rhs.y + self.z*rhs.z
     }
     /// Calculate the 3d cross product between the two vectors
     pub fn cross(self, rhs: Self) -> Self {

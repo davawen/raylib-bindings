@@ -308,7 +308,7 @@ impl Image {
     /// Compressed format are not supported.
     /// Returns `None` if the texture is in a compressed format or if there was an error when reading the data in the texture.
     pub fn load_from_texture(_rl: &mut Raylib, texture: &Texture) -> Option<Image> {
-        let image = unsafe { ffi::LoadImageFromTexture(texture.get_ffi_texture()) };
+        let image = unsafe { ffi::LoadImageFromTexture(*texture.get_ffi()) };
         Image::from_ffi(image)
     }
 
