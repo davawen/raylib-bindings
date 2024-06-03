@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use crate::{ffi, prelude::{Vector2, Vector3, Matrix, Transform, Mesh, Color, Texture, Camera, BoundingBox, Rectangle}};
+use crate::{ffi, prelude::{BoundingBox, Camera, Color, Matrix, Mesh, Rectangle, Transform, Vector2, Vector3, WeakTexture}};
 use super::{DrawHandle3D, Material};
 
 /// A raylib model.
@@ -132,21 +132,21 @@ impl DrawHandle3D {
     }
 
     /// Draw a billboard texture
-    pub fn billboard(camera: Camera, texture: Texture, pos: Vector3, size: f32, tint: Color) {
-        unsafe { ffi::DrawBillboard(camera, *texture.get_ffi(), pos, size, tint) }
+    pub fn billboard(camera: Camera, texture: impl Into<WeakTexture>, pos: Vector3, size: f32, tint: Color) {
+        unsafe { ffi::DrawBillboard(camera, *texture.into().get_ffi(), pos, size, tint) }
     }
 
     /// Draw part of a billboard texture
-    pub fn billboard_rec(camera: Camera, texture: Texture, source: Rectangle, pos: Vector3, size: Vector2, tint: Color) {
-        unsafe { ffi::DrawBillboardRec(camera, *texture.get_ffi(), source, pos, size, tint) }
+    pub fn billboard_rec(camera: Camera, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector3, size: Vector2, tint: Color) {
+        unsafe { ffi::DrawBillboardRec(camera, *texture.into().get_ffi(), source, pos, size, tint) }
     }
 
     /// Draw part of a billboard texture with source and rotation
     /// Angles are in a radians
     pub fn billboard_pro(
-        camera: Camera, texture: Texture, source: Rectangle,
+        camera: Camera, texture: impl Into<WeakTexture>, source: Rectangle,
         pos: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: f32, tint: Color)
     {
-        unsafe { ffi::DrawBillboardPro(camera, *texture.get_ffi(), source, pos, up, size, origin, rotation.to_degrees(), tint) }
+        unsafe { ffi::DrawBillboardPro(camera, *texture.into().get_ffi(), source, pos, up, size, origin, rotation.to_degrees(), tint) }
     }
 }

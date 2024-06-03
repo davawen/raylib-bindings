@@ -1,4 +1,4 @@
-use crate::{ffi, prelude::{Raylib, Shader, MaterialMapIndex, Color, Texture}};
+use crate::{ffi, prelude::{Color, MaterialMapIndex, Raylib, Shader, WeakTexture}};
 
 use std::ffi::CStr;
 
@@ -64,32 +64,28 @@ impl<'a> Material<'a> {
     }
 
     /// Get an immutable reference to a [`ffi::MaterialMap`].
-    pub fn get_map(&self, index: MaterialMapIndex) -> &ffi::MaterialMap {
+    fn get_map(&self, index: MaterialMapIndex) -> &ffi::MaterialMap {
         // SAFETY: index is always in range of the `maps` array
         unsafe { self.0.maps.offset(index as isize).as_ref().unwrap_unchecked() }
     }
 
     /// Get a mutable reference to a [`ffi::MaterialMap`].
-    pub fn get_map_mut(&mut self, index: MaterialMapIndex) -> &mut ffi::MaterialMap {
+    fn get_map_mut(&mut self, index: MaterialMapIndex) -> &mut ffi::MaterialMap {
         // SAFETY: index is always in range of the `maps` array
         unsafe { self.0.maps.offset(index as isize).as_mut().unwrap_unchecked() }
     }
 
     /// Sets the texture for a material map kind.
-    /// 
-    /// The textures are moved into the material and unloaded by it.
-    /// If you wish to modify them, use [`Material::get_texture_mut`].
-    /// If you wish to get them back, use [`Material::take_texture`].
-    pub fn set_texture(&mut self, index: MaterialMapIndex, texture: Texture, color: Color) {
-        unsafe { ffi::SetMaterialTexture(&mut self.0 as *mut _, index as i32, texture.unwrap()) };
+    pub fn set_texture(&mut self, index: MaterialMapIndex, texture: impl Into<WeakTexture>, color: Color) {
+        unsafe { ffi::SetMaterialTexture(&mut self.0 as *mut _, index as i32, texture.into().unwrap()) };
         self.get_map_mut(index).color = color;
     }
 
     /// Gets a reference to a texture used in the material.
     ///
     /// Returns `None` if no texture were set for the specified map index.
-    /// Unlike [`Material::get_texture_mut`], this function returns `Some` if the default texture is set at the specified index.
-    pub fn get_texture(&self, index: MaterialMapIndex) -> Option<&Texture> {
+    /// Returns `Some` if the default texture is set at the specified index.
+    pub fn get_texture(&self, index: MaterialMapIndex) -> Option<&WeakTexture> {
         let map = self.get_map(index);
         if !map.texture.is_valid() { return None }
 
@@ -98,33 +94,10 @@ impl<'a> Material<'a> {
         Some(unsafe { std::mem::transmute(&map.texture) })
     }
 
-    /// Gets a mutable reference to a texture used in the material.
-    /// 
-    /// Returns `None` if no textures were set for the specified map index, or if the set texture is the default one (we can't modify it).
-    pub fn get_texture_mut(&mut self, index: MaterialMapIndex) -> Option<&mut Texture> {
+    /// Removes the texture at the specified map index
+    pub fn remove_texture(&mut self, index: MaterialMapIndex) {
         let map = self.get_map_mut(index);
-        if !map.texture.is_valid() { return None }
-        // Check that it isn't the default texture
-        if map.texture.id == 1 { return None }
-
-        // SAFETY: `Texture` has the same in-memory representation as `ffi::Texture`, and its lifetime is tied to self.
-        // SAFETY: The texture has been checked to be valid
-        // SAFETY: We aren't returning the default texture
-        Some(unsafe { std::mem::transmute(&mut map.texture) })
-    }
-
-    /// Get a texture back from a material, replacing it with `None`.
-    /// 
-    /// Returns `None` if no textures were set for the specified map index, or if the set texture is the default one.
-    pub fn take_texture(&mut self, index: MaterialMapIndex) -> Option<Texture> {
-        let map = self.get_map_mut(index);
-        if !map.texture.is_valid() { return None }
-        // Check that it isn't the default texture
-        if map.texture.id == 1 { return None }
-
-        let texture = Texture::from_ffi(map.texture);
         map.texture = ffi::Texture { id: 0, width: 0, height: 0, format: 0, mipmaps: 0 };
-        texture
     }
 
     /// Sets the color of a specified map.

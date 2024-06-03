@@ -1,5 +1,5 @@
 use std::{ffi::{CString, CStr, c_void}, ptr::null};
-use crate::{ffi::{self, ShaderUniformDataType, Matrix}, prelude::{Raylib, Vector2, Vector3, Vector4, Texture}};
+use crate::{ffi::{self, Matrix, ShaderUniformDataType}, prelude::{Raylib, Texture, Vector2, Vector3, Vector4, WeakTexture}};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Uniform(i32);
@@ -205,6 +205,12 @@ impl ShaderValue<Matrix> for Shader {
 
 impl ShaderValue<&Texture> for Shader {
     fn set_uniform_value(&self, uniform: Uniform, v: &Texture) {
+        unsafe { ffi::SetShaderValueTexture(self.0, uniform.0, *v.get_ffi()) }
+    }
+}
+
+impl ShaderValue<WeakTexture> for Shader {
+    fn set_uniform_value(&self, uniform: Uniform, v: WeakTexture) {
         unsafe { ffi::SetShaderValueTexture(self.0, uniform.0, *v.get_ffi()) }
     }
 }
