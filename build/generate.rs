@@ -132,7 +132,7 @@ fn generate_callbacks(out: &mut impl Write, callbacks: Vec<Callback>) -> io::Res
 }
 
 fn generate_functions(out: &mut impl Write, functions: Vec<Function>) -> io::Result<()> {
-    writeln!(out, "#[link(name = \"raylib\")]")?;
+    writeln!(out, "#[link(name = \"raylib\", kind = \"static\")]")?;
     writeln!(out, "extern \"C\" {{")?;
 
     for f in functions {

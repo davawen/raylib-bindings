@@ -15,3 +15,31 @@ fontdue = "0.8.0"
 half = "2.4.0"
 hashbrown = "0.14.3"
 va_list = "0.1.4"
+
+[build-dependencies]
+cmake = "0.1.50"
+
+[features]
+default = ["wayland", "png", "dds", "hdr", "ktx", "astc", "jpg", "obj", "mtl", "wav", "ogg", "xm", "mod", "save_png"]
+wayland = []
+png = []
+dds = []
+hdr = []
+ktx = []
+astc = []
+bmp = []
+tga = []
+jpg = []
+gif = []
+psd = []
+pkm = []
+pvr = []
+obj = []
+mtl = []
+wav = []
+ogg = []
+xm = []
+mod = []
+flac = []
+save_png = []
+save_bmp = []
