@@ -69,6 +69,7 @@ impl Raylib {
         Self { 
             automation_event_set: false,
             automation_event_recording: false,
+            quit_requested: false,
             default_font: ManuallyDrop::new(None),
             _private: std::marker::PhantomData
         }
@@ -81,7 +82,10 @@ impl Raylib {
 /// ---
 pub trait RaylibWindowFunctions {
     /// Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
-    fn window_should_close(&self) -> bool { unsafe { ffi::WindowShouldClose() } }
+    fn window_should_close(&self) -> bool;
+    /// Asks raylib to close the window (will return false in the next iteration of [`Raylib::window_should_close`]).
+    fn quit(&mut self);
+
     /// Check if window has been initialized successfully
     fn is_window_ready(&self) -> bool { unsafe { ffi::IsWindowReady() } }
     /// Check if window is currently fullscreen
@@ -198,4 +202,13 @@ pub trait RaylibWindowFunctions {
     fn set_mouse_cursor(&mut self, cursor: MouseCursor) { unsafe { ffi::SetMouseCursor(cursor as i32) } }
 }
 
-impl RaylibWindowFunctions for Raylib {}
+impl RaylibWindowFunctions for Raylib {
+    fn window_should_close(&self) -> bool {
+        if self.quit_requested { return true }
+        unsafe { ffi::WindowShouldClose() }
+    }
+
+    fn quit(&mut self) {
+        self.quit_requested = true;
+    }
+}

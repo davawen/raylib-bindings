@@ -28,6 +28,8 @@ pub struct Raylib {
     /// See `core::automation`
     #[allow(unused)]
     automation_event_recording: bool,
+    /// The user called [`Raylib::quit`].
+    quit_requested: bool,
     /// Keeps hold of the default raylib font.
     /// NOTE: The default font needs to be dropped before raylib itself closes, which is why the `ManuallyDrop` is needed.
     default_font: ManuallyDrop<Option<BitmapFontAtlas>>,
