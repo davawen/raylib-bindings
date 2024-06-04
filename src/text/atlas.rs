@@ -1,7 +1,7 @@
 use std::num::NonZeroU16;
 use hashbrown::HashMap;
 
-use crate::{prelude::{DrawHandle, Vector2, Color, Texture, Rectangle, vec2}, ffi};
+use crate::{ffi, prelude::{vec2, Color, DrawHandle, Raylib, Rectangle, Texture, Vector2}};
 
 // TODO: Support vertical text
 
@@ -82,7 +82,7 @@ pub trait FontAtlas {
     fn get_glyph(&self, index: u16, size: f32) -> Rectangle;
 }
 
-impl DrawHandle<'_> {
+impl Raylib {
     /// Returns the width and height occupied by the given text in the given font, drawn at the given size.
     pub fn measure_text<F: FontAtlas>(&self, atlas: &F, text: &str, size: f32) -> Vector2 {
         let mut pos = Vector2::ZERO;
@@ -98,6 +98,9 @@ impl DrawHandle<'_> {
         pos
     }
 
+}
+
+impl DrawHandle<'_> {
     /// Draws some text at the specified location using the given font at the given size.
     /// 
     /// Using a [`TrueTypeFontAtlas`](super::font::TrueTypeFontAtlas) or a [`BitmapFontAtlas`](super::bitmap::BitmapFontAtlas), if the given size is different than the original render size,
