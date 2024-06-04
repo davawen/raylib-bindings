@@ -20,26 +20,44 @@ va_list = "0.1.4"
 cmake = "0.1.50"
 
 [features]
-default = ["wayland", "png", "dds", "hdr", "ktx", "astc", "jpg", "obj", "mtl", "wav", "ogg", "xm", "mod", "save_png"]
-wayland = []
+default = [
+	"image_export", "image_generation", "image_manipulation",
+	"png", "dds", "hdr", "jpg", "gif", "qoi",
+	"obj", "mtl", "iqm", "gltf", "vox", "m3d",
+	"wav", "ogg", "xm", "mod", "mp3", "qoa"
+]
+
+image_export = []
+image_generation = []
+image_manipulation = []
 png = []
 dds = []
 hdr = []
+pic = []
+pnm = []
 ktx = []
 astc = []
 bmp = []
 tga = []
 jpg = []
 gif = []
+qoi = []
 psd = []
 pkm = []
 pvr = []
+svg = []
+
 obj = []
 mtl = []
+iqm = []
+gltf = []
+vox = []
+m3d = []
+
 wav = []
 ogg = []
 xm = []
 mod = []
+mp3 = []
+qoa = []
 flac = []
-save_png = []
-save_bmp = []

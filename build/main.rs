@@ -8,43 +8,52 @@ use parser::*;
 use generate::generate;
 
 macro_rules! feature {
-    ($config:expr, $feat:literal, $param:literal) => {
-        #[cfg(feature = $feat)] $config.define($param, "ON");
-        #[cfg(not(feature = $feat))] $config.define($param, "OFF");
+    ($feat:literal) => {
+        if cfg!(feature = $feat) { "ON" } else { "OFF" }
     };
 }
 
 fn main() {
     let mut config = cmake::Config::new("raylib");
 
-    config.define("WITH_PIC", "ON")
+    let path = config
         .define("BUILD_EXAMPLES", "OFF")
-        .define("CUSTOMIZE_BUILD", "ON");
-
-    feature!(config, "wayland", "USE_WAYLAND");
-    feature!(config, "png", "SUPPORT_FILEFORMAT_PNG");
-    feature!(config, "dds", "SUPPORT_FILEFORMAT_DDS");
-    feature!(config, "hdr", "SUPPORT_FILEFORMAT_HDR");
-    feature!(config, "ktx", "SUPPORT_FILEFORMAT_KTX");
-    feature!(config, "astc", "SUPPORT_FILEFORMAT_ASTC");
-    feature!(config, "bmp", "SUPPORT_FILEFORMAT_BMP");
-    feature!(config, "tga", "SUPPORT_FILEFORMAT_TGA");
-    feature!(config, "jpg", "SUPPORT_FILEFORMAT_JPG");
-    feature!(config, "gif", "SUPPORT_FILEFORMAT_GIF");
-    feature!(config, "psd", "SUPPORT_FILEFORMAT_PSD");
-    feature!(config, "pkm", "SUPPORT_FILEFORMAT_PKM");
-    feature!(config, "pvr", "SUPPORT_FILEFORMAT_PVR");
-    feature!(config, "obj", "SUPPORT_FILEFORMAT_OBJ");
-    feature!(config, "mtl", "SUPPORT_FILEFORMAT_MTL");
-    feature!(config, "wav", "SUPPORT_FILEFORMAT_WAV");
-    feature!(config, "ogg", "SUPPORT_FILEFORMAT_OGG");
-    feature!(config, "xm", "SUPPORT_FILEFORMAT_XM");
-    feature!(config, "mod", "SUPPORT_FILEFORMAT_MOD");
-    feature!(config, "flac", "SUPPORT_FILEFORMAT_FLAC");
-    feature!(config, "save_png", "SUPPORT_SAVE_PNG");
-    feature!(config, "save_bmp", "SUPPORT_SAVE_BMP");
-
-    let path = config.build();
+        .define("CUSTOMIZE_BUILD", "ON")
+        .define("SUPPORT_FILEFORMAT_FNT", "OFF") // builtin text
+        .define("SUPPORT_FILEFORMAT_TTF", "OFF") // builtin text
+        .define("SUPPORT_IMAGE_EXPORT", feature!("image_export"))
+        .define("SUPPORT_IMAGE_GENERATION", feature!("image_generation"))
+        .define("SUPPORT_IMAGE_MANIPULATION", feature!("image_manipulation"))
+        .define("SUPPORT_FILEFORMAT_PNG", feature!("png"))
+        .define("SUPPORT_FILEFORMAT_DDS", feature!("dds"))
+        .define("SUPPORT_FILEFORMAT_HDR", feature!("hdr"))
+        .define("SUPPORT_FILEFORMAT_PIC", feature!("pic"))
+        .define("SUPPORT_FILEFORMAT_PNM", feature!("pnm"))
+        .define("SUPPORT_FILEFORMAT_KTX", feature!("ktx"))
+        .define("SUPPORT_FILEFORMAT_ASTC", feature!("astc"))
+        .define("SUPPORT_FILEFORMAT_BMP", feature!("bmp"))
+        .define("SUPPORT_FILEFORMAT_TGA", feature!("tga"))
+        .define("SUPPORT_FILEFORMAT_JPG", feature!("jpg"))
+        .define("SUPPORT_FILEFORMAT_GIF", feature!("gif"))
+        .define("SUPPORT_FILEFORMAT_QOI", feature!("qoi"))
+        .define("SUPPORT_FILEFORMAT_PSD", feature!("psd"))
+        .define("SUPPORT_FILEFORMAT_PKM", feature!("pkm"))
+        .define("SUPPORT_FILEFORMAT_PVR", feature!("pvr"))
+        .define("SUPPORT_FILEFORMAT_SVG", feature!("svg"))
+        .define("SUPPORT_FILEFORMAT_OBJ", feature!("obj"))
+        .define("SUPPORT_FILEFORMAT_MTL", feature!("mtl"))
+        .define("SUPPORT_FILEFORMAT_IQM", feature!("iqm"))
+        .define("SUPPORT_FILEFORMAT_GLTF", feature!("gltf"))
+        .define("SUPPORT_FILEFORMAT_VOX", feature!("vox"))
+        .define("SUPPORT_FILEFORMAT_M3D", feature!("m3d"))
+        .define("SUPPORT_FILEFORMAT_WAV", feature!("wav"))
+        .define("SUPPORT_FILEFORMAT_OGG", feature!("ogg"))
+        .define("SUPPORT_FILEFORMAT_XM", feature!("xm"))
+        .define("SUPPORT_FILEFORMAT_MOD", feature!("mod"))
+        .define("SUPPORT_FILEFORMAT_MP3", feature!("mp3"))
+        .define("SUPPORT_FILEFORMAT_QOA", feature!("qoa"))
+        .define("SUPPORT_FILEFORMAT_FLAC", feature!("flac"))
+        .build();
 
     println!("cargo:rustc-link-search=native={}/lib", path.display());
     println!("cargo:rustc-link-lib=static=raylib");
