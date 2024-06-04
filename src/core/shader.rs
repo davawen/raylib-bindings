@@ -26,8 +26,8 @@ impl Shader {
     /// while !rl.window_should_close() {
     ///     shader.set_uniform_value(resolution_uniform, rl.get_screen_size());
     ///     shader.set_uniform_value(camera_pos_uniform, camera_pos);
-    ///     rl.begin_drawing(|rl, draw| draw.begin_shader_mode(&shader, |draw| {
-    ///         draw.rectangle_v(Vector2::ZERO, rl.get_screen_size(), Color::WHITE);
+    ///     rl.begin_drawing(|rl| rl.begin_shader_mode(&shader, |rl| {
+    ///         rl.rectangle_v(Vector2::ZERO, rl.get_screen_size(), Color::WHITE);
     ///     }));
     ///     # break
     /// }

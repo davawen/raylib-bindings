@@ -213,7 +213,7 @@ impl RenderTexture {
 impl Texture {
     /// Updates the texture with the given image.
     /// Returns `Err(())` if the image's format or size does not correspond to the texture.
-    pub fn update(&mut self, image: &Image) -> Result<(), ()> {
+    pub fn update(&self, image: &Image) -> Result<(), ()> {
         if self.0.format != image.format() as i32 { return Err(()) }
         if self.0.width as u32 != image.width() || self.0.height as u32 != image.height() { return Err(()) }
 
@@ -224,7 +224,7 @@ impl Texture {
     /// Updates the texture with the given raw image data.
     /// The data must be in the same format as the texture.
     /// Returns `Err(())` if the buffer's size does not correspond to the texture.
-    pub fn update_raw(&mut self, buffer: &[u8]) -> Result<(), ()> {
+    pub fn update_raw(&self, buffer: &[u8]) -> Result<(), ()> {
         if get_pixel_data_size(self.0.width, self.0.height, self.0.format.try_into().unwrap()) as usize != buffer.len() { return Err(()) }
 
         unsafe { ffi::UpdateTexture(self.0, buffer.as_ptr() as *const c_void) };
@@ -236,7 +236,7 @@ impl Texture {
     /// - The image's format does not correspond to the texture
     /// - The image's size does not correspond to `rec`.
     /// - `rec` is out of texture bounds.
-    pub fn update_rec(&mut self, rec: Rectangle, image: &Image) -> Result<(), ()> {
+    pub fn update_rec(&self, rec: Rectangle, image: &Image) -> Result<(), ()> {
         if self.0.format != image.format() as i32 { return Err(()) }
         if rec.width as u32 != image.width() || rec.height as u32 != image.height() { return Err(()) }
         if rec.x < 0.0 || rec.y < 0.0 || (rec.x + rec.width) as u32 > self.0.width as u32 || (rec.y + rec.height) as u32 >= self.0.height as u32 {
@@ -252,7 +252,7 @@ impl Texture {
     /// Returns `Err(())` if:
     /// - The buffer's size does not correspond to `rec`.
     /// - `rec` is out of texture bounds.
-    pub fn update_rec_raw(&mut self, rec: Rectangle, buffer: &[u8]) -> Result<(), ()> {
+    pub fn update_rec_raw(&self, rec: Rectangle, buffer: &[u8]) -> Result<(), ()> {
         if get_pixel_data_size(rec.width as i32, rec.height as i32, self.0.format.try_into().unwrap()) as usize != buffer.len() { return Err(()) }
         if rec.x < 0.0 || rec.y < 0.0 || (rec.x + rec.width) as u32 > self.0.width as u32 || (rec.y + rec.height) as u32 >= self.0.height as u32 {
             return Err(())
@@ -288,21 +288,21 @@ impl Texture {
 /// # Texture drawing functions
 /// 
 /// ---
-impl DrawHandle {
+impl DrawHandle<'_> {
     /// Draw a texture.
     #[inline]
-    pub fn texture(&mut self, texture: impl Into<WeakTexture>, x: f32, y: f32, tint: Color) {
+    pub fn texture(&self, texture: impl Into<WeakTexture>, x: f32, y: f32, tint: Color) {
         self.texture_ex(texture, vec2(x, y), 0.0, 1.0, tint);
     }
     /// Draw a texture.
     #[inline]
-    pub fn texture_v(&mut self, texture: impl Into<WeakTexture>, pos: Vector2, tint: Color) {
+    pub fn texture_v(&self, texture: impl Into<WeakTexture>, pos: Vector2, tint: Color) {
         self.texture_ex(texture, pos, 0.0, 1.0, tint);
     }
     /// Draw a rotated and scaled texture.
     /// The rotation is in radians.
     #[inline]
-    pub fn texture_ex(&mut self, texture: impl Into<WeakTexture>, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
+    pub fn texture_ex(&self, texture: impl Into<WeakTexture>, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
         let texture = texture.into();
         let source = Rectangle::new(0.0, 0.0, texture.0.width as f32, texture.0.height as f32);
         let dest = Rectangle::new(pos.x, pos.y, texture.0.width as f32 * scale, texture.0.height as f32 * scale);
@@ -310,7 +310,7 @@ impl DrawHandle {
     }
     /// Draw part of a texture.
     #[inline]
-    pub fn texture_rec(&mut self, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector2, tint: Color) {
+    pub fn texture_rec(&self, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector2, tint: Color) {
         let dest = Rectangle::new(pos.x, pos.y, source.width, source.height);
         self.texture_pro(texture, source, dest, Vector2::ZERO, 0.0, tint)
     }
@@ -318,13 +318,13 @@ impl DrawHandle {
     /// Origin is **relative** to the destination rectangle.
     /// The rotation is in radians.
     #[inline]
-    pub fn texture_pro(&mut self, texture: impl Into<WeakTexture>, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+    pub fn texture_pro(&self, texture: impl Into<WeakTexture>, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
         unsafe { ffi::DrawTexturePro(texture.into().0, source, dest, origin, rotation.to_degrees(), tint) }
     }
     /// Draws a texture that stretches and shrinks using n-patch info.
     /// The rotation is in radians.
     #[inline]
-    pub fn texture_npatch(&mut self, texture: impl Into<WeakTexture>, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+    pub fn texture_npatch(&self, texture: impl Into<WeakTexture>, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
         unsafe { ffi::DrawTextureNPatch(texture.into().0, info, dest, origin, rotation.to_degrees(), tint) }
     }
 }

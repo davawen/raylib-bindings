@@ -12,8 +12,8 @@ fn main() {
     let mut size = 20.0;
 
     while !rl.window_should_close() {
-        rl.begin_drawing(|rl, draw| {
-            draw.clear_background(Color::RAYWHITE);
+        rl.begin_drawing(|rl| {
+            rl.clear_background(Color::RAYWHITE);
 
             if rl.is_key_down(KeyboardKey::LeftShift) {
                 size += rl.get_mouse_wheel_move();
@@ -26,11 +26,11 @@ fn main() {
             }
 
             if rl.is_key_down(KeyboardKey::A) {
-                draw.texture(rendered.texture(), 0.0, 0.0, Color::BLACK);
+                rl.texture(rendered.texture(), 0.0, 0.0, Color::BLACK);
                 return
             }
 
-            let left_size = draw.measure_text(&mut rendered, "0x0000", size).x;
+            let left_size = rl.measure_text(&mut rendered, "0x0000", size).x;
 
             let offset = size*1.5;
 
@@ -45,12 +45,12 @@ fn main() {
                 if y >= nh { break }
 
                 if x == 0 {
-                    draw.text(&mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
+                    rl.text(&mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
                 }
-                draw.glyph(&mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
+                rl.glyph(&mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
             }
 
-            draw.fps(vec2(5.0, 5.0));
+            rl.fps(vec2(5.0, 5.0));
         });
     }
 }

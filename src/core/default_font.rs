@@ -8,7 +8,7 @@ use super::Raylib;
 
 impl Raylib {
     /// Taken from https://github.com/raysan5/raylib/blob/dc7f81a7b0cbc666812c870841313e0c15a87a0c/src/rtext.c#L220
-    fn load_default_font(&mut self) -> BitmapFontAtlas {
+    pub(super) fn load_default_font(&mut self) {
         const DATA: &[u8; 2048] = include_bytes!("default_font_data");
         const CHARS_WIDTH: [u8; 224] = [
             3, 1, 4, 6, 5, 7, 6, 2, 3, 3, 5, 5, 2, 4, 1, 7, 5, 2, 5, 5, 5, 5, 5, 5, 5, 5, 1, 1, 3, 4, 3, 6,
@@ -73,14 +73,11 @@ impl Raylib {
             line_gap: 15.0
         };
 
-        BitmapFontAtlas::load(self, &image, codepoints, glyphs, line_metrics, HEIGHT as f32)
+        let atlas = BitmapFontAtlas::load(self, &image, codepoints, glyphs, line_metrics, HEIGHT as f32);
+        self.default_font = ManuallyDrop::new(Some(atlas));
     }
 
-    pub fn default_font(&mut self) -> &mut BitmapFontAtlas {
-        if self.default_font.is_none() {
-            let default_font = self.load_default_font();
-            self.default_font = ManuallyDrop::new(Some(default_font));
-        }
-        self.default_font.as_mut().unwrap()
+    pub fn default_font(&self) -> &BitmapFontAtlas {
+        self.default_font.as_ref().unwrap()
     }
 }

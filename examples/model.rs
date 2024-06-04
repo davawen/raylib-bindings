@@ -105,15 +105,15 @@ fn main() {
         camera.update_camera(CameraMode::Orbital);
         shader.set_uniform_value(loc_view, camera.position);
 
-        rl.begin_drawing(|_rl, draw| {
-            draw.clear_background(Color::BLACK);
-            draw.begin_mode3d(camera, |draw| {
+        rl.begin_drawing(|rl| {
+            rl.clear_background(Color::BLACK);
+            rl.begin_mode3d(camera, |rl| {
                 for transform in &transforms {
-                    draw.mesh(&mesh, &mat, *transform);
+                    rl.mesh(&mesh, &mat, *transform);
                 }
                 for &(color, transform) in &light_transforms {
                     light_mat.set_color(MaterialMapIndex::Albedo, Color::color_from_normalized(color));
-                    draw.mesh(&light_mesh, &light_mat, transform);
+                    rl.mesh(&light_mesh, &light_mat, transform);
                 }
             });
         });

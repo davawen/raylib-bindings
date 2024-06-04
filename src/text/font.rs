@@ -1,4 +1,4 @@
-use std::num::NonZeroU16;
+use std::{cell::RefCell, num::NonZeroU16};
 use hashbrown::HashMap;
 
 use crate::prelude::{Texture, Rectangle, PixelFormat, Raylib};
@@ -18,9 +18,9 @@ impl TrueTypeFont {
     /// let font = TrueTypeFont::from_bytes(include_bytes!("../../assets/TerminusTTF.ttf").as_slice()).unwrap();
     /// let mut atlas = font.atlas(&mut rl, 32.0);
     /// while !rl.window_should_close() {
-    ///     rl.begin_drawing(|_, draw| {
-    ///         draw.clear_background(Color::RAYWHITE);
-    ///         draw.text(&mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
+    ///     rl.begin_drawing(|rl| {
+    ///         rl.clear_background(Color::RAYWHITE);
+    ///         rl.text(&mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
     ///     });
     ///     # break
     /// }
@@ -43,14 +43,14 @@ impl TrueTypeFont {
     pub fn atlas<'f, 'r>(&'f self, rl: &'r mut Raylib, size: f32) -> TrueTypeFontAtlas<'f> {
         let (texture_size, recs) = TrueTypeFontAtlas::map_texture(self.inner(), size);
         let texture = Texture::load_empty(rl, texture_size as u32, texture_size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
-        TrueTypeFontAtlas { texture, size, recs, font: self.inner() }
+        TrueTypeFontAtlas { texture: texture.into(), size, recs: recs.into(), font: self.inner() }
     }
 }
 
 pub struct TrueTypeFontAtlas<'f> {
     texture: Texture,
     size: f32,
-    recs: Vec<(bool, Rectangle)>,
+    recs: RefCell<Vec<(bool, Rectangle)>>,
     font: &'f fontdue::Font
 }
 
@@ -115,7 +115,7 @@ impl TrueTypeFontAtlas<'_> {
     pub fn reatlas(&mut self, rl: &mut Raylib, px: f32) {
         self.size = px;
         let (size, recs) = Self::map_texture(self.font, px);
-        self.recs = recs;
+        self.recs = recs.into();
 
         if size as u32 > self.texture.width() {
             self.texture = Texture::load_empty(rl, size as u32, size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
@@ -155,8 +155,8 @@ impl FontAtlas for TrueTypeFontAtlas<'_> {
     fn kern_indexed(&self, left: u16, right: u16, size: f32) -> Option<f32> { self.font.horizontal_kern_indexed(left, right, size) }
 
     fn texture(&self) -> &Texture { &self.texture }
-    fn get_glyph(&mut self, index: u16, _size: f32) -> Rectangle {
-        let (rendered, rec) = &mut self.recs[index as usize];
+    fn get_glyph(&self, index: u16, _size: f32) -> Rectangle {
+        let (rendered, rec) = &mut self.recs.borrow_mut()[index as usize];
         // skip if glyph was already rendered
         if *rendered { return *rec }
 

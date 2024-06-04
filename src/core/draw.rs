@@ -1,8 +1,10 @@
+use std::ops::{Deref, DerefMut};
+
 use crate::{ffi::{self, Camera2D, VrStereoConfig, BlendMode}, prelude::{Color, RenderTexture, Shader}};
 use super::Raylib;
 
-pub struct DrawHandle {
-    _private: ()
+pub struct DrawHandle<'a> {
+    pub(crate) rl: &'a mut Raylib
 }
 
 /// # Drawing (module: `rcore`)
@@ -11,26 +13,39 @@ pub struct DrawHandle {
 /// ---
 impl Raylib {
     /// Setup canvas (framebuffer) to start drawing
-    pub fn begin_drawing(&mut self, f: impl FnOnce(&mut Self, &mut DrawHandle)) {
+    pub fn begin_drawing(&mut self, f: impl FnOnce(&mut DrawHandle)) {
         unsafe { ffi::BeginDrawing() }
-        let mut d = DrawHandle { _private: () };
-        f(self, &mut d);
+        let mut d = DrawHandle { rl: self };
+        f(&mut d);
         unsafe { ffi::EndDrawing() }
     }
 
     /// Begin drawing to render texture
-    pub fn begin_texture_mode(&mut self, target: &mut RenderTexture, f: impl FnOnce(&mut Self, &mut DrawHandle)) {
+    pub fn begin_texture_mode(&mut self, target: &mut RenderTexture, f: impl FnOnce(&mut DrawHandle)) {
         unsafe { ffi::BeginTextureMode(target.get_ffi_texture()) }
-        let mut d = DrawHandle { _private: () };
-        f(self, &mut d);
+        let mut d = DrawHandle { rl: self };
+        f(&mut d);
         unsafe { ffi::EndTextureMode() }
+    }
+}
+
+impl Deref for DrawHandle<'_> {
+    type Target = Raylib;
+    fn deref(&self) -> &Self::Target {
+        self.rl
+    }
+}
+
+impl DerefMut for DrawHandle<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.rl
     }
 }
 
 /// # Begin modes (module: `rcore`)
 /// 
 /// ---
-impl DrawHandle {
+impl DrawHandle<'_> {
     // Begin 2D mode with custom camera (2D)
     pub fn begin_mode2d(&mut self, camera: Camera2D, f: impl FnOnce(&mut DrawHandle)) {
         unsafe { ffi::BeginMode2D(camera) }
@@ -63,6 +78,6 @@ impl DrawHandle {
     }
 }
 
-impl DrawHandle {
-    pub fn clear_background(&mut self, color: Color) { unsafe { ffi::ClearBackground(color) } }
+impl DrawHandle<'_> {
+    pub fn clear_background(&self, color: Color) { unsafe { ffi::ClearBackground(color) } }
 }

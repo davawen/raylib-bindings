@@ -8,7 +8,7 @@ pub mod input;
 pub mod other;
 mod default_font;
 
-use std::{ptr::NonNull, ffi::c_void, mem::ManuallyDrop};
+use std::{ffi::c_void, mem::ManuallyDrop, ptr::NonNull};
 
 use crate::{ffi, text::bitmap::BitmapFontAtlas};
 

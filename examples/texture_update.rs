@@ -3,7 +3,7 @@ use raylib::prelude::*;
 fn main() {
     let mut rl = Raylib::init_window(800, 800, "test", 60);
 
-    let mut texture = Texture::load_empty(&mut rl, 500, 500, PixelFormat::UncompressedGrayAlpha).unwrap();
+    let texture = Texture::load_empty(&mut rl, 500, 500, PixelFormat::UncompressedGrayAlpha).unwrap();
 
     let mut b = vec![0; 100*100*2];
     for i in 0..100*100 {
@@ -18,10 +18,10 @@ fn main() {
     texture.update_rec_raw(rec, &b).unwrap();
 
     while !rl.window_should_close() {
-        rl.begin_drawing(|_, draw| {
-            draw.clear_background(Color::GRAY);
-            draw.circle(300.0, 300.0, 20.0, Color::RED);
-            draw.texture(&texture, 100.0, 100.0, Color::WHITE);
+        rl.begin_drawing(|rl| {
+            rl.clear_background(Color::GRAY);
+            rl.circle(300.0, 300.0, 20.0, Color::RED);
+            rl.texture(&texture, 100.0, 100.0, Color::WHITE);
         });
     }
 }

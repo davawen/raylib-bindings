@@ -79,12 +79,12 @@ pub trait FontAtlas {
     /// The texture used by the font atlas.
     fn texture(&self) -> &Texture;
     /// Get the rectangle in the texture associated to the given glyph index.
-    fn get_glyph(&mut self, index: u16, size: f32) -> Rectangle;
+    fn get_glyph(&self, index: u16, size: f32) -> Rectangle;
 }
 
-impl DrawHandle {
+impl DrawHandle<'_> {
     /// Returns the width and height occupied by the given text in the given font, drawn at the given size.
-    pub fn measure_text<F: FontAtlas>(&mut self, atlas: &mut F, text: &str, size: f32) -> Vector2 {
+    pub fn measure_text<F: FontAtlas>(&self, atlas: &F, text: &str, size: f32) -> Vector2 {
         let mut pos = Vector2::ZERO;
         let mut previous = None;
         for char in text.chars() {
@@ -105,7 +105,7 @@ impl DrawHandle {
     /// For best text quality, prefer creating the font atlas at the same size that will be used for drawing.
     /// 
     /// Returns the coordinates of the last characters .
-    pub fn text<F: FontAtlas>(&mut self, atlas: &mut F, text: &str, mut pos: Vector2, size: f32, color: Color) -> Vector2 {
+    pub fn text<F: FontAtlas>(&self, atlas: &F, text: &str, mut pos: Vector2, size: f32, color: Color) -> Vector2 {
         let mut previous = None;
         for char in text.chars() {
             let glyph_index = atlas.glyph_index(char);
@@ -120,7 +120,7 @@ impl DrawHandle {
     }
 
     /// Draws a single character at the specified location.
-    pub fn codepoint<F: FontAtlas>(&mut self, atlas: &mut F, codepoint: char, pos: Vector2, size: f32, color: Color) {
+    pub fn codepoint<F: FontAtlas>(&self, atlas: &F, codepoint: char, pos: Vector2, size: f32, color: Color) {
         let glyph_index = atlas.glyph_index(codepoint);
         self.glyph(atlas, glyph_index, pos, size, color);
     }
@@ -128,7 +128,7 @@ impl DrawHandle {
     /// Draw a glyph of the given font.
     /// Caches the glyph if it wasn't previously rendered.
     #[inline]
-    pub fn glyph<F: FontAtlas>(&mut self, atlas: &mut F, glyph_index: u16, pos: Vector2, size: f32, color: Color) {
+    pub fn glyph<F: FontAtlas>(&self, atlas: &F, glyph_index: u16, pos: Vector2, size: f32, color: Color) {
         let rec = atlas.get_glyph(glyph_index, size);
         let metrics = atlas.metrics_indexed(glyph_index, size);
         let line = atlas.line_metrics(size).unwrap_or_default();
@@ -140,7 +140,7 @@ impl DrawHandle {
         self.texture_pro(atlas.texture(), rec, dest, Vector2::ZERO, 0.0, color);
     }
 
-    pub fn fps(&mut self, pos: Vector2) {
+    pub fn fps(&self, pos: Vector2) {
         unsafe { ffi::DrawFPS(pos.x as i32, pos.y as i32) }
     }
 }

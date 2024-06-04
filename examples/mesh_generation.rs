@@ -52,11 +52,11 @@ fn main() {
     while !rl.window_should_close() {
         camera.update_camera(CameraMode::Orbital);
 
-        rl.begin_drawing(|_, draw| {
-            draw.clear_background(Color::WHITE);
+        rl.begin_drawing(|rl| {
+            rl.clear_background(Color::WHITE);
 
-            draw.begin_mode3d(camera, |draw| {
-                draw.mesh(&helix, &mat, Matrix::IDENTITY);
+            rl.begin_mode3d(camera, |rl| {
+                rl.mesh(&helix, &mat, Matrix::IDENTITY);
             });
         });
     }

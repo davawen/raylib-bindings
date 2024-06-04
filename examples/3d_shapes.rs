@@ -40,40 +40,40 @@ fn main() {
             target = RenderTexture::load(&mut rl, size.x as u32, size.y as u32).unwrap();
         }
 
-        rl.begin_texture_mode(&mut target, |_, draw| {
-            draw.clear_background(Color::RAYWHITE);
-            draw.begin_mode3d(camera, |draw| {
-                draw.cube(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::RED);
-                draw.cube_wires(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::GOLD);
-                draw.cube_wires(vec3(-4.0, 0.0, -2.0), 3.0, 6.0, 2.0, Color::MAROON);
+        rl.begin_texture_mode(&mut target, |rl| {
+            rl.clear_background(Color::RAYWHITE);
+            rl.begin_mode3d(camera, |rl| {
+                rl.cube(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::RED);
+                rl.cube_wires(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::GOLD);
+                rl.cube_wires(vec3(-4.0, 0.0, -2.0), 3.0, 6.0, 2.0, Color::MAROON);
 
-                draw.sphere(vec3(-1.0, 0.0, -2.0), 1.0, Color::GREEN);
-                draw.sphere_wires(vec3(1.0, 0.0, 2.0), 2.0, Color::LIME);
+                rl.sphere(vec3(-1.0, 0.0, -2.0), 1.0, Color::GREEN);
+                rl.sphere_wires(vec3(1.0, 0.0, 2.0), 2.0, Color::LIME);
 
-                draw.cylinder(vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::SKYBLUE);
-                draw.cylinder_wires(vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::DARKBLUE);
-                draw.cylinder_wires(vec3(4.5, -1.0, 2.0), 1.0, 1.0, 2.0, 6, Color::BROWN);
+                rl.cylinder(vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::SKYBLUE);
+                rl.cylinder_wires(vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::DARKBLUE);
+                rl.cylinder_wires(vec3(4.5, -1.0, 2.0), 1.0, 1.0, 2.0, 6, Color::BROWN);
 
-                draw.cylinder(vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::GOLD);
-                draw.cylinder_wires(vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::PINK);
+                rl.cylinder(vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::GOLD);
+                rl.cylinder_wires(vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::PINK);
 
-                draw.capsule(vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::VIOLET);
-                draw.capsule_wires(vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::PURPLE);
-                draw.grid(20, 1.0);
+                rl.capsule(vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::VIOLET);
+                rl.capsule_wires(vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::PURPLE);
+                rl.grid(20, 1.0);
             })
         });
 
-        rl.begin_drawing(|rl, draw| {
-            draw.clear_background(Color::RAYWHITE);
+        rl.begin_drawing(|rl| {
+            rl.clear_background(Color::RAYWHITE);
             let src = Rectangle::new(0.0, 0.0, size.x, -size.y);
             let dest = Rectangle::from_vecs(Vector2::ZERO, rl.get_render_size());
-            draw.texture_pro(target.texture(), src, dest, Vector2::ZERO, 0.0, Color::WHITE);
-            draw.text(rl.default_font(), &format!("Scale factor: {scale_factor} (press C and V!)"), Vector2::splat(10.0), 20.0, Color::BLACK);
+            rl.texture_pro(target.texture(), src, dest, Vector2::ZERO, 0.0, Color::WHITE);
+            rl.text(rl.default_font(), &format!("Scale factor: {scale_factor} (press C and V!)"), Vector2::splat(10.0), 20.0, Color::BLACK);
 
             let right_text = "Press ESC to unlock cursor";
-            let right_text_len = draw.measure_text(rl.default_font(), right_text, 20.0).x;
+            let right_text_len = rl.measure_text(rl.default_font(), right_text, 20.0).x;
             let pos = vec2(rl.get_render_width() - right_text_len - 10.0, 10.0);
-            draw.text(rl.default_font(), right_text, pos, 20.0, Color::BLACK);
+            rl.text(rl.default_font(), right_text, pos, 20.0, Color::BLACK);
         });
     }
 }

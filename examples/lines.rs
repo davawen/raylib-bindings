@@ -12,11 +12,11 @@ fn main() {
             points.retain(|&point| point.distance_sqr(rl.get_mouse_pos()) > 5.0*5.0);
         }
 
-        rl.begin_drawing(|_, draw| {
-            draw.clear_background(Color::RAYWHITE);
-            draw.line_strip(&points, Color::BLACK);
+        rl.begin_drawing(|rl| {
+            rl.clear_background(Color::RAYWHITE);
+            rl.line_strip(&points, Color::BLACK);
             for &point in &points {
-                draw.circle_v(point, 5.0, Color::RED);
+                rl.circle_v(point, 5.0, Color::RED);
             }
         });
     }

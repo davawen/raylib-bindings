@@ -246,8 +246,8 @@ impl Image {
     /// let rgb = Image::load_raw(&mut rl, &data, 3, 3, PixelFormat::UncompressedR8G8B8).unwrap();
     /// let rgb = Texture::load_from_image(&mut rl, &rgb).unwrap();;
     /// while !rl.window_should_close() {
-    ///     rl.begin_drawing(|_, draw| {
-    ///         draw.texture(&rgb, 0.0, 0.0, Color::WHITE);
+    ///     rl.begin_drawing(|rl| {
+    ///         rl.texture(&rgb, 0.0, 0.0, Color::WHITE);
     ///     });
     ///     # break
     /// }

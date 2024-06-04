@@ -86,10 +86,10 @@ pub trait RaylibGamepadFunctions {
     /// ```
     /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
-    /// # rl.begin_drawing(|rl, draw| {
+    /// # rl.begin_drawing(|rl| {
     /// if let Some(gamepad) = rl.is_gamepad_available(0) {
     ///     if rl.is_gamepad_button_down(gamepad, GamepadButton::MiddleLeft) {
-    ///         draw.circle(100.0, 100.0, 20.0, Color::RED);
+    ///         rl.circle(100.0, 100.0, 20.0, Color::RED);
     ///     }
     /// }
     /// # });
@@ -304,9 +304,9 @@ pub trait RaylibTouchFunctions {
     /// ```
     /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
-    /// # rl.begin_drawing(|rl, draw| {
+    /// # rl.begin_drawing(|rl| {
     /// if let Some(pos) = rl.get_touch_pos() {
-    ///     draw.circle_v(pos, 30.0, Color::ORANGE);
+    ///     rl.circle_v(pos, 30.0, Color::ORANGE);
     /// }
     /// # });
     /// ```
@@ -329,11 +329,11 @@ pub trait RaylibTouchFunctions {
     /// ```
     /// # use raylib::prelude::*;
     /// # let mut rl = Raylib::init_window(100, 100, "", 60);
-    /// # rl.begin_drawing(|rl, draw| {
+    /// # rl.begin_drawing(|rl| {
     /// for (idx, pos) in rl.get_touch_positions().enumerate() {
-    ///     draw.circle_v(pos, 30.0, Color::ORANGE);
+    ///     rl.circle_v(pos, 30.0, Color::ORANGE);
     ///     let pos = pos - vec2(10.0, 70.0);
-    ///     draw.text(rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
+    ///     rl.text(rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
     /// }
     /// # });
     /// ```

@@ -57,7 +57,7 @@ impl FontAtlas for BitmapFontAtlas {
     fn kern_indexed(&self, _left: u16, _right: u16, _size: f32) -> Option<f32> { None }
 
     fn texture(&self) -> &Texture { &self.texture }
-    fn get_glyph(&mut self, index: u16, _size: f32) -> Rectangle {
+    fn get_glyph(&self, index: u16, _size: f32) -> Rectangle {
         self.glyphs[index as usize].rec
     }
 }
