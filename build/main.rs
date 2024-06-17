@@ -13,7 +13,20 @@ macro_rules! feature {
     };
 }
 
+fn check_dynamic_runtime() {
+    #[cfg(target_feature = "crt-static")]
+    {
+        panic!(r#"ERROR (raylib-bindings): Cannot statically link C runtime with executable!
+  GLFW will fail to detect platform info if the C standard library is linked statically.
+  If you are on musl (or on another platform that links the C runtime statically by default), try compiling like this:
+
+  RUSTFLAGS='-C target-feature=-crt-static' cargo build"#);
+    }
+}
+
 fn main() {
+    check_dynamic_runtime();
+
     let mut config = cmake::Config::new("raylib");
 
     let path = config
