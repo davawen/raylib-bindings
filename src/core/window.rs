@@ -109,10 +109,11 @@ pub fn is_window_focused(_: &Raylib) -> bool { unsafe { ffi::IsWindowFocused() }
 /// Check if window has been resized last frame
 pub fn is_window_resized(_: &Raylib) -> bool { unsafe { ffi::IsWindowResized() } }
 /// Checks if at least one of the given flags is enabled
-/// Usage:
+/// Example usage:
 /// ```
 /// # use raylib::prelude::*;
-/// is_window_state((ConfigFlags::WINDOW_HIGHDPI | WindowFlags::VSYNC_HINT).bits());
+/// # let rl = &init_window(100, 100, "Test", 60);
+/// is_window_state(rl, ConfigFlags::HIGHDPI.bits() | WindowFlags::VSYNC_HINT.bits());
 /// ```
 pub fn is_window_state(_: &Raylib, bits: u32) -> bool { unsafe { ffi::IsWindowState(bits) } }                      
 /// Set runtime window configuration state using flags (only PLATFORM_DESKTOP)

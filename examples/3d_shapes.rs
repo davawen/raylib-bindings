@@ -2,7 +2,7 @@ use raylib::{prelude::*, core::cursor::RaylibCursorFunctions};
 
 fn main() {
     let rl = &mut init_window(800, 450, "Shapes", 60);
-    set_window_state(rl, ConfigFlags::FLAG_WINDOW_RESIZABLE);
+    set_window_state(rl, WindowFlags::RESIZABLE);
     rl.set_exit_key(KeyboardKey::Null);
 
     let mut camera = Camera3D {

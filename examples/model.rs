@@ -49,7 +49,7 @@ impl Light {
 
 fn main() {
     let rl = &mut init_window(800, 800, "", 60);
-    set_window_state(rl, ConfigFlags::FLAG_WINDOW_RESIZABLE);
+    set_window_state(rl, WindowFlags::RESIZABLE);
     let shader = Shader::load(rl, Some("assets/light.vs"), Some("assets/light.fs")).unwrap();
     let u_ambient = shader.get_uniform("ambient");
     shader.set_uniform_value(u_ambient, vec4(0.05, 0.05, 0.1, 1.0));

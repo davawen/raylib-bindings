@@ -2,7 +2,7 @@ use raylib::prelude::*;
 
 fn main() {
     let rl = &mut init_window(1800, 1100, "Rust text!", 60);
-    set_window_state(rl, ConfigFlags::FLAG_WINDOW_RESIZABLE);
+    set_window_state(rl, WindowFlags::RESIZABLE);
 
     let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
     // let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
