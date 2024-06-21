@@ -6,7 +6,7 @@ fn main() {
     let width = 800;
     let height = 450;
 
-    let mut rl = Raylib::init_window(width as i32, height as i32, "Procedural textures", 60);
+    let mut rl = &mut init_window(width as i32, height as i32, "Procedural textures", 60);
 
     let images = [
         Image::gen_gradient_linear(&mut rl, width, height, 0.0, Color::RED, Color::BLUE),
@@ -34,7 +34,7 @@ fn main() {
 
     let mut current = 0;
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         if rl.is_mouse_button_pressed(MouseButton::Left) {
             current += 1;
             if current >= textures.len() {

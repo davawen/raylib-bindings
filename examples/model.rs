@@ -48,13 +48,13 @@ impl Light {
 }
 
 fn main() {
-    let mut rl = Raylib::init_window(800, 800, "", 60);
-    rl.set_window_state(ConfigFlags::FLAG_WINDOW_RESIZABLE);
-    let shader = Shader::load(&mut rl, Some("assets/light.vs"), Some("assets/light.fs")).unwrap();
+    let rl = &mut init_window(800, 800, "", 60);
+    set_window_state(rl, ConfigFlags::FLAG_WINDOW_RESIZABLE);
+    let shader = Shader::load(rl, Some("assets/light.vs"), Some("assets/light.fs")).unwrap();
     let u_ambient = shader.get_uniform("ambient");
     shader.set_uniform_value(u_ambient, vec4(0.05, 0.05, 0.1, 1.0));
 
-    let mut mat = Material::load_default(&mut rl);
+    let mut mat = Material::load_default(rl);
     let mesh = Mesh::gen_cube(1.0, 1.0, 1.0);
 
     let mut lights = [
@@ -88,7 +88,7 @@ fn main() {
     }).collect();
 
     let light_transforms: Vec<_> = lights.iter().map(|l| (l.color, Matrix::translation(l.position))).collect();
-    let mut light_mat = Material::load_default(&mut rl);
+    let mut light_mat = Material::load_default(rl);
     let light_mesh = Mesh::gen_sphere(0.1, 16, 16);
 
     let mut camera = Camera3D {
@@ -101,7 +101,7 @@ fn main() {
 
     let loc_view = shader.get_uniform("viewPos");
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         camera.update_camera(CameraMode::Orbital);
         shader.set_uniform_value(loc_view, camera.position);
 

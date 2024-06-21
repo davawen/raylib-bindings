@@ -1,11 +1,11 @@
 use raylib::prelude::*;
 
 fn main() {
-    let mut rl = Raylib::init_window(800, 800, "Lines!", 60);
+    let rl = &mut init_window(800, 800, "Lines!", 60);
 
     let mut points = Vec::new();
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         if rl.is_mouse_button_pressed(MouseButton::Left) {
             points.push(rl.get_mouse_pos());
         } else if rl.is_mouse_button_pressed(MouseButton::Right) {

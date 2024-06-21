@@ -18,16 +18,16 @@ impl Shader {
     /// # Example
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(500, 500, "shader test", 60);
-    /// let shader = Shader::load(&mut rl, None, Some("assets/mandelbrot.glsl")).unwrap();
+    /// # let rl = &mut init_window(500, 500, "shader test", 60);
+    /// let shader = Shader::load(rl, None, Some("assets/mandelbrot.glsl")).unwrap();
     /// let resolution_uniform = shader.get_uniform("resolution");
     /// let camera_pos_uniform = shader.get_uniform("camera_pos");
     /// let camera_pos = Vector2::ZERO;
-    /// while !rl.window_should_close() {
-    ///     shader.set_uniform_value(resolution_uniform, rl.get_screen_size());
+    /// while !window_should_close(rl) {
+    ///     shader.set_uniform_value(resolution_uniform, get_screen_size(rl));
     ///     shader.set_uniform_value(camera_pos_uniform, camera_pos);
     ///     rl.begin_drawing(|rl| rl.begin_shader_mode(&shader, |rl| {
-    ///         rl.rectangle_v(Vector2::ZERO, rl.get_screen_size(), Color::WHITE);
+    ///         rl.rectangle_v(Vector2::ZERO, get_screen_size(rl), Color::WHITE);
     ///     }));
     ///     # break
     /// }

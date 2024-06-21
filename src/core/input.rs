@@ -85,7 +85,7 @@ pub trait RaylibGamepadFunctions {
     /// # Examples
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let rl = &mut init_window(100, 100, "", 60);
     /// # rl.begin_drawing(|rl| {
     /// if let Some(gamepad) = rl.is_gamepad_available(0) {
     ///     if rl.is_gamepad_button_down(gamepad, GamepadButton::MiddleLeft) {
@@ -120,7 +120,7 @@ pub trait RaylibGamepadFunctions {
     /// Get a `Cow<str>` with invalid characters removed:
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let rl = &mut init_window(100, 100, "", 60);
     /// if let Some(gamepad) = rl.is_gamepad_available(0) {
     ///     let name = rl.get_gamepad_name_cstr(gamepad).map(|s| s.to_string_lossy());
     /// }
@@ -303,7 +303,7 @@ pub trait RaylibTouchFunctions {
     /// # Examples
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let rl = &mut init_window(100, 100, "", 60);
     /// # rl.begin_drawing(|rl| {
     /// if let Some(pos) = rl.get_touch_pos() {
     ///     rl.circle_v(pos, 30.0, Color::ORANGE);
@@ -328,7 +328,7 @@ pub trait RaylibTouchFunctions {
     /// Draw a circle at every touch point:
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let rl = &mut init_window(100, 100, "", 60);
     /// # rl.begin_drawing(|rl| {
     /// for (idx, pos) in rl.get_touch_positions().enumerate() {
     ///     rl.circle_v(pos, 30.0, Color::ORANGE);
@@ -340,7 +340,7 @@ pub trait RaylibTouchFunctions {
     /// Get the identifier of every point:
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(100, 100, "", 60);
+    /// # let rl = &mut init_window(100, 100, "", 60);
     /// for (pos, id) in rl.get_touch_positions().zip(rl.get_touch_point_ids()) {
     ///     println!("At {pos:?}: {id}");
     /// }

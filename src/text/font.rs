@@ -14,10 +14,10 @@ impl TrueTypeFont {
     /// Load a font present in the project directory and draw text with it:
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(800, 800, "Font rendering", 60);
+    /// # let rl = &mut init_window(800, 800, "Font rendering", 60);
     /// let font = TrueTypeFont::from_bytes(include_bytes!("../../assets/TerminusTTF.ttf").as_slice()).unwrap();
-    /// let mut atlas = font.atlas(&mut rl, 32.0);
-    /// while !rl.window_should_close() {
+    /// let mut atlas = font.atlas(rl, 32.0);
+    /// while !window_should_close(rl) {
     ///     rl.begin_drawing(|rl| {
     ///         rl.clear_background(Color::RAYWHITE);
     ///         rl.text(&mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);

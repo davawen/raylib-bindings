@@ -1,12 +1,12 @@
 use raylib::prelude::*;
 
 fn main() {
-    let mut rl = Raylib::init_window(800, 800, "Test input", 60);
+    let rl = &mut init_window(800, 800, "Test input", 60);
     let mut s = String::new();
 
     let mut cursor_pos = 0;
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         while let Some(c) = rl.get_char_pressed() {
             s.insert(cursor_pos, c);
             cursor_pos += c.len_utf8();

@@ -1,8 +1,8 @@
 use raylib::{prelude::*, core::cursor::RaylibCursorFunctions};
 
 fn main() {
-    let mut rl = Raylib::init_window(800, 450, "Shapes", 60);
-    rl.set_window_state(ConfigFlags::FLAG_WINDOW_RESIZABLE);
+    let rl = &mut init_window(800, 450, "Shapes", 60);
+    set_window_state(rl, ConfigFlags::FLAG_WINDOW_RESIZABLE);
     rl.set_exit_key(KeyboardKey::Null);
 
     let mut camera = Camera3D {
@@ -16,8 +16,8 @@ fn main() {
     rl.disable_cursor();
 
     let mut scale_factor = 1.0;
-    let mut target = RenderTexture::load(&mut rl, 800, 450).unwrap(); // render at quarter resolution
-    while !rl.window_should_close() {
+    let mut target = RenderTexture::load(rl, 800, 450).unwrap(); // render at quarter resolution
+    while !window_should_close(rl) {
         if rl.is_key_pressed(KeyboardKey::Escape) {
             rl.enable_cursor();
         } else if !rl.is_cursor_hidden() && rl.is_mouse_button_pressed(MouseButton::Left) {
@@ -35,9 +35,9 @@ fn main() {
             scale_factor += 1.0;
         }
 
-        let size = rl.get_render_size() / scale_factor;
-        if rl.is_window_resized() || prev_scale_factor != scale_factor {
-            target = RenderTexture::load(&mut rl, size.x as u32, size.y as u32).unwrap();
+        let size = get_render_size(rl) / scale_factor;
+        if is_window_resized(rl) || prev_scale_factor != scale_factor {
+            target = RenderTexture::load(rl, size.x as u32, size.y as u32).unwrap();
         }
 
         rl.begin_texture_mode(&mut target, |rl| {
@@ -66,13 +66,13 @@ fn main() {
         rl.begin_drawing(|rl| {
             rl.clear_background(Color::RAYWHITE);
             let src = Rectangle::new(0.0, 0.0, size.x, -size.y);
-            let dest = Rectangle::from_vecs(Vector2::ZERO, rl.get_render_size());
+            let dest = Rectangle::from_vecs(Vector2::ZERO, get_render_size(rl));
             rl.texture_pro(target.texture(), src, dest, Vector2::ZERO, 0.0, Color::WHITE);
             rl.text(rl.default_font(), &format!("Scale factor: {scale_factor} (press C and V!)"), Vector2::splat(10.0), 20.0, Color::BLACK);
 
             let right_text = "Press ESC to unlock cursor";
             let right_text_len = rl.measure_text(rl.default_font(), right_text, 20.0).x;
-            let pos = vec2(rl.get_render_width() - right_text_len - 10.0, 10.0);
+            let pos = vec2(get_render_width(rl) - right_text_len - 10.0, 10.0);
             rl.text(rl.default_font(), right_text, pos, 20.0, Color::BLACK);
         });
     }

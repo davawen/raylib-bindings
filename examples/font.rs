@@ -1,17 +1,17 @@
 use raylib::prelude::*;
 
 fn main() {
-    let mut rl = Raylib::init_window(1800, 1100, "Rust text!", 60);
-    rl.set_window_state(ConfigFlags::FLAG_WINDOW_RESIZABLE);
+    let rl = &mut init_window(1800, 1100, "Rust text!", 60);
+    set_window_state(rl, ConfigFlags::FLAG_WINDOW_RESIZABLE);
 
     let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
     // let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
-    let mut rendered = font.atlas(&mut rl, 20.0);
+    let mut rendered = font.atlas(rl, 20.0);
 
     let mut scroll = 0;
     let mut size = 20.0;
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         rl.begin_drawing(|rl| {
             rl.clear_background(Color::RAYWHITE);
 
@@ -34,7 +34,7 @@ fn main() {
 
             let offset = size*1.5;
 
-            let (w, h) = (rl.get_render_width() as i32, rl.get_render_height() as i32);
+            let (w, h) = (get_render_width(rl) as i32, get_render_height(rl) as i32);
             let (nw, nh) = ((w - 50 - left_size as i32 - 25)/(offset as i32), (h-100)/(offset as i32));
 
             for i in 0..rendered.glyph_count() as u16 {

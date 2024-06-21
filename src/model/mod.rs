@@ -14,7 +14,7 @@ pub use material::*;
 /// A handle created with a camera that allows 3d drawing.
 /// ```
 /// # use raylib::prelude::*;
-/// # let mut rl = Raylib::init_window(800, 800, "3d", 60);
+/// # let rl = &mut init_window(800, 800, "3d", 60);
 /// let camera = Camera {
 ///     position: vec3(0.0, 0.0, 1.0),
 ///     target: vec3(0.0, 0.0, 0.0),

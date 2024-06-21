@@ -102,7 +102,7 @@ impl MeshBuilder {
     /// Creates a new mesh builder.
     /// ```
     /// # use raylib::prelude::*;
-    /// # let mut rl = Raylib::init_window(800, 800, "Test", 60);
+    /// # let rl = &mut init_window(800, 800, "Test", 60);
     /// let vertices = &[vec3(0.0, 0.0, 0.0), vec3(0.5, 1.0, 0.0), vec3(1.0, 0.0, 0.0)];
     /// let texcoords = &[vec2(0.0, 0.0), vec2(0.5, 1.0), vec2(1.0, 0.0)];
     /// let normals = &[vec3(-1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(1.0, 0.0, 0.0)];

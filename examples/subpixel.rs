@@ -1,19 +1,19 @@
 use raylib::prelude::*;
 
 fn main() {
-    let mut rl = Raylib::init_window(400, 400, "Subpixel positioning", 60);
+    let rl = &mut init_window(400, 400, "Subpixel positioning", 60);
 
     let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
-    let mut rendered = font.atlas(&mut rl, 40.0);
+    let mut rendered = font.atlas(rl, 40.0);
 
     let mut pos = 0.0;
 
     let mut size = 40.0;
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         size += rl.get_mouse_wheel_move();
         if size != rendered.size() {
-            rendered.reatlas(&mut rl, size);
+            rendered.reatlas(rl, size);
         }
 
         if rl.is_key_down(KeyboardKey::Right) {

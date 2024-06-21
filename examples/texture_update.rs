@@ -1,7 +1,7 @@
 use raylib::prelude::*;
 
 fn main() {
-    let mut rl = Raylib::init_window(800, 800, "test", 60);
+    let mut rl = &mut init_window(800, 800, "test", 60);
 
     let texture = Texture::load_empty(&mut rl, 500, 500, PixelFormat::UncompressedGrayAlpha).unwrap();
 
@@ -17,7 +17,7 @@ fn main() {
     let rec = Rectangle::new(300.0, 300.0, 100.0, 100.0);
     texture.update_rec_raw(rec, &b).unwrap();
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         rl.begin_drawing(|rl| {
             rl.clear_background(Color::GRAY);
             rl.circle(300.0, 300.0, 20.0, Color::RED);

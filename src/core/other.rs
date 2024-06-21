@@ -69,7 +69,7 @@ impl Raylib {
     /// ```
     /// use std::time::SystemTime;
     /// use raylib::prelude::*;
-    /// let rl = Raylib::init_window(800, 800, "Random value", 60);
+    /// let rl = &mut init_window(800, 800, "Random value", 60);
     /// rl.set_random_seed(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() as u32)
     /// ```
     pub fn set_random_seed(&self, seed: u32) {

@@ -1,7 +1,7 @@
 use raylib::prelude::*;
 
 fn main() {
-    let mut rl = Raylib::init_window(800, 800, "Mesh Generation", 60);
+    let rl = &mut init_window(800, 800, "Mesh Generation", 60);
 
     let mut camera = Camera {
         position: vec3(0.0, 5.0, 3.0),
@@ -46,10 +46,10 @@ fn main() {
     let helix = MeshBuilder::new(&helix, &helix.iter().map(|_| vec2(0.0, 0.0)).collect::<Vec<_>>())
         .build();
 
-    let mut mat = Material::load_default(&mut rl);
+    let mut mat = Material::load_default(rl);
     mat.set_color(MaterialMapIndex::Albedo, Color::RED);
 
-    while !rl.window_should_close() {
+    while !window_should_close(rl) {
         camera.update_camera(CameraMode::Orbital);
 
         rl.begin_drawing(|rl| {
