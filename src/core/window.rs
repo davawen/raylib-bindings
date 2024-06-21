@@ -9,38 +9,41 @@ use super::Raylib;
 
 bitflags! {
     pub struct ConfigFlags: u32 {
-        /// Set to try enabling V-Sync on GPU
-        const FLAG_VSYNC_HINT = ffi::ConfigFlags::VsyncHint as u32;
-        /// Set to run program in fullscreen
-        const FLAG_FULLSCREEN_MODE= ffi::ConfigFlags::FullscreenMode as u32;
-        /// Set to allow resizable window
-        const FLAG_WINDOW_RESIZABLE = ffi::ConfigFlags::WindowResizable as u32;
-        /// Set to disable window decoration (frame and buttons)
-        const FLAG_WINDOW_UNDECORATED = ffi::ConfigFlags::WindowUndecorated as u32;
-        /// Set to hide window
-        const FLAG_WINDOW_HIDDEN= ffi::ConfigFlags::WindowHidden as u32;
-        /// Set to minimize window (iconify)
-        const FLAG_WINDOW_MINIMIZED = ffi::ConfigFlags::WindowMinimized as u32;
-        /// Set to maximize window (expanded to monitor)
-        const FLAG_WINDOW_MAXIMIZED = ffi::ConfigFlags::WindowMaximized as u32;
-        /// Set to window non focused
-        const FLAG_WINDOW_UNFOCUSED = ffi::ConfigFlags::WindowUnfocused as u32;
-        /// Set to window always on top
-        const FLAG_WINDOW_TOPMOST = ffi::ConfigFlags::WindowTopmost as u32;
-        /// Set to allow windows running while minimized
-        const FLAG_WINDOW_ALWAYS_RUN= ffi::ConfigFlags::WindowAlwaysRun as u32;
-        /// Set to allow transparent framebuffer
-        const FLAG_WINDOW_TRANSPARENT = ffi::ConfigFlags::WindowTransparent as u32;
         /// Set to support HighDPI
-        const FLAG_WINDOW_HIGHDPI = ffi::ConfigFlags::WindowHighdpi as u32;
-        /// Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
-        const FLAG_WINDOW_MOUSE_PASSTHROUGH = ffi::ConfigFlags::WindowMousePassthrough as u32;
-        /// Set to run program in borderless windowed mode
-        const FLAG_BORDERLESS_WINDOWED_MODE = ffi::ConfigFlags::BorderlessWindowedMode as u32;
+        const HIGHDPI = ffi::ConfigFlags::WindowHighdpi as u32;
+        /// Set to allow transparent framebuffer
+        const TRANSPARENT = ffi::ConfigFlags::WindowTransparent as u32;
         /// Set to try enabling MSAA 4X
-        const FLAG_MSAA_4X_HINT = ffi::ConfigFlags::Msaa4XHint as u32;
+        const MSAA_4X_HINT = ffi::ConfigFlags::Msaa4XHint as u32;
+    }
+
+    pub struct WindowFlags: u32 {
+        /// Set to try enabling V-Sync on GPU
+        const VSYNC_HINT = ffi::ConfigFlags::VsyncHint as u32;
+        /// Set to run program in fullscreen
+        const FULLSCREEN = ffi::ConfigFlags::FullscreenMode as u32;
+        /// Set to allow resizable window
+        const RESIZABLE = ffi::ConfigFlags::WindowResizable as u32;
+        /// Set to disable window decoration (frame and buttons)
+        const UNDECORATED = ffi::ConfigFlags::WindowUndecorated as u32;
+        /// Set to hide window
+        const HIDDEN= ffi::ConfigFlags::WindowHidden as u32;
+        /// Set to minimize window (iconify)
+        const MINIMIZED = ffi::ConfigFlags::WindowMinimized as u32;
+        /// Set to maximize window (expanded to monitor)
+        const MAXIMIZED = ffi::ConfigFlags::WindowMaximized as u32;
+        /// Set to window non focused
+        const UNFOCUSED = ffi::ConfigFlags::WindowUnfocused as u32;
+        /// Set to window always on top
+        const TOPMOST = ffi::ConfigFlags::WindowTopmost as u32;
+        /// Set to allow windows running while minimized
+        const ALWAYS_RUN= ffi::ConfigFlags::WindowAlwaysRun as u32;
+        /// Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
+        const MOUSE_PASSTHROUGH = ffi::ConfigFlags::WindowMousePassthrough as u32;
+        /// Set to run program in borderless windowed mode
+        const BORDERLESS = ffi::ConfigFlags::BorderlessWindowedMode as u32;
         /// Set to try enabling interlaced video format (for V3D)
-        const FLAG_INTERLACED_HINT= ffi::ConfigFlags::InterlacedHint as u32;
+        const INTERLACED_HINT = ffi::ConfigFlags::InterlacedHint as u32;
     }
 }
 
@@ -78,7 +81,9 @@ pub fn init_window_cstr(width: i32, height: i32, title: &CStr) -> Raylib {
     this
 }
 
-/// Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
+/// Check if application should close ([`KeyboardKey::Escape`][`ffi::KeyboardKey::Escape`] pressed or windows close icon clicked)
+/// 
+/// To change the default exit key, you can use [`crate::core::input::set_exit_key`].
 pub fn window_should_close(rl: &Raylib) -> bool {
     if rl.quit_requested { return true }
     unsafe { ffi::WindowShouldClose() }
@@ -103,13 +108,25 @@ pub fn is_window_maximized(_: &Raylib) -> bool { unsafe { ffi::IsWindowMaximized
 pub fn is_window_focused(_: &Raylib) -> bool { unsafe { ffi::IsWindowFocused() } }
 /// Check if window has been resized last frame
 pub fn is_window_resized(_: &Raylib) -> bool { unsafe { ffi::IsWindowResized() } }
-/// Check if one specific window flag is enabled
-pub fn is_window_state(_: &Raylib, flag: ffi::ConfigFlags) -> bool { unsafe { ffi::IsWindowState(flag as u32) } }                      
-/// Set window configuration state using flags (only PLATFORM_DESKTOP)
-pub fn set_window_state(_: &mut Raylib, flags: ConfigFlags) { unsafe { ffi::SetWindowState(flags.bits()) } }
+/// Checks if at least one of the given flags is enabled
+/// Usage:
+/// ```
+/// # use raylib::prelude::*;
+/// is_window_state((ConfigFlags::WINDOW_HIGHDPI | WindowFlags::VSYNC_HINT).bits());
+/// ```
+pub fn is_window_state(_: &Raylib, bits: u32) -> bool { unsafe { ffi::IsWindowState(bits) } }                      
+/// Set runtime window configuration state using flags (only PLATFORM_DESKTOP)
+/// 
+/// To use [`ConfigFlags`], see [`set_config_flags`].
+pub fn set_window_state(_: &mut Raylib, flags: WindowFlags) { unsafe { ffi::SetWindowState(flags.bits()) } }
+/// Set window configuration state.
+/// Must be used before the call to [`init_window`], otherwise won't have any effect.
+/// 
+/// To use [`WindowFlags`], see [`set_window_state`].
+pub fn set_config_flags(flags: ConfigFlags) { unsafe { ffi::SetConfigFlags(flags.bits()) } }
 /// Clear the window configuration state flags.
 /// That is, set the given flags to false.
-pub fn clear_window_state(_: &mut Raylib, flags: ConfigFlags) { unsafe { ffi::ClearWindowState(flags.bits()) } }
+pub fn clear_window_state(_: &mut Raylib, flags: WindowFlags) { unsafe { ffi::ClearWindowState(flags.bits()) } }
 /// Toggle window state: fullscreen/windowed (only PLATFORM_DESKTOP)
 pub fn toggle_fullscreen(_: &mut Raylib) { unsafe { ffi::ToggleFullscreen() } }
 /// Toggle window state: borderless windowed (only PLATFORM_DESKTOP)
