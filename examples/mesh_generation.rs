@@ -52,8 +52,8 @@ fn main() {
     while !window_should_close(rl) {
         camera.update_camera(CameraMode::Orbital);
 
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::WHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::WHITE);
 
             rl.begin_mode3d(camera, |rl| {
                 rl.mesh(&helix, &mat, Matrix::IDENTITY);

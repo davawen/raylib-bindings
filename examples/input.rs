@@ -54,8 +54,8 @@ fn main() {
             }
         }
 
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::RAYWHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::RAYWHITE);
 
             let c = std::ffi::CString::new(s.as_str()).unwrap();
             unsafe { raylib::ffi::DrawText(c.as_ptr(), 20, 20, 20, Color::BLACK) };

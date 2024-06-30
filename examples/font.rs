@@ -12,8 +12,8 @@ fn main() {
     let mut size = 20.0;
 
     while !window_should_close(rl) {
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::RAYWHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::RAYWHITE);
 
             if rl.is_key_down(KeyboardKey::LeftShift) {
                 size += rl.get_mouse_wheel_move();

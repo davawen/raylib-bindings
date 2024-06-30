@@ -12,8 +12,8 @@ fn main() {
             points.retain(|&point| point.distance_sqr(rl.get_mouse_pos()) > 5.0*5.0);
         }
 
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::RAYWHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::RAYWHITE);
             rl.line_strip(&points, Color::BLACK);
             for &point in &points {
                 rl.circle_v(point, 5.0, Color::RED);

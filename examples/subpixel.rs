@@ -22,8 +22,8 @@ fn main() {
             pos -= 0.05;
         }
 
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::RAYWHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::RAYWHITE);
 
             rl.text(&mut rendered, &format!("Pos: {pos}"), vec2(20.0, 40.0), size, Color::BLACK);
             rl.circle(20.0, 40.0, 5.0, Color::RED);

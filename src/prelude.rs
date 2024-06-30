@@ -9,7 +9,7 @@ pub use crate::ffi::{
 pub use crate::core::{
     Raylib,
     window::*,
-    // cursor::*,
+    cursor::*,
     draw::*,
     shader::*,
     vr::*,

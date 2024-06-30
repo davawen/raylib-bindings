@@ -7,8 +7,8 @@ fn main() {
     let mut atlases: Vec<_> = (1..=20).map(|px| px as f32).map(|px| font.atlas(rl, px)).collect();
 
     while !window_should_close(rl) {
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::RAYWHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::RAYWHITE);
             let mut y = 30.0;
             for atlas in atlases.iter_mut().rev() {
                 let size = atlas.size();

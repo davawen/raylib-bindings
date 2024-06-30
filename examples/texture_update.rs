@@ -18,8 +18,8 @@ fn main() {
     texture.update_rec_raw(rec, &b).unwrap();
 
     while !window_should_close(rl) {
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::GRAY);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::GRAY);
             rl.circle(300.0, 300.0, 20.0, Color::RED);
             rl.texture(&texture, 100.0, 100.0, Color::WHITE);
         });

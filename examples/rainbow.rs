@@ -7,11 +7,11 @@ fn main() {
     let time_uniform = shader.get_uniform("time");
 
     while !window_should_close(rl) {
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::WHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::WHITE);
 
             shader.set_uniform_value(time_uniform, rl.get_time());
-            rl.begin_shader_mode(&shader, |rl| rl.rectangle(50.0, 50.0, 700.0, 700.0, Color::WHITE));
+            begin_shader_mode(rl, &shader, |rl| rl.rectangle(50.0, 50.0, 700.0, 700.0, Color::WHITE));
         });
     }
 }

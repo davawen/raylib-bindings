@@ -1,13 +1,16 @@
 //! Window functions (module: `rcore`)
 
 use std::{ffi::{CStr, CString}, mem::ManuallyDrop};
-use crate::{ffi::{self, Image, MouseCursor}, prelude::{Vector2, vec2}};
+use crate::{ffi::{self, Image}, prelude::{Vector2, vec2}};
 
 use bitflags::bitflags;
 
-use super::Raylib;
+use super::{other::set_target_fps, Raylib};
 
 bitflags! {
+    /// Window parameters that must be set before window creation (before the call to [`init_window`]).
+    ///
+    /// For other parameters, see [`WindowFlags`].
     pub struct ConfigFlags: u32 {
         /// Set to support HighDPI
         const HIGHDPI = ffi::ConfigFlags::WindowHighdpi as u32;
@@ -17,6 +20,9 @@ bitflags! {
         const MSAA_4X_HINT = ffi::ConfigFlags::Msaa4XHint as u32;
     }
 
+    /// Window parameters that must be set after window creation (after the call to [`init_window`])
+    ///
+    /// For other parameters, see [`ConfigFlags`].
     pub struct WindowFlags: u32 {
         /// Set to try enabling V-Sync on GPU
         const VSYNC_HINT = ffi::ConfigFlags::VsyncHint as u32;
@@ -64,7 +70,7 @@ bitflags! {
 /// Panics if the given title contains null characters
 pub fn init_window(width: i32, height: i32, title: &str, target_fps: i32) -> Raylib {
     let rl = init_window_cstr(width, height, CString::new(title).expect("a title without null characters").as_c_str());
-    rl.set_target_fps(target_fps);
+    set_target_fps(&rl, target_fps);
     rl
 }
 
@@ -218,6 +224,3 @@ pub fn get_clipboard_text(_: &Raylib) -> &'static CStr {
 pub fn enable_event_waiting(_: &Raylib) { unsafe { ffi::EnableEventWaiting() } }
 /// Disable waiting for events on EndDrawing(), automatic events polling   
 pub fn disable_event_waiting(_: &Raylib) { unsafe { ffi::DisableEventWaiting() } }
-
-/// Set the current mouse cursor kind
-pub fn set_mouse_cursor(_: &mut Raylib, cursor: MouseCursor) { unsafe { ffi::SetMouseCursor(cursor as i32) } }

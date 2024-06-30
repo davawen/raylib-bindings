@@ -1,4 +1,4 @@
-use raylib::{prelude::*, core::cursor::RaylibCursorFunctions};
+use raylib::prelude::*;
 
 fn main() {
     let rl = &mut init_window(800, 450, "Shapes", 60);
@@ -13,18 +13,18 @@ fn main() {
         projection: CameraProjection::Perspective as i32
     };
 
-    rl.disable_cursor();
+    disable_cursor(rl);
 
     let mut scale_factor = 1.0;
     let mut target = RenderTexture::load(rl, 800, 450).unwrap(); // render at quarter resolution
     while !window_should_close(rl) {
         if rl.is_key_pressed(KeyboardKey::Escape) {
-            rl.enable_cursor();
-        } else if !rl.is_cursor_hidden() && rl.is_mouse_button_pressed(MouseButton::Left) {
-            rl.disable_cursor();
+            enable_cursor(rl);
+        } else if !is_cursor_hidden(rl) && rl.is_mouse_button_pressed(MouseButton::Left) {
+            disable_cursor(rl);
         }
 
-        if rl.is_cursor_hidden() {
+        if is_cursor_hidden(rl) {
             camera.update_camera(CameraMode::Free);
         }
 
@@ -40,8 +40,8 @@ fn main() {
             target = RenderTexture::load(rl, size.x as u32, size.y as u32).unwrap();
         }
 
-        rl.begin_texture_mode(&mut target, |rl| {
-            rl.clear_background(Color::RAYWHITE);
+        begin_texture_mode(rl, &mut target, |rl| {
+            clear_background(rl, Color::RAYWHITE);
             rl.begin_mode3d(camera, |rl| {
                 rl.cube(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::RED);
                 rl.cube_wires(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::GOLD);
@@ -63,8 +63,8 @@ fn main() {
             })
         });
 
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::RAYWHITE);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::RAYWHITE);
             let src = Rectangle::new(0.0, 0.0, size.x, -size.y);
             let dest = Rectangle::from_vecs(Vector2::ZERO, get_render_size(rl));
             rl.texture_pro(target.texture(), src, dest, Vector2::ZERO, 0.0, Color::WHITE);

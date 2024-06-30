@@ -105,8 +105,8 @@ fn main() {
         camera.update_camera(CameraMode::Orbital);
         shader.set_uniform_value(loc_view, camera.position);
 
-        rl.begin_drawing(|rl| {
-            rl.clear_background(Color::BLACK);
+        begin_drawing(rl, |rl| {
+            clear_background(rl, Color::BLACK);
             rl.begin_mode3d(camera, |rl| {
                 for transform in &transforms {
                     rl.mesh(&mesh, &mat, *transform);
