@@ -3,7 +3,7 @@ use raylib::prelude::*;
 fn main() {
     let rl = &mut init_window(800, 450, "Shapes", 60);
     set_window_state(rl, WindowFlags::RESIZABLE);
-    rl.set_exit_key(KeyboardKey::Null);
+    set_exit_key(rl, KeyboardKey::Null);
 
     let mut camera = Camera3D {
         position: vec3(0.0, 10.0, 10.0),
@@ -18,9 +18,9 @@ fn main() {
     let mut scale_factor = 1.0;
     let mut target = RenderTexture::load(rl, 800, 450).unwrap(); // render at quarter resolution
     while !window_should_close(rl) {
-        if rl.is_key_pressed(KeyboardKey::Escape) {
+        if is_key_pressed(rl, KeyboardKey::Escape) {
             enable_cursor(rl);
-        } else if !is_cursor_hidden(rl) && rl.is_mouse_button_pressed(MouseButton::Left) {
+        } else if !is_cursor_hidden(rl) && is_mouse_button_pressed(rl, MouseButton::Left) {
             disable_cursor(rl);
         }
 
@@ -29,9 +29,9 @@ fn main() {
         }
 
         let prev_scale_factor = scale_factor;
-        if rl.is_key_pressed(KeyboardKey::C) && scale_factor > 1.0 {
+        if is_key_pressed(rl, KeyboardKey::C) && scale_factor > 1.0 {
             scale_factor -= 1.0;
-        } else if rl.is_key_pressed(KeyboardKey::V) && scale_factor < 16.0 {
+        } else if is_key_pressed(rl, KeyboardKey::V) && scale_factor < 16.0 {
             scale_factor += 1.0;
         }
 

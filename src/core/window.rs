@@ -60,8 +60,8 @@ bitflags! {
 /// use raylib::prelude::*;
 /// let rl = &mut init_window(800, 800, "Raylib bindings!", 60);
 /// while !window_should_close(rl) {
-///     rl.begin_drawing(|rl| {
-///         rl.clear_background(Color::RAYWHITE);
+///     begin_drawing(rl, |rl| {
+///         clear_background(rl, Color::RAYWHITE);
 ///     });
 ///     # break
 /// }

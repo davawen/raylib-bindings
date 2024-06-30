@@ -6,10 +6,10 @@ fn main() {
     let mut points = Vec::new();
 
     while !window_should_close(rl) {
-        if rl.is_mouse_button_pressed(MouseButton::Left) {
-            points.push(rl.get_mouse_pos());
-        } else if rl.is_mouse_button_pressed(MouseButton::Right) {
-            points.retain(|&point| point.distance_sqr(rl.get_mouse_pos()) > 5.0*5.0);
+        if is_mouse_button_pressed(rl, MouseButton::Left) {
+            points.push(get_mouse_pos(rl));
+        } else if is_mouse_button_pressed(rl, MouseButton::Right) {
+            points.retain(|&point| point.distance_sqr(get_mouse_pos(rl)) > 5.0*5.0);
         }
 
         begin_drawing(rl, |rl| {

@@ -7,11 +7,11 @@ fn main() {
     let mut cursor_pos = 0;
 
     while !window_should_close(rl) {
-        while let Some(c) = rl.get_char_pressed() {
+        while let Some(c) = get_char_pressed(rl) {
             s.insert(cursor_pos, c);
             cursor_pos += c.len_utf8();
         }
-        while let Some(k) = rl.get_key_pressed() {
+        while let Some(k) = get_key_pressed(rl) {
             match k {
                 KeyboardKey::Backspace => {
                     if cursor_pos > 0 {
@@ -36,12 +36,12 @@ fn main() {
             }
         }
 
-        if rl.is_mouse_button_pressed(MouseButton::Left) {
+        if is_mouse_button_pressed(rl, MouseButton::Left) {
             let mut idx = s.len();
             let mut c = std::ffi::CString::new(s.as_str()).unwrap();
             let mut bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };
-            if rl.get_mouse_x() < (bounds as f32 + 20.0) {
-                while rl.get_mouse_x() < (bounds as f32 + 20.0) {
+            if get_mouse_x(rl) < (bounds as f32 + 20.0) {
+                while get_mouse_x(rl) < (bounds as f32 + 20.0) {
                     let mut v = c.into_bytes();
                     if v.is_empty() { break }
 
@@ -65,7 +65,7 @@ fn main() {
 
             let bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };
 
-            let time = rl.get_time();
+            let time = get_time(rl);
             let color = ((time*2.0*std::f32::consts::PI).sin()*128.0 + 128.0) as u8;
             let color = Color::rgba(0, 0, 0, color);
 

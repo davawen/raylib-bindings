@@ -20,7 +20,7 @@ pub struct DrawHandle<'a> {
 /// # use raylib::prelude::*;
 /// # let rl = &mut init_window(100, 100, "", 60);
 /// begin_drawing(rl, |rl| {
-///     rl.clear_background(Color::WHITE);
+///     clear_background(rl, Color::WHITE);
 ///     rl.rectangle(10.0, 10.0, 100.0, 100.0, Color::RED);
 /// });
 /// ```
@@ -40,13 +40,13 @@ pub fn begin_drawing(rl: &mut Raylib, f: impl FnOnce(&mut DrawHandle)) {
 /// let mut frame = RenderTexture::load(rl, 800, 800).unwrap();
 /// while !window_should_close(rl) {
 ///     begin_texture_mode(rl, &mut frame, |rl| {
-///         rl.clear_background(Color::WHITE);
+///         clear_background(rl, Color::WHITE);
 ///         rl.rectangle(10.0, 10.0, 100.0, 100.0, Color::RED);
 ///     });
 ///     // ...
 ///     begin_drawing(rl, |rl| {
 ///         rl.texture_ex(frame.texture(), vec2(40.0, 70.0), PI/2.0, 2.0, Color::WHITE);
-///    })
+///    });
 ///     # break;
 /// }
 /// ```

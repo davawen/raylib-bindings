@@ -35,7 +35,7 @@ fn main() {
     let mut current = 0;
 
     while !window_should_close(rl) {
-        if rl.is_mouse_button_pressed(MouseButton::Left) {
+        if is_mouse_button_pressed(rl, MouseButton::Left) {
             current += 1;
             if current >= textures.len() {
                 current = 0;

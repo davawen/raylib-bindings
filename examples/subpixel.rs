@@ -11,14 +11,14 @@ fn main() {
     let mut size = 40.0;
 
     while !window_should_close(rl) {
-        size += rl.get_mouse_wheel_move();
+        size += get_mouse_wheel_move(rl);
         if size != rendered.size() {
             rendered.reatlas(rl, size);
         }
 
-        if rl.is_key_down(KeyboardKey::Right) {
+        if is_key_down(rl, KeyboardKey::Right) {
             pos += 0.05;
-        } else if rl.is_key_down(KeyboardKey::Left) {
+        } else if is_key_down(rl, KeyboardKey::Left) {
             pos -= 0.05;
         }
 

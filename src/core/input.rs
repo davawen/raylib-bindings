@@ -81,9 +81,9 @@ pub fn gamepad_available(_: &Raylib, gamepad: i32) -> bool {
 /// ```
 /// # use raylib::prelude::*;
 /// # let rl = &mut init_window(100, 100, "", 60);
-/// # rl.begin_drawing(|rl| {
-/// if let Some(gamepad) = rl.is_gamepad_available(0) {
-///     if rl.is_gamepad_button_down(gamepad, GamepadButton::MiddleLeft) {
+/// # begin_drawing(rl, |rl| {
+/// if let Some(gamepad) = is_gamepad_available(rl, 0) {
+///     if is_gamepad_button_down(rl, gamepad, GamepadButton::MiddleLeft) {
 ///         rl.circle(100.0, 100.0, 20.0, Color::RED);
 ///     }
 /// }
@@ -116,8 +116,8 @@ pub fn get_gamepad_name(rl: &Raylib, gamepad: Gamepad) -> Option<&str> {
 /// ```
 /// # use raylib::prelude::*;
 /// # let rl = &mut init_window(100, 100, "", 60);
-/// if let Some(gamepad) = rl.is_gamepad_available(0) {
-///     let name = rl.get_gamepad_name_cstr(gamepad).map(|s| s.to_string_lossy());
+/// if let Some(gamepad) = is_gamepad_available(rl, 0) {
+///     let name = get_gamepad_name_cstr(rl, gamepad).map(|s| s.to_string_lossy());
 /// }
 /// ```
 pub fn get_gamepad_name_cstr(rl: &Raylib, gamepad: Gamepad) -> Option<&CStr> {
@@ -285,8 +285,8 @@ pub fn get_touch_y(rl: &Raylib) -> Option<f32> {
 /// ```
 /// # use raylib::prelude::*;
 /// # let rl = &mut init_window(100, 100, "", 60);
-/// # rl.begin_drawing(|rl| {
-/// if let Some(pos) = rl.get_touch_pos() {
+/// # begin_drawing(rl, |rl| {
+/// if let Some(pos) = get_touch_pos(rl) {
 ///     rl.circle_v(pos, 30.0, Color::ORANGE);
 /// }
 /// # });
@@ -310,8 +310,8 @@ pub fn get_touch_position(rl: &Raylib, index: usize) -> Option<Vector2> {
 /// ```
 /// # use raylib::prelude::*;
 /// # let rl = &mut init_window(100, 100, "", 60);
-/// # rl.begin_drawing(|rl| {
-/// for (idx, pos) in rl.get_touch_positions().enumerate() {
+/// # begin_drawing(rl, |rl| {
+/// for (idx, pos) in get_touch_positions(rl).enumerate() {
 ///     rl.circle_v(pos, 30.0, Color::ORANGE);
 ///     let pos = pos - vec2(10.0, 70.0);
 ///     rl.text(rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
@@ -322,7 +322,7 @@ pub fn get_touch_position(rl: &Raylib, index: usize) -> Option<Vector2> {
 /// ```
 /// # use raylib::prelude::*;
 /// # let rl = &mut init_window(100, 100, "", 60);
-/// for (pos, id) in rl.get_touch_positions().zip(rl.get_touch_point_ids()) {
+/// for (pos, id) in get_touch_positions(rl).zip(get_touch_point_ids(rl)) {
 ///     println!("At {pos:?}: {id}");
 /// }
 /// ```

@@ -10,7 +10,7 @@ fn main() {
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::WHITE);
 
-            shader.set_uniform_value(time_uniform, rl.get_time());
+            shader.set_uniform_value(time_uniform, get_time(rl));
             begin_shader_mode(rl, &shader, |rl| rl.rectangle(50.0, 50.0, 700.0, 700.0, Color::WHITE));
         });
     }

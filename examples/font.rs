@@ -15,17 +15,17 @@ fn main() {
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::RAYWHITE);
 
-            if rl.is_key_down(KeyboardKey::LeftShift) {
-                size += rl.get_mouse_wheel_move();
+            if is_key_down(rl, KeyboardKey::LeftShift) {
+                size += get_mouse_wheel_move(rl);
                 size = size.max(1.0);
                 if size != rendered.size() {
                     rendered.reatlas(rl, size);
                 }
             } else {
-                scroll += rl.get_mouse_wheel_move() as i32;
+                scroll += get_mouse_wheel_move(rl) as i32;
             }
 
-            if rl.is_key_down(KeyboardKey::A) {
+            if is_key_down(rl, KeyboardKey::A) {
                 rl.texture(rendered.texture(), 0.0, 0.0, Color::BLACK);
                 return
             }

@@ -7,8 +7,8 @@
 //! fn main() {
 //!     let rl = &mut init_window(800, 800, "Rusty Raylib", 60);
 //!     while !window_should_close(rl) {
-//!         rl.begin_drawing(|rl| {
-//!             rl.clear_background(Color::RAYWHITE);
+//!         begin_drawing(rl, |rl| {
+//!             clear_background(rl, Color::RAYWHITE);
 //!             rl.text(rl.default_font(), "Hello, world!", vec2(20.0, 20.0), 20.0, Color::BLACK);
 //!         });
 //!         # break

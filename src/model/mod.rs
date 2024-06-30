@@ -23,7 +23,7 @@ pub use material::*;
 ///     projection: CameraProjection::Perspective as i32
 /// };
 /// 
-/// rl.begin_drawing(|rl| {
+/// begin_drawing(rl, |rl| {
 ///     rl.begin_mode3d(camera, |rl| {
 ///         // draw a mesh or a model here
 ///     });

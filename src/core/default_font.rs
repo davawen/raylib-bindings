@@ -76,8 +76,8 @@ impl Raylib {
         let atlas = BitmapFontAtlas::load(self, &image, codepoints, glyphs, line_metrics, HEIGHT as f32);
         self.default_font = ManuallyDrop::new(Some(atlas));
     }
-}
 
-pub fn default_font(rl: &Raylib) -> &BitmapFontAtlas {
-    rl.default_font.as_ref().unwrap()
+    pub fn default_font(&self) -> &BitmapFontAtlas {
+        self.default_font.as_ref().unwrap()
+    }
 }
