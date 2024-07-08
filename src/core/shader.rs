@@ -27,7 +27,7 @@ impl Shader {
     ///     shader.set_uniform_value(resolution_uniform, get_screen_size(rl));
     ///     shader.set_uniform_value(camera_pos_uniform, camera_pos);
     ///     begin_drawing(rl, |rl| begin_shader_mode(rl, &shader, |rl| {
-    ///         rl.rectangle_v(Vector2::ZERO, get_screen_size(rl), Color::WHITE);
+    ///         draw_rectangle_v(rl, Vector2::ZERO, get_screen_size(rl), Color::WHITE);
     ///     }));
     ///     # break
     /// }

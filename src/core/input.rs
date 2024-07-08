@@ -84,7 +84,7 @@ pub fn gamepad_available(_: &Raylib, gamepad: i32) -> bool {
 /// # begin_drawing(rl, |rl| {
 /// if let Some(gamepad) = is_gamepad_available(rl, 0) {
 ///     if is_gamepad_button_down(rl, gamepad, GamepadButton::MiddleLeft) {
-///         rl.circle(100.0, 100.0, 20.0, Color::RED);
+///         draw_circle(rl, 100.0, 100.0, 20.0, Color::RED);
 ///     }
 /// }
 /// # });
@@ -287,7 +287,7 @@ pub fn get_touch_y(rl: &Raylib) -> Option<f32> {
 /// # let rl = &mut init_window(100, 100, "", 60);
 /// # begin_drawing(rl, |rl| {
 /// if let Some(pos) = get_touch_pos(rl) {
-///     rl.circle_v(pos, 30.0, Color::ORANGE);
+///     draw_circle_v(rl, pos, 30.0, Color::ORANGE);
 /// }
 /// # });
 /// ```
@@ -312,7 +312,7 @@ pub fn get_touch_position(rl: &Raylib, index: usize) -> Option<Vector2> {
 /// # let rl = &mut init_window(100, 100, "", 60);
 /// # begin_drawing(rl, |rl| {
 /// for (idx, pos) in get_touch_positions(rl).enumerate() {
-///     rl.circle_v(pos, 30.0, Color::ORANGE);
+///     draw_circle_v(rl, pos, 30.0, Color::ORANGE);
 ///     let pos = pos - vec2(10.0, 70.0);
 ///     rl.text(rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
 /// }

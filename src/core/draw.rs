@@ -21,7 +21,7 @@ pub struct DrawHandle<'a> {
 /// # let rl = &mut init_window(100, 100, "", 60);
 /// begin_drawing(rl, |rl| {
 ///     clear_background(rl, Color::WHITE);
-///     rl.rectangle(10.0, 10.0, 100.0, 100.0, Color::RED);
+///     draw_rectangle(rl, 10.0, 10.0, 100.0, 100.0, Color::RED);
 /// });
 /// ```
 pub fn begin_drawing(rl: &mut Raylib, f: impl FnOnce(&mut DrawHandle)) {
@@ -41,7 +41,7 @@ pub fn begin_drawing(rl: &mut Raylib, f: impl FnOnce(&mut DrawHandle)) {
 /// while !window_should_close(rl) {
 ///     begin_texture_mode(rl, &mut frame, |rl| {
 ///         clear_background(rl, Color::WHITE);
-///         rl.rectangle(10.0, 10.0, 100.0, 100.0, Color::RED);
+///         draw_rectangle(rl, 10.0, 10.0, 100.0, 100.0, Color::RED);
 ///     });
 ///     // ...
 ///     begin_drawing(rl, |rl| {
