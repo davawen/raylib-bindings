@@ -42,7 +42,7 @@ impl Camera {
 
 impl Camera2D {
     /// Gets this camera's 2d view matrix
-    pub fn get_matrix2d(&self) -> Matrix {
+    pub fn get_matrix(&self) -> Matrix {
         unsafe { ffi::GetCameraMatrix2D(*self) }
     }
 

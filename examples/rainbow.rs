@@ -11,7 +11,7 @@ fn main() {
             clear_background(rl, Color::WHITE);
 
             shader.set_uniform_value(time_uniform, get_time(rl));
-            begin_shader_mode(rl, &shader, |rl| rl.rectangle(50.0, 50.0, 700.0, 700.0, Color::WHITE));
+            begin_shader_mode(rl, &shader, |rl| draw_rectangle(rl, 50.0, 50.0, 700.0, 700.0, Color::WHITE));
         });
     }
 }

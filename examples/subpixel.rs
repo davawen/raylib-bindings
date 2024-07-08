@@ -26,7 +26,7 @@ fn main() {
             clear_background(rl, Color::RAYWHITE);
 
             rl.text(&mut rendered, &format!("Pos: {pos}"), vec2(20.0, 40.0), size, Color::BLACK);
-            rl.circle(20.0, 40.0, 5.0, Color::RED);
+            draw_circle(rl, 20.0, 40.0, 5.0, Color::RED);
         });
     }
 }

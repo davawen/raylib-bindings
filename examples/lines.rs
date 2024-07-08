@@ -14,9 +14,9 @@ fn main() {
 
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::RAYWHITE);
-            rl.line_strip(&points, Color::BLACK);
+            draw_line_strip(rl, &points, Color::BLACK);
             for &point in &points {
-                rl.circle_v(point, 5.0, Color::RED);
+                draw_circle_v(rl, point, 5.0, Color::RED);
             }
         });
     }

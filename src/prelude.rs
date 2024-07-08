@@ -18,6 +18,8 @@ pub use crate::core::{
     other::*
 };
 
+pub use crate::shapes::*;
+
 pub use crate::textures::{
     image::*,
     texture::*,
