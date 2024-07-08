@@ -26,7 +26,7 @@ fn main() {
             }
 
             if is_key_down(rl, KeyboardKey::A) {
-                rl.texture(rendered.texture(), 0.0, 0.0, Color::BLACK);
+                draw_texture(rl, rendered.texture(), 0.0, 0.0, Color::BLACK);
                 return
             }
 

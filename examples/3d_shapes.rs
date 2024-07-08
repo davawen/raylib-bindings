@@ -67,7 +67,7 @@ fn main() {
             clear_background(rl, Color::RAYWHITE);
             let src = Rectangle::new(0.0, 0.0, size.x, -size.y);
             let dest = Rectangle::from_vecs(Vector2::ZERO, get_render_size(rl));
-            rl.texture_pro(target.texture(), src, dest, Vector2::ZERO, 0.0, Color::WHITE);
+            draw_texture_pro(rl, target.texture(), src, dest, Vector2::ZERO, 0.0, Color::WHITE);
             rl.text(rl.default_font(), &format!("Scale factor: {scale_factor} (press C and V!)"), Vector2::splat(10.0), 20.0, Color::BLACK);
 
             let right_text = "Press ESC to unlock cursor";

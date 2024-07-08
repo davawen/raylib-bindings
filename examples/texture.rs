@@ -43,7 +43,7 @@ fn main() {
         }
 
         begin_drawing(rl, |rl| {
-            rl.texture(&textures[current], 0.0, 0.0, Color::WHITE);
+            draw_texture(rl, &textures[current], 0.0, 0.0, Color::WHITE);
             rl.text(rl.default_font(), names[current].0, vec2(10.0, 10.0), 20.0, names[current].1);
         });
     }

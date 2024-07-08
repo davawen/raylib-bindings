@@ -45,7 +45,7 @@ pub fn begin_drawing(rl: &mut Raylib, f: impl FnOnce(&mut DrawHandle)) {
 ///     });
 ///     // ...
 ///     begin_drawing(rl, |rl| {
-///         rl.texture_ex(frame.texture(), vec2(40.0, 70.0), PI/2.0, 2.0, Color::WHITE);
+///         draw_texture_ex(rl, frame.texture(), vec2(40.0, 70.0), PI/2.0, 2.0, Color::WHITE);
 ///    });
 ///     # break;
 /// }

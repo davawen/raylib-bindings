@@ -285,46 +285,41 @@ impl Texture {
     }
 }
 
-/// # Texture drawing functions
-/// 
-/// ---
-impl DrawHandle<'_> {
-    /// Draw a texture.
-    #[inline]
-    pub fn texture(&self, texture: impl Into<WeakTexture>, x: f32, y: f32, tint: Color) {
-        self.texture_ex(texture, vec2(x, y), 0.0, 1.0, tint);
-    }
-    /// Draw a texture.
-    #[inline]
-    pub fn texture_v(&self, texture: impl Into<WeakTexture>, pos: Vector2, tint: Color) {
-        self.texture_ex(texture, pos, 0.0, 1.0, tint);
-    }
-    /// Draw a rotated and scaled texture.
-    /// The rotation is in radians.
-    #[inline]
-    pub fn texture_ex(&self, texture: impl Into<WeakTexture>, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
-        let texture = texture.into();
-        let source = Rectangle::new(0.0, 0.0, texture.0.width as f32, texture.0.height as f32);
-        let dest = Rectangle::new(pos.x, pos.y, texture.0.width as f32 * scale, texture.0.height as f32 * scale);
-        self.texture_pro(texture, source, dest, Vector2::ZERO, rotation, tint)
-    }
-    /// Draw part of a texture.
-    #[inline]
-    pub fn texture_rec(&self, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector2, tint: Color) {
-        let dest = Rectangle::new(pos.x, pos.y, source.width, source.height);
-        self.texture_pro(texture, source, dest, Vector2::ZERO, 0.0, tint)
-    }
-    /// Draw part of a texture to a part of the screen, rotated around the given origin point.
-    /// Origin is **relative** to the destination rectangle.
-    /// The rotation is in radians.
-    #[inline]
-    pub fn texture_pro(&self, texture: impl Into<WeakTexture>, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
-        unsafe { ffi::DrawTexturePro(texture.into().0, source, dest, origin, rotation.to_degrees(), tint) }
-    }
-    /// Draws a texture that stretches and shrinks using n-patch info.
-    /// The rotation is in radians.
-    #[inline]
-    pub fn texture_npatch(&self, texture: impl Into<WeakTexture>, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
-        unsafe { ffi::DrawTextureNPatch(texture.into().0, info, dest, origin, rotation.to_degrees(), tint) }
-    }
+/// Draw a texture.
+#[inline]
+pub fn draw_texture(rl: &DrawHandle, texture: impl Into<WeakTexture>, x: f32, y: f32, tint: Color) {
+    draw_texture_ex(rl, texture, vec2(x, y), 0.0, 1.0, tint);
+}
+/// Draw a texture.
+#[inline]
+pub fn draw_texture_v(rl: &DrawHandle, texture: impl Into<WeakTexture>, pos: Vector2, tint: Color) {
+    draw_texture_ex(rl, texture, pos, 0.0, 1.0, tint);
+}
+/// Draw a rotated and scaled texture.
+/// The rotation is in radians.
+#[inline]
+pub fn draw_texture_ex(rl: &DrawHandle, texture: impl Into<WeakTexture>, pos: Vector2, rotation: f32, scale: f32, tint: Color) {
+    let texture = texture.into();
+    let source = Rectangle::new(0.0, 0.0, texture.0.width as f32, texture.0.height as f32);
+    let dest = Rectangle::new(pos.x, pos.y, texture.0.width as f32 * scale, texture.0.height as f32 * scale);
+    draw_texture_pro(rl, texture, source, dest, Vector2::ZERO, rotation, tint)
+}
+/// Draw part of a texture.
+#[inline]
+pub fn draw_texture_rec(rl: &DrawHandle, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector2, tint: Color) {
+    let dest = Rectangle::new(pos.x, pos.y, source.width, source.height);
+    draw_texture_pro(rl, texture, source, dest, Vector2::ZERO, 0.0, tint)
+}
+/// Draw part of a texture to a part of the screen, rotated around the given origin point.
+/// Origin is **relative** to the destination rectangle.
+/// The rotation is in radians.
+#[inline]
+pub fn draw_texture_pro(_rl: &DrawHandle, texture: impl Into<WeakTexture>, source: Rectangle, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+    unsafe { ffi::DrawTexturePro(texture.into().0, source, dest, origin, rotation.to_degrees(), tint) }
+}
+/// Draws a texture that stretches and shrinks using n-patch info.
+/// The rotation is in radians.
+#[inline]
+pub fn draw_texture_npatch(_rl: &DrawHandle, texture: impl Into<WeakTexture>, info: NPatchInfo, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color) {
+    unsafe { ffi::DrawTextureNPatch(texture.into().0, info, dest, origin, rotation.to_degrees(), tint) }
 }

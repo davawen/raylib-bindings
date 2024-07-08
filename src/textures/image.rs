@@ -247,7 +247,7 @@ impl Image {
     /// let rgb = Texture::load_from_image(rl, &rgb).unwrap();;
     /// while !window_should_close(rl) {
     ///     begin_drawing(rl, |rl| {
-    ///         rl.texture(&rgb, 0.0, 0.0, Color::WHITE);
+    ///         draw_texture(rl, &rgb, 0.0, 0.0, Color::WHITE);
     ///     });
     ///     # break
     /// }

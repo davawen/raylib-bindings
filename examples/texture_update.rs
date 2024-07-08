@@ -21,7 +21,7 @@ fn main() {
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::GRAY);
             draw_circle(rl, 300.0, 300.0, 20.0, Color::RED);
-            rl.texture(&texture, 100.0, 100.0, Color::WHITE);
+            draw_texture(rl, &texture, 100.0, 100.0, Color::WHITE);
         });
     }
 }

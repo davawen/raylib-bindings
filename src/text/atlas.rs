@@ -1,7 +1,7 @@
 use std::num::NonZeroU16;
 use hashbrown::HashMap;
 
-use crate::{ffi, prelude::{vec2, Color, DrawHandle, Raylib, Rectangle, Texture, Vector2}};
+use crate::{ffi, prelude::{draw_texture_pro, vec2, Color, DrawHandle, Raylib, Rectangle, Texture, Vector2}};
 
 // TODO: Support vertical text
 
@@ -140,7 +140,7 @@ impl DrawHandle<'_> {
             pos.x, pos.y,
             metrics.width, metrics.height
         );
-        self.texture_pro(atlas.texture(), rec, dest, Vector2::ZERO, 0.0, color);
+        draw_texture_pro(self, atlas.texture(), rec, dest, Vector2::ZERO, 0.0, color);
     }
 
     pub fn fps(&self, pos: Vector2) {
