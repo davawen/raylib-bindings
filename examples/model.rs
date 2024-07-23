@@ -107,13 +107,13 @@ fn main() {
 
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::BLACK);
-            rl.begin_mode3d(camera, |rl| {
+            begin_mode3d(rl, camera, |rl| {
                 for transform in &transforms {
-                    rl.mesh(&mesh, &mat, *transform);
+                    draw_mesh(rl, &mesh, &mat, *transform);
                 }
                 for &(color, transform) in &light_transforms {
                     light_mat.set_color(MaterialMapIndex::Albedo, Color::color_from_normalized(color));
-                    rl.mesh(&light_mesh, &light_mat, transform);
+                    draw_mesh(rl, &light_mesh, &light_mat, transform);
                 }
             });
         });

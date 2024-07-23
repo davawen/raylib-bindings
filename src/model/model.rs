@@ -105,49 +105,47 @@ impl Model {
     }
 }
 
-impl DrawHandle3D<'_> {
-    /// Draw a model (with texture if set)
-    pub fn model(&self, model: &Model, pos: Vector3, scale: f32, tint: Color) {
-        unsafe { ffi::DrawModel(model.0, pos, scale, tint) }
-    }
+/// Draw a model (with texture if set)
+pub fn draw_model(_rl: &DrawHandle3D, model: &Model, pos: Vector3, scale: f32, tint: Color) {
+    unsafe { ffi::DrawModel(model.0, pos, scale, tint) }
+}
 
-    /// Draw a model (with texture if set) with extended parameters
-    pub fn model_ex(&self, model: &Model, pos: Vector3, axis: Vector3, angle: f32, scale: Vector3, tint: Color) {
-        unsafe { ffi::DrawModelEx(model.0, pos, axis, angle, scale, tint) }
-    }
+/// Draw a model (with texture if set) with extended parameters
+pub fn draw_model_ex(_rl: &DrawHandle3D, model: &Model, pos: Vector3, axis: Vector3, angle: f32, scale: Vector3, tint: Color) {
+    unsafe { ffi::DrawModelEx(model.0, pos, axis, angle, scale, tint) }
+}
 
-    /// Draw a wireframe model (with texture if set)
-    pub fn model_wires(&self, model: &Model, pos: Vector3, scale: f32, tint: Color) {
-        unsafe { ffi::DrawModelWires(model.0, pos, scale, tint) }
-    }
+/// Draw a wireframe model (with texture if set)
+pub fn draw_model_wires(_rl: &DrawHandle3D, model: &Model, pos: Vector3, scale: f32, tint: Color) {
+    unsafe { ffi::DrawModelWires(model.0, pos, scale, tint) }
+}
 
-    /// Draw a wireframe model (with texture if set) with extended parameters
-    pub fn model_wires_ex(&self, model: &Model, pos: Vector3, axis: Vector3, angle: f32, scale: Vector3, tint: Color) {
-        unsafe { ffi::DrawModelWiresEx(model.0, pos, axis, angle, scale, tint) }
-    }
+/// Draw a wireframe model (with texture if set) with extended parameters
+pub fn draw_model_wires_ex(_rl: &DrawHandle3D, model: &Model, pos: Vector3, axis: Vector3, angle: f32, scale: Vector3, tint: Color) {
+    unsafe { ffi::DrawModelWiresEx(model.0, pos, axis, angle, scale, tint) }
+}
 
-    /// Draw a wireframe bounding box
-    pub fn bounding_box(&self, bounds: BoundingBox, color: Color) {
-        unsafe { ffi::DrawBoundingBox(bounds, color) }
-    }
+/// Draw a wireframe bounding box
+pub fn draw_bounding_box(_rl: &DrawHandle3D, bounds: BoundingBox, color: Color) {
+    unsafe { ffi::DrawBoundingBox(bounds, color) }
+}
 
-    /// Draw a billboard texture
-    pub fn billboard(&self, camera: Camera, texture: impl Into<WeakTexture>, pos: Vector3, size: f32, tint: Color) {
-        unsafe { ffi::DrawBillboard(camera, *texture.into().get_ffi(), pos, size, tint) }
-    }
+/// Draw a billboard texture
+pub fn draw_billboard(_rl: &DrawHandle3D, camera: Camera, texture: impl Into<WeakTexture>, pos: Vector3, size: f32, tint: Color) {
+    unsafe { ffi::DrawBillboard(camera, *texture.into().get_ffi(), pos, size, tint) }
+}
 
-    /// Draw part of a billboard texture
-    pub fn billboard_rec(&self, camera: Camera, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector3, size: Vector2, tint: Color) {
-        unsafe { ffi::DrawBillboardRec(camera, *texture.into().get_ffi(), source, pos, size, tint) }
-    }
+/// Draw part of a billboard texture
+pub fn draw_billboard_rec(_rl: &DrawHandle3D, camera: Camera, texture: impl Into<WeakTexture>, source: Rectangle, pos: Vector3, size: Vector2, tint: Color) {
+    unsafe { ffi::DrawBillboardRec(camera, *texture.into().get_ffi(), source, pos, size, tint) }
+}
 
-    /// Draw part of a billboard texture with source and rotation
-    /// Angles are in a radians
-    pub fn billboard_pro(
-        &self,
-        camera: Camera, texture: impl Into<WeakTexture>, source: Rectangle,
-        pos: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: f32, tint: Color)
-    {
-        unsafe { ffi::DrawBillboardPro(camera, *texture.into().get_ffi(), source, pos, up, size, origin, rotation.to_degrees(), tint) }
-    }
+/// Draw part of a billboard texture with source and rotation
+/// Angles are in a radians
+pub fn draw_billboard_pro(
+    _rl: &DrawHandle3D,
+    camera: Camera, texture: impl Into<WeakTexture>, source: Rectangle,
+    pos: Vector3, up: Vector3, size: Vector2, origin: Vector2, rotation: f32, tint: Color)
+{
+    unsafe { ffi::DrawBillboardPro(camera, *texture.into().get_ffi(), source, pos, up, size, origin, rotation.to_degrees(), tint) }
 }

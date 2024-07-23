@@ -55,8 +55,8 @@ fn main() {
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::WHITE);
 
-            rl.begin_mode3d(camera, |rl| {
-                rl.mesh(&helix, &mat, Matrix::IDENTITY);
+            begin_mode3d(rl, camera, |rl| {
+                draw_mesh(rl, &helix, &mat, Matrix::IDENTITY);
             });
         });
     }

@@ -7,6 +7,7 @@ mod model;
 mod mesh;
 mod material;
 
+pub use shapes::*;
 pub use model::*;
 pub use mesh::*;
 pub use material::*;
@@ -24,7 +25,7 @@ pub use material::*;
 /// };
 /// 
 /// begin_drawing(rl, |rl| {
-///     rl.begin_mode3d(camera, |rl| {
+///     begin_mode3d(rl, camera, |rl| {
 ///         // draw a mesh or a model here
 ///     });
 /// })
@@ -46,13 +47,10 @@ impl DerefMut for DrawHandle3D<'_> {
     }
 }
 
-impl DrawHandle<'_> {
-    // Begin 3D mode with custom camera (3D)
-    pub fn begin_mode3d(&mut self, camera: Camera3D, f: impl FnOnce(&mut DrawHandle3D)) {
-        unsafe { ffi::BeginMode3D(camera) }
-        let mut d = DrawHandle3D { rl: self.rl };
-        f(&mut d);
-        unsafe { ffi::EndMode3D() }
-    }
+// Begin 3D mode with custom camera (3D)
+pub fn begin_mode3d(rl: &mut DrawHandle, camera: Camera3D, f: impl FnOnce(&mut DrawHandle3D)) {
+    unsafe { ffi::BeginMode3D(camera) }
+    let mut d = DrawHandle3D { rl };
+    f(&mut d);
+    unsafe { ffi::EndMode3D() }
 }
-

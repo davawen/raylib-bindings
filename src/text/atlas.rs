@@ -1,7 +1,7 @@
 use std::num::NonZeroU16;
 use hashbrown::HashMap;
 
-use crate::{ffi, prelude::{draw_texture_pro, vec2, Color, DrawHandle, Raylib, Rectangle, Texture, Vector2}};
+use crate::{ffi, prelude::{draw_texture_pro, vec2, Color, DrawHandle, Rectangle, Texture, Vector2}};
 
 // TODO: Support vertical text
 

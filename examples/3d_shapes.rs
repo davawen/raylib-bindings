@@ -42,24 +42,24 @@ fn main() {
 
         begin_texture_mode(rl, &mut target, |rl| {
             clear_background(rl, Color::RAYWHITE);
-            rl.begin_mode3d(camera, |rl| {
-                rl.cube(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::RED);
-                rl.cube_wires(vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::GOLD);
-                rl.cube_wires(vec3(-4.0, 0.0, -2.0), 3.0, 6.0, 2.0, Color::MAROON);
+            begin_mode3d(rl, camera, |rl| {
+                draw_cube(rl, vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::RED);
+                draw_cube_wires(rl, vec3(-4.0, 0.0, 2.0), 2.0, 5.0, 2.0, Color::GOLD);
+                draw_cube_wires(rl, vec3(-4.0, 0.0, -2.0), 3.0, 6.0, 2.0, Color::MAROON);
 
-                rl.sphere(vec3(-1.0, 0.0, -2.0), 1.0, Color::GREEN);
-                rl.sphere_wires(vec3(1.0, 0.0, 2.0), 2.0, Color::LIME);
+                draw_sphere(rl, vec3(-1.0, 0.0, -2.0), 1.0, Color::GREEN);
+                draw_sphere_wires(rl, vec3(1.0, 0.0, 2.0), 2.0, Color::LIME);
 
-                rl.cylinder(vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::SKYBLUE);
-                rl.cylinder_wires(vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::DARKBLUE);
-                rl.cylinder_wires(vec3(4.5, -1.0, 2.0), 1.0, 1.0, 2.0, 6, Color::BROWN);
+                draw_cylinder(rl, vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::SKYBLUE);
+                draw_cylinder_wires(rl, vec3(4.0, 0.0, -2.0), 1.0, 2.0, 3.0, 4, Color::DARKBLUE);
+                draw_cylinder_wires(rl, vec3(4.5, -1.0, 2.0), 1.0, 1.0, 2.0, 6, Color::BROWN);
 
-                rl.cylinder(vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::GOLD);
-                rl.cylinder_wires(vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::PINK);
+                draw_cylinder(rl, vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::GOLD);
+                draw_cylinder_wires(rl, vec3(1.0, 0.0, -4.0), 0.0, 1.5, 3.0, 8, Color::PINK);
 
-                rl.capsule(vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::VIOLET);
-                rl.capsule_wires(vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::PURPLE);
-                rl.grid(20, 1.0);
+                draw_capsule(rl, vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::VIOLET);
+                draw_capsule_wires(rl, vec3(-3.0, 1.5, -4.0), vec3(-4.0, -1.0, -4.0), 1.2, 8, 8, Color::PURPLE);
+                draw_grid(rl, 20, 1.0);
             })
         });
 

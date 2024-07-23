@@ -195,18 +195,15 @@ impl MeshBuilder {
     }
 }
 
-impl DrawHandle3D<'_> {
-    /// Draw a 3d mesh with a material and a transform.
-    #[inline]
-    pub fn mesh(&self, mesh: &Mesh, material: &Material, transform: Matrix) {
-        unsafe { ffi::DrawMesh(mesh.0, *material.get_ffi(), transform) }
-    }
-    /// Draw multiple mesh instances with the same material and different transforms.
-    /// 
-    /// Note that shaders need to be made specifically for instanced rendering.
-    #[inline]
-    pub fn mesh_instanced(&self, mesh: &Mesh, material: &Material, transforms: &[Matrix]) {
-        unsafe { ffi::DrawMeshInstanced(mesh.0, *material.get_ffi(), transforms.as_ptr(), transforms.len() as i32) }
-    }
+/// Draw a 3d mesh with a material and a transform.
+#[inline]
+pub fn draw_mesh(_rl: &DrawHandle3D, mesh: &Mesh, material: &Material, transform: Matrix) {
+    unsafe { ffi::DrawMesh(mesh.0, *material.get_ffi(), transform) }
 }
-
+/// Draw multiple mesh instances with the same material and different transforms.
+/// 
+/// Note that shaders need to be made specifically for instanced rendering.
+#[inline]
+pub fn draw_mesh_instanced(_rl: &DrawHandle3D, mesh: &Mesh, material: &Material, transforms: &[Matrix]) {
+    unsafe { ffi::DrawMeshInstanced(mesh.0, *material.get_ffi(), transforms.as_ptr(), transforms.len() as i32) }
+}
