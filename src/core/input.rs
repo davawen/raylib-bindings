@@ -314,7 +314,7 @@ pub fn get_touch_position(rl: &Raylib, index: usize) -> Option<Vector2> {
 /// for (idx, pos) in get_touch_positions(rl).enumerate() {
 ///     draw_circle_v(rl, pos, 30.0, Color::ORANGE);
 ///     let pos = pos - vec2(10.0, 70.0);
-///     rl.text(rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
+///     draw_text(rl, rl.default_font(), &format!("{idx}"), pos, 40.0, Color::BLACK);
 /// }
 /// # });
 /// ```

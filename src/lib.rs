@@ -9,7 +9,7 @@
 //!     while !window_should_close(rl) {
 //!         begin_drawing(rl, |rl| {
 //!             clear_background(rl, Color::RAYWHITE);
-//!             rl.text(rl.default_font(), "Hello, world!", vec2(20.0, 20.0), 20.0, Color::BLACK);
+//!             draw_text(rl, rl.default_font(), "Hello, world!", vec2(20.0, 20.0), 20.0, Color::BLACK);
 //!         });
 //!         # break
 //!     }

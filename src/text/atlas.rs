@@ -82,68 +82,63 @@ pub trait FontAtlas {
     fn get_glyph(&self, index: u16, size: f32) -> Rectangle;
 }
 
-impl Raylib {
-    /// Returns the width and height occupied by the given text in the given font, drawn at the given size.
-    pub fn measure_text<F: FontAtlas>(&self, atlas: &F, text: &str, size: f32) -> Vector2 {
-        let mut pos = Vector2::ZERO;
-        let mut previous = None;
-        for char in text.chars() {
-            let glyph_index = atlas.glyph_index(char);
-            if let Some(previous) = previous {
-                pos.x += atlas.kern_indexed(previous, glyph_index, size).unwrap_or_default();
-            }
-            pos.x += atlas.metrics_indexed(glyph_index, size).advance_width;
-            previous = Some(glyph_index);
+/// Returns the width and height occupied by the given text in the given font, drawn at the given size.
+pub fn measure_text<F: FontAtlas>(atlas: &F, text: &str, size: f32) -> Vector2 {
+    let mut pos = Vector2::ZERO;
+    let mut previous = None;
+    for char in text.chars() {
+        let glyph_index = atlas.glyph_index(char);
+        if let Some(previous) = previous {
+            pos.x += atlas.kern_indexed(previous, glyph_index, size).unwrap_or_default();
         }
-        pos
+        pos.x += atlas.metrics_indexed(glyph_index, size).advance_width;
+        previous = Some(glyph_index);
     }
-
+    pos
 }
 
-impl DrawHandle<'_> {
-    /// Draws some text at the specified location using the given font at the given size.
-    /// 
-    /// Using a [`TrueTypeFontAtlas`](super::font::TrueTypeFontAtlas) or a [`BitmapFontAtlas`](super::bitmap::BitmapFontAtlas), if the given size is different than the original render size,
-    /// the glyph will be scaled using interpolation.
-    /// For best text quality, prefer creating the font atlas at the same size that will be used for drawing.
-    /// 
-    /// Returns the coordinates of the last characters .
-    pub fn text<F: FontAtlas>(&self, atlas: &F, text: &str, mut pos: Vector2, size: f32, color: Color) -> Vector2 {
-        let mut previous = None;
-        for char in text.chars() {
-            let glyph_index = atlas.glyph_index(char);
-            if let Some(previous) = previous {
-                pos.x += atlas.kern_indexed(previous, glyph_index, size).unwrap_or_default();
-            }
-            self.glyph(atlas, glyph_index, pos, size, color);
-            pos.x += atlas.metrics_indexed(glyph_index, size).advance_width;
-            previous = Some(glyph_index);
+/// Draws some text at the specified location using the given font at the given size.
+/// 
+/// Using a [`TrueTypeFontAtlas`](super::font::TrueTypeFontAtlas) or a [`BitmapFontAtlas`](super::bitmap::BitmapFontAtlas), if the given size is different than the original render size,
+/// the glyph will be scaled using interpolation.
+/// For best text quality, prefer creating the font atlas at the same size that will be used for drawing.
+/// 
+/// Returns the coordinates of the last characters .
+pub fn draw_text<F: FontAtlas>(rl: &DrawHandle, atlas: &F, text: &str, mut pos: Vector2, size: f32, color: Color) -> Vector2 {
+    let mut previous = None;
+    for char in text.chars() {
+        let glyph_index = atlas.glyph_index(char);
+        if let Some(previous) = previous {
+            pos.x += atlas.kern_indexed(previous, glyph_index, size).unwrap_or_default();
         }
-        pos
+        draw_glyph(rl, atlas, glyph_index, pos, size, color);
+        pos.x += atlas.metrics_indexed(glyph_index, size).advance_width;
+        previous = Some(glyph_index);
     }
+    pos
+}
 
-    /// Draws a single character at the specified location.
-    pub fn codepoint<F: FontAtlas>(&self, atlas: &F, codepoint: char, pos: Vector2, size: f32, color: Color) {
-        let glyph_index = atlas.glyph_index(codepoint);
-        self.glyph(atlas, glyph_index, pos, size, color);
-    }
+/// Draws a single character at the specified location.
+pub fn draw_codepoint<F: FontAtlas>(rl: &DrawHandle, atlas: &F, codepoint: char, pos: Vector2, size: f32, color: Color) {
+    let glyph_index = atlas.glyph_index(codepoint);
+    draw_glyph(rl, atlas, glyph_index, pos, size, color);
+}
 
-    /// Draw a glyph of the given font.
-    /// Caches the glyph if it wasn't previously rendered.
-    #[inline]
-    pub fn glyph<F: FontAtlas>(&self, atlas: &F, glyph_index: u16, pos: Vector2, size: f32, color: Color) {
-        let rec = atlas.get_glyph(glyph_index, size);
-        let metrics = atlas.metrics_indexed(glyph_index, size);
-        let line = atlas.line_metrics(size).unwrap_or_default();
-        let pos = vec2((pos.x + metrics.xmin).floor(), (pos.y - metrics.ymin - metrics.height + line.ascent).floor());
-        let dest = Rectangle::new(
-            pos.x, pos.y,
-            metrics.width, metrics.height
-        );
-        draw_texture_pro(self, atlas.texture(), rec, dest, Vector2::ZERO, 0.0, color);
-    }
+/// Draw a glyph of the given font.
+/// Caches the glyph if it wasn't previously rendered.
+#[inline]
+pub fn draw_glyph<F: FontAtlas>(rl: &DrawHandle, atlas: &F, glyph_index: u16, pos: Vector2, size: f32, color: Color) {
+    let rec = atlas.get_glyph(glyph_index, size);
+    let metrics = atlas.metrics_indexed(glyph_index, size);
+    let line = atlas.line_metrics(size).unwrap_or_default();
+    let pos = vec2((pos.x + metrics.xmin).floor(), (pos.y - metrics.ymin - metrics.height + line.ascent).floor());
+    let dest = Rectangle::new(
+        pos.x, pos.y,
+        metrics.width, metrics.height
+    );
+    draw_texture_pro(rl, atlas.texture(), rec, dest, Vector2::ZERO, 0.0, color);
+}
 
-    pub fn fps(&self, pos: Vector2) {
-        unsafe { ffi::DrawFPS(pos.x as i32, pos.y as i32) }
-    }
+pub fn draw_fps(_rl: &DrawHandle, pos: Vector2) {
+    unsafe { ffi::DrawFPS(pos.x as i32, pos.y as i32) }
 }

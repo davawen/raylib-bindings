@@ -30,7 +30,7 @@ fn main() {
                 return
             }
 
-            let left_size = rl.measure_text(&mut rendered, "0x0000", size).x;
+            let left_size = measure_text(&mut rendered, "0x0000", size).x;
 
             let offset = size*1.5;
 
@@ -45,12 +45,12 @@ fn main() {
                 if y >= nh { break }
 
                 if x == 0 {
-                    rl.text(&mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
+                    draw_text(rl, &mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
                 }
-                rl.glyph(&mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
+                draw_glyph(rl, &mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
             }
 
-            rl.fps(vec2(5.0, 5.0));
+            draw_fps(rl, vec2(5.0, 5.0));
         });
     }
 }

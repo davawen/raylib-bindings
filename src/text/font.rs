@@ -20,7 +20,7 @@ impl TrueTypeFont {
     /// while !window_should_close(rl) {
     ///     begin_drawing(rl, |rl| {
     ///         clear_background(rl, Color::RAYWHITE);
-    ///         rl.text(&mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
+    ///         draw_text(rl, &mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
     ///     });
     ///     # break
     /// }

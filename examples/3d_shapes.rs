@@ -68,12 +68,12 @@ fn main() {
             let src = Rectangle::new(0.0, 0.0, size.x, -size.y);
             let dest = Rectangle::from_vecs(Vector2::ZERO, get_render_size(rl));
             draw_texture_pro(rl, target.texture(), src, dest, Vector2::ZERO, 0.0, Color::WHITE);
-            rl.text(rl.default_font(), &format!("Scale factor: {scale_factor} (press C and V!)"), Vector2::splat(10.0), 20.0, Color::BLACK);
+            draw_text(rl, rl.default_font(), &format!("Scale factor: {scale_factor} (press C and V!)"), Vector2::splat(10.0), 20.0, Color::BLACK);
 
             let right_text = "Press ESC to unlock cursor";
-            let right_text_len = rl.measure_text(rl.default_font(), right_text, 20.0).x;
+            let right_text_len = measure_text(rl.default_font(), right_text, 20.0).x;
             let pos = vec2(get_render_width(rl) - right_text_len - 10.0, 10.0);
-            rl.text(rl.default_font(), right_text, pos, 20.0, Color::BLACK);
+            draw_text(rl, rl.default_font(), right_text, pos, 20.0, Color::BLACK);
         });
     }
 }
