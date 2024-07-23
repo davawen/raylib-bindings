@@ -42,4 +42,10 @@ pub use crate::math::{
 };
 
 pub use crate::collisions::*;
-pub use crate::model::*;
+pub use crate::model::{
+    begin_mode3d,
+    shapes::*,
+    model::*,
+    mesh::*,
+    material::*
+};

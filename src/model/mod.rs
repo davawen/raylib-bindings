@@ -2,15 +2,10 @@ use std::ops::{Deref, DerefMut};
 
 use crate::{ffi, prelude::{Camera3D, DrawHandle, Raylib}};
 
-mod shapes;
-mod model;
-mod mesh;
-mod material;
-
-pub use shapes::*;
-pub use model::*;
-pub use mesh::*;
-pub use material::*;
+pub mod shapes;
+pub mod model;
+pub mod mesh;
+pub mod material;
 
 /// A handle created with a camera that allows 3d drawing.
 /// ```

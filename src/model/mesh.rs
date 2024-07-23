@@ -1,4 +1,4 @@
-use super::{DrawHandle3D, Material};
+use super::{DrawHandle3D, material::Material};
 
 use crate::ffi;
 use crate::prelude::{Vector2, Vector3, Vector4, Color, Image, Matrix, BoundingBox};

@@ -1,7 +1,7 @@
 use std::ffi::CStr;
 
 use crate::{ffi, prelude::{BoundingBox, Camera, Color, Matrix, Mesh, Rectangle, Transform, Vector2, Vector3, WeakTexture}};
-use super::{DrawHandle3D, Material};
+use super::{DrawHandle3D, material::Material};
 
 /// A raylib model.
 ///
