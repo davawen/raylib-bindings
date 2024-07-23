@@ -152,7 +152,11 @@ fn generate_functions(out: &mut impl Write, functions: Vec<Function>) -> io::Res
 }
 
 fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
-    for e in enums {
+    for mut e in enums {
+        if e.name == "KeyboardKey" {
+            e.name = "Key";
+        }
+
         generate_doc(out, e.desc, "")?;
         writeln!(out, "#[repr(C)]")?;
         writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Hash)]")?;
@@ -199,6 +203,7 @@ pub fn generate(out: &mut impl Write, raylib: Raylib) -> io::Result<()> {
     ]);
 
     generate_defines(out, raylib.defines)?;
+
     generate_structs(out, raylib.structs, &attributes)?;
     generate_aliases(out, raylib.aliases)?;
     generate_callbacks(out, raylib.callbacks)?;

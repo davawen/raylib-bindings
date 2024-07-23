@@ -2,7 +2,7 @@ pub use crate::ffi::{Ray, RayCollision, Transform};
 pub use crate::ffi::{AutomationEvent, BoneInfo, BoundingBox, GlyphInfo, MaterialMap, NPatchInfo};
 pub use crate::ffi::{
     BlendMode, CubemapLayout, FontType, GamepadAxis,
-    GamepadButton, Gesture, KeyboardKey, MaterialMapIndex, MouseButton, MouseCursor, NPatchLayout,
+    GamepadButton, Gesture, Key, MaterialMapIndex, MouseButton, MouseCursor, NPatchLayout,
     PixelFormat, ShaderAttributeDataType, ShaderLocationIndex, ShaderUniformDataType, TextureFilter, TextureWrap, TraceLogLevel
 };
 

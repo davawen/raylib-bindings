@@ -16,9 +16,9 @@ fn main() {
             rendered.reatlas(rl, size);
         }
 
-        if is_key_down(rl, KeyboardKey::Right) {
+        if is_key_down(rl, Key::Right) {
             pos += 0.05;
-        } else if is_key_down(rl, KeyboardKey::Left) {
+        } else if is_key_down(rl, Key::Left) {
             pos -= 0.05;
         }
 

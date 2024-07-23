@@ -13,7 +13,7 @@ fn main() {
         }
         while let Some(k) = get_key_pressed(rl) {
             match k {
-                KeyboardKey::Backspace => {
+                Key::Backspace => {
                     if cursor_pos > 0 {
                         cursor_pos -= 1;
                         while cursor_pos > 0 && !s.is_char_boundary(cursor_pos) {
@@ -22,13 +22,13 @@ fn main() {
                         s.remove(cursor_pos);
                     }
                 },
-                KeyboardKey::Left => if cursor_pos > 0 && cursor_pos <= s.len() {
+                Key::Left => if cursor_pos > 0 && cursor_pos <= s.len() {
                     cursor_pos -= 1;
                     while cursor_pos > 0 && !s.is_char_boundary(cursor_pos) {
                         cursor_pos -= 1;
                     }
                 },
-                KeyboardKey::Right => if cursor_pos < s.len() {
+                Key::Right => if cursor_pos < s.len() {
                     let c = s[cursor_pos..].chars().next().unwrap();
                     cursor_pos += c.len_utf8() 
                 },

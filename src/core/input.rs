@@ -4,41 +4,41 @@ use std::ffi::CStr;
 
 use bitflags::bitflags;
 
-use crate::{core::Raylib, ffi::{KeyboardKey, self, MouseButton, GamepadButton, Gesture, Vector2}, prelude::vec2};
+use crate::{core::Raylib, ffi::{Key, self, MouseButton, GamepadButton, Gesture, Vector2}, prelude::vec2};
 
 /// Check if a key has been pressed in this frame (rising edge)
-pub fn is_key_pressed(_: &Raylib, key: KeyboardKey) -> bool {
+pub fn is_key_pressed(_: &Raylib, key: Key) -> bool {
     unsafe { ffi::IsKeyPressed(key as i32) }
 }
 
 /// Check if a key has been pressed again (only on desktop platforms)
-pub fn is_key_pressed_again(_: &Raylib, key: KeyboardKey) -> bool {
+pub fn is_key_pressed_again(_: &Raylib, key: Key) -> bool {
     unsafe { ffi::IsKeyPressedRepeat(key as i32) }
 }
 
 /// Check if a key has been released in this frame (falling edge)
-pub fn is_key_released(_: &Raylib, key: KeyboardKey) -> bool {
+pub fn is_key_released(_: &Raylib, key: Key) -> bool {
     unsafe { ffi::IsKeyReleased(key as i32) }
 }
 
 /// Check if a key is currently being pressed
-pub fn is_key_down(_: &Raylib, key: KeyboardKey) -> bool {
+pub fn is_key_down(_: &Raylib, key: Key) -> bool {
     unsafe { ffi::IsKeyDown(key as i32) }
 }
 
 /// Check if a key is currently not being pressed
-pub fn is_key_up(_: &Raylib, key: KeyboardKey) -> bool {
+pub fn is_key_up(_: &Raylib, key: Key) -> bool {
     unsafe { ffi::IsKeyUp(key as i32) }
 }
 
 /// Get the keycode of the key pressed
 /// Call multiple times to get queued presses
 /// Returns `None` when the queue is empty
-/// Will never return `KeyboardKey::Null`
-pub fn get_key_pressed(_: &mut Raylib) -> Option<KeyboardKey> {
+/// Will never return `Key::Null`
+pub fn get_key_pressed(_: &mut Raylib) -> Option<Key> {
     let key = unsafe { ffi::GetKeyPressed() };
     if key == 0 { return None }
-    KeyboardKey::try_from(key).ok()
+    Key::try_from(key).ok()
 }
 
 /// Get the unicode character pressed
@@ -52,7 +52,7 @@ pub fn get_char_pressed(_: &mut Raylib) -> Option<char> {
 }
 
 /// Set a custom key to exit the program (default is ESC)
-pub fn set_exit_key(_: &mut Raylib, key: KeyboardKey) {
+pub fn set_exit_key(_: &mut Raylib, key: Key) {
     unsafe { ffi::SetExitKey(key as i32) }
 }
 

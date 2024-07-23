@@ -15,7 +15,7 @@ fn main() {
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::RAYWHITE);
 
-            if is_key_down(rl, KeyboardKey::LeftShift) {
+            if is_key_down(rl, Key::LeftShift) {
                 size += get_mouse_wheel_move(rl);
                 size = size.max(1.0);
                 if size != rendered.size() {
@@ -25,7 +25,7 @@ fn main() {
                 scroll += get_mouse_wheel_move(rl) as i32;
             }
 
-            if is_key_down(rl, KeyboardKey::A) {
+            if is_key_down(rl, Key::A) {
                 draw_texture(rl, rendered.texture(), 0.0, 0.0, Color::BLACK);
                 return
             }
