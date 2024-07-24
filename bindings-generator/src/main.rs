@@ -1,4 +1,4 @@
-use std::{env, fs, path::Path, error::Error, io::Write};
+use std::{fs, error::Error, io::Write};
 
 mod structure;
 mod parser;

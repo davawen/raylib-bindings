@@ -38,17 +38,17 @@ fn main() {
 
         if is_mouse_button_pressed(rl, MouseButton::Left) {
             let mut idx = s.len();
-            let mut c = std::ffi::CString::new(s.as_str()).unwrap();
-            let mut bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };
+            let mut bounds = measure_text(rl.default_font(), &s, 20.0).x;
             if get_mouse_x(rl) < (bounds as f32 + 20.0) {
                 while get_mouse_x(rl) < (bounds as f32 + 20.0) {
-                    let mut v = c.into_bytes();
-                    if v.is_empty() { break }
+                    if s.is_empty() { break }
 
-                    v.pop();
                     idx -= 1;
-                    c = std::ffi::CString::new(v).unwrap();
-                    bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };
+                    while idx > 0 && !s.is_char_boundary(idx) {
+                        idx -= 1;
+                    }
+
+                    bounds = measure_text(rl.default_font(), &s[..idx], 20.0).x;
                 }
                 cursor_pos = idx;
             }
@@ -57,19 +57,15 @@ fn main() {
         begin_drawing(rl, |rl| {
             clear_background(rl, Color::RAYWHITE);
 
-            let c = std::ffi::CString::new(s.as_str()).unwrap();
-            unsafe { raylib::ffi::DrawText(c.as_ptr(), 20, 20, 20, Color::BLACK) };
-            let mut c = c.into_bytes();
-            c.truncate(cursor_pos);
-            let c = std::ffi::CString::new(c).unwrap();
+            draw_text(rl, rl.default_font(), &s, Vector2::splat(20.0), 20.0, Color::BLACK);
 
-            let bounds = unsafe { raylib::ffi::MeasureText(c.as_ptr(), 20) };
+            let bounds = measure_text(rl.default_font(), &s[..cursor_pos], 20.0).x;
 
             let time = get_time(rl);
             let color = ((time*2.0*std::f32::consts::PI).sin()*128.0 + 128.0) as u8;
             let color = Color::rgba(0, 0, 0, color);
 
-            unsafe { raylib::ffi::DrawRectangle(22 + bounds, 20, 2, 20, color) };
+            draw_rectangle(rl, 18.0 + bounds, 20.0, 2.0, 20.0, color);
         });
     }
 }
