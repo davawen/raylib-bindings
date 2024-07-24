@@ -1,15 +1,8 @@
-use std::{env, fs, path::Path};
-
-mod structure;
-mod parser;
-mod generate;
-
 macro_rules! feature {
     ($feat:literal) => {
         if cfg!(feature = $feat) { "ON" } else { "OFF" }
     };
 }
-
 
 #[cfg(target_feature = "crt-static")]
 compile_error!(r#"ERROR (raylib-bindings): Cannot statically link C runtime with executable!
@@ -67,20 +60,4 @@ fn main() {
     println!("cargo:rerun-if-changed=build/generate.rs");
     println!("cargo:rerun-if-changed=build/parser.rs");
     println!("cargo:rerun-if-changed=build/structure.rs");
-
-    println!("cargo:rerun-if-changed=parser/raylib_api.json");
-    println!("cargo:rerun-if-changed=parser/rlgl_api.json");
-
-    generate_api("parser/raylib_api.json", "ffi.rs");
-    generate_api("parser/rlgl_api.json", "rlgl.rs");
-}
-
-fn generate_api(input: &str, output: &str) {
-    let file = fs::read_to_string(input).unwrap();
-    let api = serde_json::from_str(&file).expect("raylib_api.json to be valid");
-
-    let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join(output);
-    let mut ffi = fs::File::create(dest_path).unwrap();
-    generate::generate(&mut ffi, api).unwrap();
 }
