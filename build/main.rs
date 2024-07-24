@@ -4,7 +4,6 @@ mod structure;
 mod parser;
 mod generate;
 
-use parser::*;
 use generate::generate;
 
 macro_rules! feature {
@@ -76,10 +75,9 @@ fn main() {
     println!("cargo:rerun-if-changed=build/parser.rs");
     println!("cargo:rerun-if-changed=build/structure.rs");
 
-    let file = fs::read_to_string("parser/raylib_api.txt").unwrap();
+    let file = fs::read_to_string("parser/raylib_api.json").unwrap();
+    let raylib = serde_json::from_str(&file).expect("raylib_api.json to be valid");
 
-    let raylib = parse_raylib(&file);
-    
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("ffi.rs");
     let mut ffi = fs::File::create(dest_path).unwrap();

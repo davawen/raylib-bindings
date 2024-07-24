@@ -6,7 +6,7 @@ use crate::ffi;
 impl Camera {
     /// Get a ray trace from mouse position
     pub fn get_mouse_ray(&self, mouse_pos: Vector2) -> Ray {
-        unsafe { ffi::GetMouseRay(mouse_pos, *self) }
+        unsafe { ffi::GetScreenToWorldRay(mouse_pos, *self) }
     }
 
     /// Get this camera's view matrix

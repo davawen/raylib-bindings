@@ -187,8 +187,14 @@ pub fn draw_rectangle_rounded(_rl: &DrawHandle, rec: Rectangle, roundness: f32, 
 /// Draw the outline of a rectangle with rounded corners and thickness.
 /// `roundness` goes from 0.0 to 1.0.
 #[inline]
-pub fn draw_rectangle_rounded_lines(_rl: &DrawHandle, rec: Rectangle, roundness: f32, segments: i32, thick: f32, color: Color) {
-    unsafe { ffi::DrawRectangleRoundedLines(rec, roundness, segments, thick, color) }
+pub fn draw_rectangle_rounded_lines(_rl: &DrawHandle, rec: Rectangle, roundness: f32, segments: i32, color: Color) {
+    unsafe { ffi::DrawRectangleRoundedLines(rec, roundness, segments, color) }
+}
+/// Draw the outline of a rectangle with rounded corners and thickness.
+/// `roundness` goes from 0.0 to 1.0.
+#[inline]
+pub fn draw_rectangle_rounded_lines_ex(_rl: &DrawHandle, rec: Rectangle, roundness: f32, segments: i32, thick: f32, color: Color) {
+    unsafe { ffi::DrawRectangleRoundedLinesEx(rec, roundness, segments, thick, color) }
 }
 /// Draw a filled triangle.
 /// WARN: The vertices MUST be given in counter-clockwise order! Otherwise, the triangle won't render!

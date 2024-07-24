@@ -1,6 +1,19 @@
-use std::{io::{Write, self}, fmt::Display, collections::HashMap};
+use std::{collections::HashMap, fmt::Display, io::{self, Write}};
 
 use crate::structure::*;
+
+fn snake_to_pascal(snake: &str) -> String {
+    snake.split('_')
+        .flat_map(|word| word.split_inclusive(|c: char| c.is_ascii_digit()))
+        .map(|word| {
+        let mut chars = word.chars();
+        if let Some(c) = chars.next() {
+            c.to_uppercase()
+                .chain(chars.as_str().to_lowercase().chars())
+                .collect()
+        } else { String::new() }
+    }).collect()
+}
 
 fn map_type<'a>(name: &'a str, qualifier: Option<&'a str>) -> &'a str {
     match (name, qualifier) {
@@ -65,7 +78,7 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, attributes: &Has
             writeln!(out)?;
         }
 
-        generate_doc(out, s.desc, "")?;
+        generate_doc(out, s.description, "")?;
 
         writeln!(out, "#[repr(C)]")?;
         write!(out, "#[derive(Debug, Clone, Copy, PartialEq")?;
@@ -77,7 +90,7 @@ fn generate_structs(out: &mut impl Write, structs: Vec<Struct>, attributes: &Has
         writeln!(out, ")]")?;
         writeln!(out, "pub struct {} {{", s.name)?;
         for field in s.fields {
-            generate_doc(out, field.desc, "    ")?;
+            generate_doc(out, field.description, "    ")?;
             writeln!(out, "    pub {}: {},", escape_name(field.name), field.ty)?;
         }
         writeln!(out, "}}")?;
@@ -107,7 +120,7 @@ fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>) -> io::Result<()>
             continue;
         }
 
-        generate_doc(out, a.desc, "")?;
+        generate_doc(out, a.description, "")?;
         writeln!(out, "pub type {} = {};", a.name, a.ty)?;
     }
 
@@ -116,7 +129,7 @@ fn generate_aliases(out: &mut impl Write, aliases: Vec<Alias>) -> io::Result<()>
 
 fn generate_callbacks(out: &mut impl Write, callbacks: Vec<Callback>) -> io::Result<()> {
     for callback in callbacks {
-        generate_doc(out, callback.desc, "")?;
+        generate_doc(out, callback.description, "")?;
         write!(out, "pub type {} = extern fn(", callback.name)?;
         for param in callback.params {
             write!(out, "{}, ", param.ty)?;
@@ -136,7 +149,7 @@ fn generate_functions(out: &mut impl Write, functions: Vec<Function>) -> io::Res
     writeln!(out, "extern \"C\" {{")?;
 
     for f in functions {
-        generate_doc(out, f.desc, "")?;
+        generate_doc(out, &f.description, "")?;
         write!(out, "pub fn {}(", f.name)?;
         for param in f.params {
             write!(out, "{}: {}, ", escape_name(param.name), param.ty)?;
@@ -157,12 +170,36 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
             e.name = "Key";
         }
 
-        generate_doc(out, e.desc, "")?;
+        // Convert variant name to pascal case
+        for variant in &mut e.values {
+            variant.name = snake_to_pascal(&variant.name);
+        }
+
+        // Remove common prefix between all enum values
+        // you cannot simply remove the enum's name: some variants have a shortened prefix, and some casing is not consistent
+        let mut iter = e.values.iter().map(|variant| variant.name.as_str());
+        if let Some(first) = iter.next() {
+            let (_, common_prefix_len) = iter.fold((first, first.len()), |(acc, _), v| {
+                let len = v.char_indices().zip(acc.chars())
+                    .take_while(|((_, x), y)| x == y)
+                    .map(|((idx, _), _)| idx+1)
+                    .last()
+                    .unwrap_or(0);
+                (&v[0..len], len)
+            });
+
+            for value in &mut e.values {
+                value.name.drain(0..common_prefix_len);
+            }
+        }
+
+        generate_doc(out, e.description, "")?;
         writeln!(out, "#[repr(C)]")?;
         writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Hash)]")?;
         writeln!(out, "pub enum {} {{", e.name)?;
-        for (name, value) in &e.values {
-            writeln!(out, "    {} = {},", name, value)?;
+        for variant in &e.values {
+            generate_doc(out, &variant.description, "    ")?;
+            writeln!(out, "    {} = {},", variant.name, variant.value)?;
         }
         writeln!(out, "}}")?;
 
@@ -170,8 +207,8 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
         writeln!(out, "    type Error = ();")?;
         writeln!(out, "    fn try_from(value: i32) -> Result<Self, <Self as TryFrom<i32>>::Error> {{")?;
         writeln!(out, "        match value {{")?;
-        for (name, value) in &e.values {
-            writeln!(out, "            {} => Ok({}::{}),", value, e.name, name)?;
+        for variant in &e.values {
+            writeln!(out, "            {} => Ok({}::{}),", variant.value, e.name, variant.name)?;
         }
         writeln!(out, "            _ => Err(())")?;
         writeln!(out, "        }}")?;
@@ -184,6 +221,11 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
 
 fn generate_defines(out: &mut impl Write, defines: Vec<Define>) -> io::Result<()> {
     for define in defines {
+
+        if define.kind == "INT" || define.kind == "STRING" {
+            generate_doc(out, define.description, "")?;
+        }
+
         match define.kind {
             "INT" => writeln!(out, "pub const {}: i32 = {};", define.name, define.value)?,
             "STRING" => writeln!(out, "pub const {}: &str = {};", define.name, define.value)?,
