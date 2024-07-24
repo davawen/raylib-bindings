@@ -67,7 +67,7 @@ fn parse_type(ty: &str) -> Type {
                 }
             };
 
-            let num = ty[idx+1..end_idx].parse().unwrap();
+            let num = ty[idx+1..end_idx].parse().inspect_err(|_| eprintln!("{ty}")).unwrap();
             tokens.push(Token::Array(num));
         } else if c == '.' && idx+3 <= ty.len() && &ty[idx..idx+3] == "..." {
             tokens.push(Token::TripleDot);

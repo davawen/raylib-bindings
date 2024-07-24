@@ -4,28 +4,21 @@ mod structure;
 mod parser;
 mod generate;
 
-use generate::generate;
-
 macro_rules! feature {
     ($feat:literal) => {
         if cfg!(feature = $feat) { "ON" } else { "OFF" }
     };
 }
 
-fn check_dynamic_runtime() {
-    #[cfg(target_feature = "crt-static")]
-    {
-        panic!(r#"ERROR (raylib-bindings): Cannot statically link C runtime with executable!
-  GLFW will fail to detect platform info if the C standard library is linked statically.
-  If you are on musl (or on another platform that links the C runtime statically by default), try compiling like this:
 
-  RUSTFLAGS='-C target-feature=-crt-static' cargo build"#);
-    }
-}
+#[cfg(target_feature = "crt-static")]
+compile_error!(r#"ERROR (raylib-bindings): Cannot statically link C runtime with executable!
+GLFW will fail to detect platform info if the C standard library is linked statically.
+If you are on musl (or on another platform that links the C runtime statically by default), try compiling like this:
+
+RUSTFLAGS='-C target-feature=-crt-static' cargo build"#);
 
 fn main() {
-    check_dynamic_runtime();
-
     let mut config = cmake::Config::new("raylib");
 
     let path = config
@@ -75,11 +68,19 @@ fn main() {
     println!("cargo:rerun-if-changed=build/parser.rs");
     println!("cargo:rerun-if-changed=build/structure.rs");
 
-    let file = fs::read_to_string("parser/raylib_api.json").unwrap();
-    let raylib = serde_json::from_str(&file).expect("raylib_api.json to be valid");
+    println!("cargo:rerun-if-changed=parser/raylib_api.json");
+    println!("cargo:rerun-if-changed=parser/rlgl_api.json");
+
+    generate_api("parser/raylib_api.json", "ffi.rs");
+    generate_api("parser/rlgl_api.json", "rlgl.rs");
+}
+
+fn generate_api(input: &str, output: &str) {
+    let file = fs::read_to_string(input).unwrap();
+    let api = serde_json::from_str(&file).expect("raylib_api.json to be valid");
 
     let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("ffi.rs");
+    let dest_path = Path::new(&out_dir).join(output);
     let mut ffi = fs::File::create(dest_path).unwrap();
-    generate(&mut ffi, raylib).unwrap();
+    generate::generate(&mut ffi, api).unwrap();
 }

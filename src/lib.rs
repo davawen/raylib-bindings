@@ -16,7 +16,15 @@
 //! }
 //! ```
 
+#[cfg(not(feature = "ffi"))]
+mod ffi;
+#[cfg(feature = "ffi")]
 pub mod ffi;
+
+#[cfg(not(feature = "rlgl"))]
+mod rlgl;
+#[cfg(feature = "rlgl")]
+pub mod rlgl;
 
 pub mod core;
 pub mod math;

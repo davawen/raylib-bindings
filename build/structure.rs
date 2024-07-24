@@ -89,7 +89,7 @@ pub struct Function<'a> {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Raylib<'a> {
+pub struct Api<'a> {
     #[serde(borrow)] 
     pub defines: Vec<Define<'a>>,
     pub structs: Vec<Struct<'a>>,

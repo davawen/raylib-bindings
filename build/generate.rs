@@ -164,19 +164,9 @@ fn generate_functions(out: &mut impl Write, functions: Vec<Function>) -> io::Res
     writeln!(out, "}}")
 }
 
+
 fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
-    for mut e in enums {
-        if e.name == "KeyboardKey" {
-            e.name = "Key";
-        }
-
-        // Convert variant name to pascal case
-        for variant in &mut e.values {
-            variant.name = snake_to_pascal(&variant.name);
-        }
-
-        // Remove common prefix between all enum values
-        // you cannot simply remove the enum's name: some variants have a shortened prefix, and some casing is not consistent
+    fn remove_common_prefix(e: &mut Enum) {
         let mut iter = e.values.iter().map(|variant| variant.name.as_str());
         if let Some(first) = iter.next() {
             let (_, common_prefix_len) = iter.fold((first, first.len()), |(acc, _), v| {
@@ -191,6 +181,22 @@ fn generate_enums(out: &mut impl Write, enums: Vec<Enum>) -> io::Result<()> {
             for value in &mut e.values {
                 value.name.drain(0..common_prefix_len);
             }
+        }
+    }
+
+    for mut e in enums {
+        if e.name == "KeyboardKey" {
+            e.name = "Key";
+        }
+
+        // Convert variant name to pascal case
+        for variant in &mut e.values {
+            variant.name = snake_to_pascal(&variant.name);
+        }
+
+        if e.name != "rlGlVersion" { // disable on `rlGlVersion` enum, because it contains only numbers without common prefix
+            // you cannot simply remove the enum's name: some variants have a shortened prefix, and some casing is not consistent
+            remove_common_prefix(&mut e);
         }
 
         generate_doc(out, e.description, "")?;
@@ -236,7 +242,7 @@ fn generate_defines(out: &mut impl Write, defines: Vec<Define>) -> io::Result<()
     Ok(())
 }
 
-pub fn generate(out: &mut impl Write, raylib: Raylib) -> io::Result<()> {
+pub fn generate(out: &mut impl Write, api: Api) -> io::Result<()> {
     let attributes = HashMap::from([
         ("Color", ["Eq", "Hash", "Default"].as_slice()),
         ("Vector2", ["Default"].as_slice()),
@@ -244,13 +250,13 @@ pub fn generate(out: &mut impl Write, raylib: Raylib) -> io::Result<()> {
         ("Vector4", ["Default"].as_slice()),
     ]);
 
-    generate_defines(out, raylib.defines)?;
+    generate_defines(out, api.defines)?;
 
-    generate_structs(out, raylib.structs, &attributes)?;
-    generate_aliases(out, raylib.aliases)?;
-    generate_callbacks(out, raylib.callbacks)?;
-    generate_functions(out, raylib.functions)?;
-    generate_enums(out, raylib.enums)?;
+    generate_structs(out, api.structs, &attributes)?;
+    generate_aliases(out, api.aliases)?;
+    generate_callbacks(out, api.callbacks)?;
+    generate_functions(out, api.functions)?;
+    generate_enums(out, api.enums)?;
 
     Ok(())
 }

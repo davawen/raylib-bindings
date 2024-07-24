@@ -29,6 +29,9 @@ default = [
 	"wav", "ogg", "xm", "mod", "mp3", "qoa"
 ]
 
+ffi = []
+rlgl = []
+
 image_export = []
 image_generation = []
 image_manipulation = []
