@@ -203,7 +203,7 @@ impl Image {
     /// but support for the given file extension was not compiled into raylib,
     /// or the input file is in an unknown file format.
     /// Otherwise, returns the loaded image.
-    pub fn load(rl: &mut Raylib, filename: impl AsRef<std::path::Path>) -> std::io::Result<Option<Image>> {
+    pub fn load(rl: &Raylib, filename: impl AsRef<std::path::Path>) -> std::io::Result<Option<Image>> {
         if !filename.as_ref().exists() { return Err(std::io::ErrorKind::NotFound.into()) }
 
         let filetype = match filename.as_ref().extension().map(|s| s.to_str()).flatten() {
@@ -252,7 +252,7 @@ impl Image {
     ///     # break
     /// }
     /// ```
-    pub fn load_raw(_rl: &mut Raylib, data: &[u8], width: i32, height: i32, format: PixelFormat) -> Option<Image> {
+    pub fn load_raw(_rl: &Raylib, data: &[u8], width: i32, height: i32, format: PixelFormat) -> Option<Image> {
         assert!(width > 0 && height > 0);
 
         let size = unsafe { ffi::GetPixelDataSize(width, height, format as i32) };
@@ -279,7 +279,7 @@ impl Image {
     /// Loads an image from a memory buffer (in the given filetype's encoding).
     /// Returns `None` if support for the given format was not compiled into raylib.
     /// If you need to create an image from raw data (no filetype), use [`Image::load_raw`].
-    pub fn load_from_memory(_rl: &mut Raylib, filetype: ImageFiletype, data: &[u8]) -> Option<Image> {
+    pub fn load_from_memory(_rl: &Raylib, filetype: ImageFiletype, data: &[u8]) -> Option<Image> {
         let filetype = filetype.extension();
 
         let image = unsafe { ffi::LoadImageFromMemory(filetype.as_ptr(), data.as_ptr(), data.len() as i32) };
@@ -294,7 +294,7 @@ impl Image {
     /// - All frames are in RGBA format.
     /// - Only the GIF filetype is supported (other filetypes will load a single image).
     /// - Frames delay data is discarded.
-    pub fn load_image_anim_from_memory(_rl: &mut Raylib, filetype: ImageFiletype, data: &[u8]) -> Option<(usize, Image)> {
+    pub fn load_image_anim_from_memory(_rl: &Raylib, filetype: ImageFiletype, data: &[u8]) -> Option<(usize, Image)> {
         let filetype = filetype.extension();
         let mut frames = 0;
         let image = unsafe { ffi::LoadImageAnimFromMemory(filetype.as_ptr(), data.as_ptr(), data.len() as i32, &mut frames as *mut i32) };
@@ -307,7 +307,7 @@ impl Image {
     /// Loads image from GPU texture data.
     /// Compressed format are not supported.
     /// Returns `None` if the texture is in a compressed format or if there was an error when reading the data in the texture.
-    pub fn load_from_texture(_rl: &mut Raylib, texture: &Texture) -> Option<Image> {
+    pub fn load_from_texture(_rl: &Raylib, texture: &Texture) -> Option<Image> {
         let image = unsafe { ffi::LoadImageFromTexture(*texture.get_ffi()) };
         Image::from_ffi(image)
     }
@@ -315,7 +315,7 @@ impl Image {
     /// Loads an image from the current screen buffer (= take a screenshot)
     /// # Panics
     /// This function panics if there was an error reading the screen buffer data.
-    pub fn load_from_screen(_rl: &mut Raylib) -> Image {
+    pub fn load_from_screen(_rl: &Raylib) -> Image {
         let image = unsafe { ffi::LoadImageFromScreen() };
 
         Image::from_ffi(image).unwrap()
@@ -329,7 +329,7 @@ impl Image {
     /// Create an image of the given size composed of plain color.
     /// The resulting image format is [`PixelFormat::UncompressedR8G8B8A8`].
     #[inline]
-    pub fn gen_color(_rl: &mut Raylib, width: u32, height: u32, color: Color) -> Image {
+    pub fn gen_color(_rl: &Raylib, width: u32, height: u32, color: Color) -> Image {
         let image = unsafe { ffi::GenImageColor(width as i32, height as i32, color) };
         Image::from_ffi(image).unwrap()
     }
@@ -339,7 +339,7 @@ impl Image {
     /// The resulting image format is [`PixelFormat::UncompressedR8G8B8A8`].
     /// WARN: Due to raylib shenigans, the angle cannot go below integer degree precision.
     #[inline]
-    pub fn gen_gradient_linear(_rl: &mut Raylib, width: u32, height: u32, angle: f32, start: Color, end: Color) -> Image {
+    pub fn gen_gradient_linear(_rl: &Raylib, width: u32, height: u32, angle: f32, start: Color, end: Color) -> Image {
         let image = unsafe { ffi::GenImageGradientLinear(width as i32, height as i32, angle.to_degrees().round() as i32, start, end) };
         Image::from_ffi(image).unwrap()
     }
@@ -353,7 +353,7 @@ impl Image {
     ///
     /// The resulting image format is [`PixelFormat::UncompressedR8G8B8A8`].
     #[inline]
-    pub fn gen_gradient_radial(_rl: &mut Raylib, width: u32, height: u32, density: f32, inner: Color, outer: Color) -> Image {
+    pub fn gen_gradient_radial(_rl: &Raylib, width: u32, height: u32, density: f32, inner: Color, outer: Color) -> Image {
         let image = unsafe { ffi::GenImageGradientRadial(width as i32, height as i32, density, inner, outer) };
         Image::from_ffi(image).unwrap()
     }
@@ -364,7 +364,7 @@ impl Image {
     ///
     /// The resulting image format is [`PixelFormat::UncompressedR8G8B8A8`].
     #[inline]
-    pub fn gen_gradient_square(_rl: &mut Raylib, width: u32, height: u32, density: f32, inner: Color, outer: Color) -> Image {
+    pub fn gen_gradient_square(_rl: &Raylib, width: u32, height: u32, density: f32, inner: Color, outer: Color) -> Image {
         let image = unsafe { ffi::GenImageGradientSquare(width as i32, height as i32, density, inner, outer) };
         Image::from_ffi(image).unwrap()
     }
@@ -372,7 +372,7 @@ impl Image {
     /// Creates an image of the given size in a checkerboard pattern.
     /// If you need a set number of square instead of a set size, use [`Image::gen_checked_num`].
     #[inline]
-    pub fn gen_checked(_rl: &mut Raylib, width: u32, height: u32, check_width: u32, check_height: u32, top_left: Color, other: Color) -> Image {
+    pub fn gen_checked(_rl: &Raylib, width: u32, height: u32, check_width: u32, check_height: u32, top_left: Color, other: Color) -> Image {
         let image = unsafe { ffi::GenImageChecked(width as i32, height as i32, check_width as i32, check_height as i32, top_left, other) };
         Image::from_ffi(image).unwrap()
     }
@@ -380,7 +380,7 @@ impl Image {
     /// Creates an image of the given size in a checkerboard pattern.
     /// If you need a set size instead of a set number of square, use [`Image::gen_checked`].
     #[inline]
-    pub fn gen_checked_num(rl: &mut Raylib, width: u32, height: u32, num_check_x: u32, num_check_y: u32, top_left: Color, other: Color) -> Image {
+    pub fn gen_checked_num(rl: &Raylib, width: u32, height: u32, num_check_x: u32, num_check_y: u32, top_left: Color, other: Color) -> Image {
         let w = width / num_check_x;
         let h = height / num_check_y;
         Image::gen_checked(rl, width, height, w, h, top_left, other)
@@ -390,7 +390,7 @@ impl Image {
     /// - `factor` defines the ratio between white and black pixels.
     /// - `0.0` means all black, `1.0` means all white.
     #[inline]
-    pub fn gen_white_noise(_rl: &mut Raylib, width: u32, height: u32, factor: f32) -> Image {
+    pub fn gen_white_noise(_rl: &Raylib, width: u32, height: u32, factor: f32) -> Image {
         let image = unsafe { ffi::GenImageWhiteNoise(width as i32, height as i32, factor) };
         Image::from_ffi(image).unwrap()
     }
@@ -401,7 +401,7 @@ impl Image {
     /// - gain = 0.5
     /// - octaves = 6
     #[inline]
-    pub fn gen_perlin_noise(_rl: &mut Raylib, width: u32, height: u32, offset_x: i32, offset_y: i32, scale: f32) -> Image {
+    pub fn gen_perlin_noise(_rl: &Raylib, width: u32, height: u32, offset_x: i32, offset_y: i32, scale: f32) -> Image {
         let image = unsafe { ffi::GenImagePerlinNoise(width as i32, height as i32, offset_x, offset_y, scale) };
         Image::from_ffi(image).unwrap()
     }
@@ -410,7 +410,7 @@ impl Image {
     /// Use a bigger tile size to get less points.
     /// Pixels close to points are black, pixels far away are white.
     #[inline]
-    pub fn gen_cellular(_rl: &mut Raylib, width: u32, height: u32, tile_size: u32) -> Image {
+    pub fn gen_cellular(_rl: &Raylib, width: u32, height: u32, tile_size: u32) -> Image {
         let image = unsafe { ffi::GenImageCellular(width as i32, height as i32, tile_size as i32) };
         Image::from_ffi(image).unwrap()
     }
@@ -418,7 +418,7 @@ impl Image {
     /// Create an image from the byte data in text.
     // NOTE: I honestly have no idea what would be the use for this.
     #[inline]
-    pub fn gen_text(_rl: &mut Raylib, width: u32, height: u32, text: &CStr) -> Image {
+    pub fn gen_text(_rl: &Raylib, width: u32, height: u32, text: &CStr) -> Image {
         let image = unsafe { ffi::GenImageText(width as i32, height as i32, text.as_ptr()) };
         Image::from_ffi(image).unwrap()
     }

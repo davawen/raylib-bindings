@@ -27,7 +27,7 @@ pub use crate::textures::{
 
 pub use crate::text::{
     font::*,
-    atlas::*
+    cache::*
 };
 
 pub use crate::math::{

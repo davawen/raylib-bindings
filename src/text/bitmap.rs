@@ -13,9 +13,9 @@ use std::num::NonZeroU16;
 
 use hashbrown::HashMap;
 
-use crate::prelude::{Rectangle, Raylib, Texture, Image};
+use crate::prelude::{draw_texture_pro, Color, DrawHandle, Image, Raylib, Rectangle, Texture, Vector2};
 
-use super::atlas::{Metrics, LineMetrics, FontAtlas};
+use super::cache::{Metrics, LineMetrics, FontCache};
 
 pub struct BitmapFontAtlas {
     texture: Texture,
@@ -44,7 +44,7 @@ impl BitmapFontAtlas {
     }
 }
 
-impl FontAtlas for BitmapFontAtlas {
+impl FontCache for BitmapFontAtlas {
     fn codepoints(&self) -> &HashMap<char, NonZeroU16> { &self.codepoints }
     fn glyph_count(&self) -> u16 { self.glyph_count }
     fn line_metrics(&self, size: f32) -> Option<LineMetrics> {
@@ -56,8 +56,7 @@ impl FontAtlas for BitmapFontAtlas {
     }
     fn kern_indexed(&self, _left: u16, _right: u16, _size: f32) -> Option<f32> { None }
 
-    fn texture(&self) -> &Texture { &self.texture }
-    fn get_glyph(&self, index: u16, _size: f32) -> Rectangle {
-        self.glyphs[index as usize].rec
+    fn draw_glyph(&self, rl: &DrawHandle, index: u16, _: f32, dest: Rectangle, color: Color) {
+        draw_texture_pro(rl, &self.texture, self.glyphs[index as usize].rec, dest, Vector2::ZERO, 0.0, color);
     }
 }

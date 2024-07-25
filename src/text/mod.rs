@@ -2,4 +2,4 @@
 
 pub mod font;
 pub mod bitmap;
-pub mod atlas;
+pub mod cache;

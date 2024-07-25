@@ -162,7 +162,7 @@ impl Texture {
     /// but support for the given file extension was not compiled into raylib,
     /// or the input file is in an unknown file format.
     /// Otherwise, returns the loaded texture.
-    pub fn load(rl: &mut Raylib, filename: impl AsRef<std::path::Path>) -> std::io::Result<Option<Texture>> {
+    pub fn load(rl: &Raylib, filename: impl AsRef<std::path::Path>) -> std::io::Result<Option<Texture>> {
         let image = Image::load(rl, filename)?;
         if let Some(image) = image {
             Ok(Self::load_from_image(rl, &image))
@@ -172,14 +172,14 @@ impl Texture {
     /// Load texture from image data.
     /// Returns `None` if there was an error loading the texture.
     #[inline]
-    pub fn load_from_image(_rl: &mut Raylib, image: &Image) -> Option<Texture> {
+    pub fn load_from_image(_rl: &Raylib, image: &Image) -> Option<Texture> {
         let texture = unsafe { ffi::LoadTextureFromImage(image.get_ffi_image()) };
         Texture::from_ffi(texture)
     }
 
     /// Loads an empty texture in the given format.
     /// Returns `None` if there was an error creating the texture.
-    pub fn load_empty(_rl: &mut Raylib, width: u32, height: u32, format: PixelFormat) -> Option<Texture> {
+    pub fn load_empty(_rl: &Raylib, width: u32, height: u32, format: PixelFormat) -> Option<Texture> {
         let empty_image = ffi::Image {
             data: std::ptr::null_mut(),
             width: width as i32, height: height as i32,
@@ -194,7 +194,7 @@ impl Texture {
     /// Load a cubemap texture from an image.
     /// Returns `None` if there was an error loading the texture.
     #[inline]
-    pub fn load_cubmap(_rl: &mut Raylib, image: &Image, layout: CubemapLayout) -> Option<Texture> {
+    pub fn load_cubmap(_rl: &Raylib, image: &Image, layout: CubemapLayout) -> Option<Texture> {
         let texture = unsafe { ffi::LoadTextureCubemap(image.get_ffi_image(), layout as i32) };
         Texture::from_ffi(texture)
     }
@@ -204,7 +204,7 @@ impl RenderTexture {
     /// Create a render texture of the given size.
     /// Returns `None` if there was an error when loading the texture.
     #[inline]
-    pub fn load(_rl: &mut Raylib, width: u32, height: u32) -> Option<RenderTexture> {
+    pub fn load(_rl: &Raylib, width: u32, height: u32) -> Option<RenderTexture> {
         let texture = unsafe { ffi::LoadRenderTexture(width as i32, height as i32) };
         RenderTexture::from_ffi(texture)
     }

@@ -1,9 +1,9 @@
-use std::{cell::RefCell, num::NonZeroU16};
+use std::{cell::RefCell, hash::Hash, num::NonZeroU16, path::Path};
 use hashbrown::HashMap;
 
-use crate::prelude::{Texture, Rectangle, PixelFormat, Raylib};
+use crate::prelude::{draw_texture_pro, Color, DrawHandle, PixelFormat, Raylib, Rectangle, Texture, Vector2};
 
-use super::atlas::{FontAtlas, LineMetrics, Metrics};
+use super::cache::{FontCache, LineMetrics, Metrics};
 
 /// A font created from a `.tff` or `.otf` file.
 pub struct TrueTypeFont(fontdue::Font);
@@ -38,23 +38,94 @@ impl TrueTypeFont {
     pub fn inner(&self) -> &fontdue::Font {
         &self.0
     }
+}
 
-    /// Creates a texture to hold the font rendered at a certain size
-    pub fn atlas<'f, 'r>(&'f self, rl: &'r mut Raylib, size: f32) -> TrueTypeFontAtlas<'f> {
-        let (texture_size, recs) = TrueTypeFontAtlas::map_texture(self.inner(), size);
-        let texture = Texture::load_empty(rl, texture_size as u32, texture_size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
-        TrueTypeFontAtlas { texture: texture.into(), size, recs: recs.into(), font: self.inner() }
+#[derive(Clone, Copy)]
+struct FontSizeKey(f32);
+
+impl PartialEq for FontSizeKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 ||
+        (self.0.is_nan() && other.0.is_nan())
+    }
+}
+impl Eq for FontSizeKey {}
+
+impl Hash for FontSizeKey {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u32(self.0.to_bits());
     }
 }
 
-pub struct TrueTypeFontAtlas<'f> {
-    texture: Texture,
-    size: f32,
-    recs: RefCell<Vec<(bool, Rectangle)>>,
-    font: &'f fontdue::Font
+pub fn load_font(rl: &Raylib, path: impl AsRef<Path>) -> std::io::Result<TrueTypeFontCache> {
+    use std::io::{Error, ErrorKind};
+
+    let bytes = std::fs::read(path)?;
+    let font = TrueTypeFont::from_bytes(bytes.as_slice()).map_err(|s| Error::new(ErrorKind::InvalidData, s))?;
+    Ok(load_font_ex(rl, font))
 }
 
-impl TrueTypeFontAtlas<'_> {
+pub fn load_font_ex(_rl: &Raylib, font: TrueTypeFont) -> TrueTypeFontCache {
+    TrueTypeFontCache {
+        font: font.0,
+        atlases: RefCell::default()
+    }
+}
+
+pub struct TrueTypeFontCache {
+    font: fontdue::Font,
+    atlases: RefCell<HashMap<FontSizeKey, TrueTypeFontAtlas>>
+}
+
+impl FontCache for TrueTypeFontCache {
+    fn codepoints(&self) -> &HashMap<char, NonZeroU16> { self.font.chars() }
+    fn glyph_count(&self) -> u16 { self.font.glyph_count() }
+    fn line_metrics(&self, size: f32) -> Option<LineMetrics> {
+        self.font.horizontal_line_metrics(size).map(|m| LineMetrics {
+            ascent: m.ascent, descent: m.descent, line_gap: m.line_gap
+        })
+    }
+
+    fn metrics_indexed(&self, index: u16, size: f32) -> Metrics {
+        let m = self.font.metrics_indexed(index, size);
+        Metrics {
+            xmin: m.xmin as f32,
+            ymin: m.ymin as f32,
+            width: m.width as f32,
+            height: m.height as f32,
+            advance_width: m.advance_width
+        }
+    }
+    fn kern_indexed(&self, left: u16, right: u16, size: f32) -> Option<f32> { self.font.horizontal_kern_indexed(left, right, size) }
+
+    fn draw_glyph(&self, rl: &DrawHandle, index: u16, size: f32, dest: Rectangle, color: Color) {
+        let key = FontSizeKey(size);
+        let mut atlases = self.atlases.borrow_mut();
+
+        let atlas = if let Some(atlas) = atlases.get(&key) {
+            atlas
+        } else {
+            let (texture_size, recs) = TrueTypeFontAtlas::map_texture(&self.font, size);
+            let texture = Texture::load_empty(rl, texture_size as u32, texture_size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
+            let atlas = TrueTypeFontAtlas { texture: texture.into(), size, recs: recs.into() };
+            // SAFETY: we just checked above that `key` was not yet inserted into the map
+            let (_, atlas) = atlases.insert_unique_unchecked(key, atlas);
+            atlas
+        };
+
+        let rec = atlas.get_glyph(&self.font, index, size);
+
+        draw_texture_pro(rl, atlas.texture(), rec, dest, Vector2::ZERO, 0.0, color);
+    }
+}
+
+struct TrueTypeFontAtlas {
+    texture: Texture,
+    size: f32,
+    recs: RefCell<Vec<(bool, Rectangle)>>
+}
+
+impl TrueTypeFontAtlas {
     /// Returns the size of the texture expected and the vec containing the position of the glyphs.
     fn map_texture(font: &fontdue::Font, px: f32) -> (usize, Vec<(bool, Rectangle)>) {
         let mut size = 128;
@@ -110,57 +181,16 @@ impl TrueTypeFontAtlas<'_> {
         (size, recs)
     }
 
-    /// Recalculate texture size for a new font size.
-    /// This re-uses the already created texture if it is big enough. 
-    pub fn reatlas(&mut self, rl: &mut Raylib, px: f32) {
-        self.size = px;
-        let (size, recs) = Self::map_texture(self.font, px);
-        self.recs = recs.into();
-
-        if size as u32 > self.texture.width() {
-            self.texture = Texture::load_empty(rl, size as u32, size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
-        }
+    fn texture(&self) -> &Texture {
+        &self.texture
     }
 
-    /// The size at which the font was rendered
-    pub fn size(&self) -> f32 {
-        self.size
-    }
-
-    // A reference to the font used to create this atlas.
-    pub fn font(&self) -> &fontdue::Font {
-        self.font
-    }
-}
-
-impl FontAtlas for TrueTypeFontAtlas<'_> {
-    fn codepoints(&self) -> &HashMap<char, NonZeroU16> { self.font.chars() }
-    fn glyph_count(&self) -> u16 { self.font.glyph_count() }
-    fn line_metrics(&self, size: f32) -> Option<LineMetrics> {
-        self.font.horizontal_line_metrics(size).map(|m| LineMetrics {
-            ascent: m.ascent, descent: m.descent, line_gap: m.line_gap
-        })
-    }
-
-    fn metrics_indexed(&self, index: u16, size: f32) -> Metrics {
-        let m = self.font.metrics_indexed(index, size);
-        Metrics {
-            xmin: m.xmin as f32,
-            ymin: m.ymin as f32,
-            width: m.width as f32,
-            height: m.height as f32,
-            advance_width: m.advance_width
-        }
-    }
-    fn kern_indexed(&self, left: u16, right: u16, size: f32) -> Option<f32> { self.font.horizontal_kern_indexed(left, right, size) }
-
-    fn texture(&self) -> &Texture { &self.texture }
-    fn get_glyph(&self, index: u16, _size: f32) -> Rectangle {
+    fn get_glyph(&self, font: &fontdue::Font, index: u16, _size: f32) -> Rectangle {
         let (rendered, rec) = &mut self.recs.borrow_mut()[index as usize];
         // skip if glyph was already rendered
         if *rendered { return *rec }
 
-        let (_, rasterized) = self.font.rasterize_indexed(index, self.size);
+        let (_, rasterized) = font.rasterize_indexed(index, self.size);
         // convert to GrayAlpha
         let mut data = Vec::with_capacity(rasterized.len()*2);
         for alpha in rasterized {
@@ -172,3 +202,4 @@ impl FontAtlas for TrueTypeFontAtlas<'_> {
         *rec
     }
 }
+

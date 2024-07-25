@@ -5,8 +5,7 @@ fn main() {
     set_window_state(rl, WindowFlags::RESIZABLE);
 
     let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
-    // let font = TrueTypeFont::from_bytes(include_bytes!("../assets/TerminusTTF.ttf").as_slice()).unwrap();
-    let mut rendered = font.atlas(rl, 20.0);
+    let font = load_font_ex(rl, font);
 
     let mut scroll = 0;
     let mut size = 20.0;
@@ -18,26 +17,18 @@ fn main() {
             if is_key_down(rl, Key::LeftShift) {
                 size += get_mouse_wheel_move(rl);
                 size = size.max(1.0);
-                if size != rendered.size() {
-                    rendered.reatlas(rl, size);
-                }
             } else {
                 scroll += get_mouse_wheel_move(rl) as i32;
             }
 
-            if is_key_down(rl, Key::A) {
-                draw_texture(rl, rendered.texture(), 0.0, 0.0, Color::BLACK);
-                return
-            }
-
-            let left_size = measure_text(&mut rendered, "0x0000", size).x;
+            let left_size = measure_text(&font, "0x0000", size).x;
 
             let offset = size*1.5;
 
             let (w, h) = (get_render_width(rl) as i32, get_render_height(rl) as i32);
             let (nw, nh) = ((w - 50 - left_size as i32 - 25)/(offset as i32), (h-100)/(offset as i32));
 
-            for i in 0..rendered.glyph_count() as u16 {
+            for i in 0..font.glyph_count() as u16 {
                 let x = i as i32 % nw;
                 let y = (i as i32 / nw) + scroll;
 
@@ -45,9 +36,9 @@ fn main() {
                 if y >= nh { break }
 
                 if x == 0 {
-                    draw_text(rl, &mut rendered, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
+                    draw_text(rl, &font, &format!("0x{:04x}", i), vec2(5.0, y as f32*offset + 50.0), size, Color::BLACK);
                 }
-                draw_glyph(rl, &mut rendered, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
+                draw_glyph(rl, &font, i, vec2(x as f32*offset + left_size + 25.0, y as f32*offset + 50.0), size, Color::BLACK);
             }
 
             draw_fps(rl, vec2(5.0, 5.0));
