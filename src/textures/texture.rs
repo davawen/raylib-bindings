@@ -261,6 +261,71 @@ impl Texture {
         unsafe { ffi::UpdateTextureRec(self.0, rec, buffer.as_ptr() as *const c_void) };
         Ok(())
     }
+
+    /// Resizes this texture to new dimensions, losing image data in the process. 
+    /// # Safety
+    /// Since [`Texture`]s are neither `Send` nor `Sync`, if the current texture was well created,
+    /// it should be living on the main thread.
+    /// This means it does not have to take a [`Raylib`] parameter.
+    /// Note that this function is not safe to be called from any context other than the main thread.
+    pub fn resize_lossy(&mut self, new_width: u32, new_height: u32) {
+        unsafe { ffi::UnloadTexture(self.0) };
+
+        let empty_image = ffi::Image {
+            data: std::ptr::null_mut(),
+            width: new_width as i32, height: new_height as i32,
+            format: self.0.format as i32,
+            mipmaps: 1
+        };
+
+        let texture = unsafe { ffi::LoadTextureFromImage(empty_image) };
+        *self = Texture::from_ffi(texture).unwrap();
+    }
+
+    /// Resizes this texture using the bicubic scaling algorithm. 
+    /// See [`Image::resize_bicubic`] for limitations.
+    /// # Safety
+    /// Since [`Texture`]s are neither `Send` nor `Sync`, if the current texture was well created,
+    /// it should be living on the main thread.
+    /// This means it does not have to take a [`Raylib`] parameter.
+    /// Note that this function is not safe to be called from any context other than the main thread.
+    pub fn resize_bicubic(&mut self, new_width: u32, new_height: u32) {
+        let mut image = unsafe { ffi::LoadImageFromTexture(self.0) };
+        unsafe { ffi::ImageResize(&mut image as *mut _, new_width as i32, new_height as i32) };
+
+        let texture = unsafe { ffi::LoadTextureFromImage(image) };
+        *self = Texture::from_ffi(texture).unwrap();
+    }
+
+    /// Resizes this texture using the nearest neighbour algorithm. 
+    /// See [`Image::resize_nn`] for limitations.
+    /// # Safety
+    /// Since [`Texture`]s are neither `Send` nor `Sync`, if the current texture was well created,
+    /// it should be living on the main thread.
+    /// This means it does not have to take a [`Raylib`] parameter.
+    /// Note that this function is not safe to be called from any context other than the main thread.
+    pub fn resize_nn(&mut self, new_width: u32, new_height: u32) {
+        let mut image = unsafe { ffi::LoadImageFromTexture(self.0) };
+        unsafe { ffi::ImageResizeNN(&mut image as *mut _, new_width as i32, new_height as i32) };
+
+        let texture = unsafe { ffi::LoadTextureFromImage(image) };
+        *self = Texture::from_ffi(texture).unwrap();
+    }
+
+    /// Crops part of the texture and fills out of bounds part with the given color.
+    /// See [`Image::resize_canvas`] for limitations.
+    /// # Safety
+    /// Since [`Texture`]s are neither `Send` nor `Sync`, if the current texture was well created,
+    /// it should be living on the main thread.
+    /// This means it does not have to take a [`Raylib`] parameter.
+    /// Note that this function is not safe to be called from any context other than the main thread.
+    pub fn resize_canvas(&mut self, new_width: u32, new_height: u32, offset_x: i32, offset_y: i32, fill: Color) {
+        let mut image = unsafe { ffi::LoadImageFromTexture(self.0) };
+        unsafe { ffi::ImageResizeCanvas(&mut image as *mut _, new_width as i32, new_height as i32, offset_x, offset_y, fill) };
+
+        let texture = unsafe { ffi::LoadTextureFromImage(image) };
+        *self = Texture::from_ffi(texture).unwrap();
+    }
 }
 
 /// # Texture configuration functions
