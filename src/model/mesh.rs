@@ -5,7 +5,7 @@ use crate::prelude::{Vector2, Vector3, Vector4, Color, Image, Matrix, BoundingBo
 
 /// A raylib mesh.
 /// 
-/// Unlike a [`ffi::Mesh`], a [`Mesh`] is garanteed to have been uploaded to the GPU and to be drawable.
+/// Unlike a `ffi::Mesh`, a [`Mesh`] is garanteed to have been uploaded to the GPU and to be drawable.
 /// Note that to draw a mesh, you need to create a [`DrawHandle3D`].
 /// 
 /// To procedurally create a mesh, use the [`MeshBuilder`] struct (see the `mesh_generation` example).

@@ -44,7 +44,8 @@ pub fn check_collision_point_triangle(point: Vector2, p1: Vector2, p2: Vector2, 
 pub fn check_collision_point_poly(point: Vector2, points: &[Vector2]) -> bool {
     unsafe { ffi::CheckCollisionPointPoly(point, points.as_ptr().cast_mut(), points.len() as i32) }
 }
-/// Returns `Some` with the coordinate if there is a collision and `None` if there wasn't any. #[inline]
+/// Returns `Some` with the coordinate if there is a collision and `None` if there wasn't any. 
+#[inline]
 pub fn check_collision_lines(start1: Vector2, end1: Vector2, start2: Vector2, end2: Vector2) -> Option<Vector2> {
     let mut p = Vector2::ZERO;
     let col = unsafe { ffi::CheckCollisionLines(start1, end1, start2, end2, &mut p as *mut _) };

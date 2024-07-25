@@ -1,5 +1,7 @@
 use std::{fs, error::Error, io::Write};
 
+use structure::Api;
+
 mod structure;
 mod parser;
 mod generate;
@@ -16,7 +18,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn generate_api(input: &str, output: &mut fs::File) -> Result<(), Box<dyn Error>> {
     let file = fs::read_to_string(input)?;
-    let api = serde_json::from_str(&file).expect("raylib_api.json to be valid");
+    let api: Api = serde_json::from_str(&file).expect("raylib_api.json to be valid");
 
     writeln!(output, "#![allow(non_snake_case, non_camel_case_types, unused)]")?;
     writeln!(output, "use std::ffi;\n")?;

@@ -87,7 +87,7 @@ pub fn init_window_cstr(width: i32, height: i32, title: &CStr) -> Raylib {
     this
 }
 
-/// Check if application should close ([`KeyboardKey::Escape`][`ffi::KeyboardKey::Escape`] pressed or windows close icon clicked)
+/// Check if application should close ([`Key::Escape`][`ffi::Key::Escape`] pressed or windows close icon clicked)
 /// 
 /// To change the default exit key, you can use [`crate::core::input::set_exit_key`].
 pub fn window_should_close(rl: &Raylib) -> bool {
@@ -95,7 +95,7 @@ pub fn window_should_close(rl: &Raylib) -> bool {
     unsafe { ffi::WindowShouldClose() }
 }
 
-/// Asks raylib to close the window (will return false in the next iteration of [`Raylib::window_should_close`]).
+/// Asks raylib to close the window (will return false in the next iteration of [`window_should_close`]).
 pub fn quit(rl: &mut Raylib) {
     rl.quit_requested = true;
 }

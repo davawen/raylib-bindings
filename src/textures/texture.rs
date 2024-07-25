@@ -7,16 +7,16 @@ use crate::{ffi, prelude::{Raylib, DrawHandle, get_pixel_data_size, Vector2, Col
 use super::image::Image;
 
 /// A raylib texture.
-/// Use `Raylib::load_texture` to create one.
+/// Use [`Texture::load`] to create one.
 /// 
 /// Textures are stored on the GPU in VRAM.
-/// If you need to interact with graphical data from the CPU, prefer using an `Image`.
+/// If you need to interact with graphical data from the CPU, prefer using an [`Image`].
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct Texture(ffi::Texture, PhantomData<*const c_void>);
 
 /// A weak reference to a raylib texture.
-/// Used when we need long-time read-only access to a texture, while allowing modifications to it, such as in [`crate::model::Material`].
+/// Used when we need long-time read-only access to a texture, while allowing modifications to it, such as in [`crate::model::material::Material`].
 /// This reference offers no garantee that the texture will live for its whole lifetime.
 #[repr(transparent)]
 #[derive(Debug, Clone)]
