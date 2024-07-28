@@ -3,8 +3,7 @@ use raylib::prelude::*;
 fn main() {
     let rl = &mut init_window(400, 400, "Subpixel positioning", 60);
 
-    let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
-    let font = load_font_ex(rl, font);
+    let font = load_font_bytes(rl, include_bytes!("../assets/iosevka-medium.ttc").as_slice());
 
     let mut pos = 0.0;
 

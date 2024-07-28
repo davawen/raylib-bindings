@@ -4,8 +4,7 @@ fn main() {
     let rl = &mut init_window(1800, 1100, "Rust text!", 60);
     set_window_state(rl, WindowFlags::RESIZABLE);
 
-    let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
-    let font = load_font_ex(rl, font);
+    let font = load_font_bytes(rl, include_bytes!("../assets/iosevka-medium.ttc").as_slice());
 
     let mut scroll = 0;
     let mut size = 20.0;

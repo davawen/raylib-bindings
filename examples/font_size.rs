@@ -3,8 +3,7 @@ use raylib::prelude::*;
 fn main() {
     let rl = &mut init_window(800, 800, "Font size", 60);
 
-    let font = TrueTypeFont::from_bytes(include_bytes!("../assets/iosevka-medium.ttc").as_slice()).unwrap();
-    let font = load_font_ex(rl, font);
+    let font = load_font_bytes(rl, include_bytes!("../assets/iosevka-medium.ttc").as_slice());
 
     while !window_should_close(rl) {
         begin_drawing(rl, |rl| {

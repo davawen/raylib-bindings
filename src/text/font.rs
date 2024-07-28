@@ -1,7 +1,7 @@
 use std::{cell::RefCell, hash::Hash, num::NonZeroU16, path::Path};
 use hashbrown::HashMap;
 
-use crate::prelude::{draw_texture_pro, Color, DrawHandle, PixelFormat, Raylib, Rectangle, Texture, Vector2};
+use crate::prelude::{draw_texture_pro, Color, DrawHandle, PixelFormat, Raylib, Rectangle, Texture, TextureFilter, Vector2};
 
 use super::cache::{FontCache, LineMetrics, Metrics};
 
@@ -16,11 +16,11 @@ impl TrueTypeFont {
     /// # use raylib::prelude::*;
     /// # let rl = &mut init_window(800, 800, "Font rendering", 60);
     /// let font = TrueTypeFont::from_bytes(include_bytes!("../../assets/TerminusTTF.ttf").as_slice()).unwrap();
-    /// let mut atlas = font.atlas(rl, 32.0);
+    /// let font = load_font_ex(rl, font);
     /// while !window_should_close(rl) {
     ///     begin_drawing(rl, |rl| {
     ///         clear_background(rl, Color::RAYWHITE);
-    ///         draw_text(rl, &mut atlas, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
+    ///         draw_text(rl, &font, "Hello, Terminus!", vec2(20.0, 20.0), 32.0, Color::BLACK);
     ///     });
     ///     # break
     /// }
@@ -57,23 +57,92 @@ impl Hash for FontSizeKey {
     }
 }
 
+/// Loads a font into raylib from a path, with default [`FontParams`].
+/// Supports `.ttf` and `.otf` data.
+/// Characters are rendered at the right resolution when calls to [`draw_text`][`super::cache::draw_text`] are issued.
+/// See [`load_font_ex`] and [`TrueTypeFont`] to have more control over font loading.
+/// 
+/// To use the default raylib font, see [`Raylib::default_font`].
+/// # Examples
+/// ```
+/// # use raylib::prelude::*;
+/// # let mut rl = &mut init_window(100, 100, "load_font", 60);
+/// let font = load_font(rl, "TerminusTTF.ttf").unwrap();
+/// begin_drawing(rl, |rl| {
+///     draw_text(rl, &font, "Hello, world!", vec2(20.0, 60.0), Color::BLACK);
+/// });
+/// ```
 pub fn load_font(rl: &Raylib, path: impl AsRef<Path>) -> std::io::Result<TrueTypeFontCache> {
     use std::io::{Error, ErrorKind};
 
     let bytes = std::fs::read(path)?;
     let font = TrueTypeFont::from_bytes(bytes.as_slice()).map_err(|s| Error::new(ErrorKind::InvalidData, s))?;
-    Ok(load_font_ex(rl, font))
+    Ok(load_font_ex(rl, font, FontParams::default()))
 }
 
-pub fn load_font_ex(_rl: &Raylib, font: TrueTypeFont) -> TrueTypeFontCache {
+/// Loads a font into raylib from bytes.
+/// # Panics
+/// Panics if the given bytes are not a valid font.
+/// Use [`TrueTypeFont::from_bytes`] and [`load_font_ex`] if you need to handle a potential error.
+/// # Examples
+/// Include a font in the project directory in the executable:
+/// ```
+/// # use raylib::prelude::*;
+/// # let mut rl = &mut init_window(100, 100, "font from bytes");
+/// let font = load_font_bytes(rl, include_bytes!("assets/TerminusTTF.ttf").as_slice());
+/// begin_drawing(rl, |rl| {
+///     draw_text(rl, &font, "Hello, Terminus!", vec2(20.0, 20.0), 20.0, Color::BLACK);
+/// });
+/// ```
+pub fn load_font_bytes(rl: &Raylib, bytes: &[u8]) -> TrueTypeFontCache {
+    let font = TrueTypeFont::from_bytes(bytes).expect("a valid ttf or otf font in bytes");
+    load_font_ex(rl, font, FontParams::default())
+}
+
+/// Loads a [`TrueTypeFont`] into raylib with the given [`FontParams`].
+pub fn load_font_ex(_rl: &Raylib, font: TrueTypeFont, params: FontParams) -> TrueTypeFontCache {
     TrueTypeFontCache {
         font: font.0,
+        params,
         atlases: RefCell::default()
     }
 }
 
+/// Parameters for loading a [`TrueTypeFont`] into a [`TrueTypeFontCache`].
+/// See [`load_font_ex`].
+/// For default values (used in [`load_font`] and [`load_font_bytes`]), see [`FontParams::default`].
+/// This struct may be extended in the future.
+pub struct FontParams {
+    /// The minimum size at which the font will be rendered.
+    /// For sizes smaller than this, the texture will get scaled down.
+    pub min_size: f32,
+    /// The maximum size at which the font will be rendered.
+    /// For sizes bigger than this, the texture will get scaled up.
+    /// This is set to prevent arbitrarly large texture allocations.
+    pub max_size: f32,
+    /// Whether to always round font sizes.
+    /// This is on by default, because in most cases fractional pixel-size fonts are not wanted and might cause unnecessary texture allocations.
+    pub integer_size: bool,
+    /// The texture filter used by the texture atlases. 
+    pub texture_filter: TextureFilter
+}
+
+impl Default for FontParams {
+    /// Those values are pretty arbitrary, but should be good for common usecases.
+    fn default() -> Self {
+        Self {
+            min_size: 6.0,
+            max_size: 48.0,
+            integer_size: true,
+            texture_filter: TextureFilter::Bilinear
+        }
+    }
+}
+
+/// A cache for [`TrueTypeFont`] glyphs, rendered at various sizes.
 pub struct TrueTypeFontCache {
     font: fontdue::Font,
+    params: FontParams,
     atlases: RefCell<HashMap<FontSizeKey, TrueTypeFontAtlas>>
 }
 
@@ -99,13 +168,18 @@ impl FontCache for TrueTypeFontCache {
     fn kern_indexed(&self, left: u16, right: u16, size: f32) -> Option<f32> { self.font.horizontal_kern_indexed(left, right, size) }
 
     fn draw_glyph(&self, rl: &DrawHandle, index: u16, size: f32, dest: Rectangle, color: Color) {
+        let mut size = size.clamp(self.params.min_size, self.params.max_size);
+        if self.params.integer_size {
+            size = size.round();
+        }
+
         let key = FontSizeKey(size);
         let mut atlases = self.atlases.borrow_mut();
 
         let atlas = if let Some(atlas) = atlases.get_mut(&key) {
             atlas
         } else {
-            let atlas = TrueTypeFontAtlas::new(rl, &self.font);
+            let atlas = TrueTypeFontAtlas::new(rl, &self.font, self.params.texture_filter);
             // SAFETY: we just checked above that `key` was not yet inserted into the map
             let (_, atlas) = atlases.insert_unique_unchecked(key, atlas);
             atlas
@@ -132,9 +206,11 @@ struct AtlasRectangle {
 }
 
 impl TrueTypeFontAtlas {
-    fn new(rl: &Raylib, font: &fontdue::Font) -> Self {
+    fn new(rl: &Raylib, font: &fontdue::Font, texture_filter: TextureFilter) -> Self {
+        let mut texture = Texture::load_empty(rl, 128, 128, PixelFormat::UncompressedGrayAlpha).unwrap();
+        texture.set_texture_filter(texture_filter);
         Self {
-            texture: Texture::load_empty(rl, 128, 128, PixelFormat::UncompressedGrayAlpha).unwrap(),
+            texture,
             recs: vec![None; font.glyph_count() as usize],
             atlas_rectangle: AtlasRectangle::new(128)
         }
