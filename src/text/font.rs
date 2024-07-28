@@ -102,12 +102,10 @@ impl FontCache for TrueTypeFontCache {
         let key = FontSizeKey(size);
         let mut atlases = self.atlases.borrow_mut();
 
-        let atlas = if let Some(atlas) = atlases.get(&key) {
+        let atlas = if let Some(atlas) = atlases.get_mut(&key) {
             atlas
         } else {
-            let (texture_size, recs) = TrueTypeFontAtlas::map_texture(&self.font, size);
-            let texture = Texture::load_empty(rl, texture_size as u32, texture_size as u32, PixelFormat::UncompressedGrayAlpha).unwrap();
-            let atlas = TrueTypeFontAtlas { texture: texture.into(), size, recs: recs.into() };
+            let atlas = TrueTypeFontAtlas::new(rl, &self.font);
             // SAFETY: we just checked above that `key` was not yet inserted into the map
             let (_, atlas) = atlases.insert_unique_unchecked(key, atlas);
             atlas
@@ -121,85 +119,106 @@ impl FontCache for TrueTypeFontCache {
 
 struct TrueTypeFontAtlas {
     texture: Texture,
-    size: f32,
-    recs: RefCell<Vec<(bool, Rectangle)>>
+    recs: Vec<Option<Rectangle>>,
+    atlas_rectangle: AtlasRectangle
+}
+
+struct AtlasRectangle {
+    offset_x: usize,
+    offset_y: usize,
+    min_x: usize,
+    max_y: usize,
+    pot_y: usize
 }
 
 impl TrueTypeFontAtlas {
-    /// Returns the size of the texture expected and the vec containing the position of the glyphs.
-    fn map_texture(font: &fontdue::Font, px: f32) -> (usize, Vec<(bool, Rectangle)>) {
-        let mut size = 128;
-        let mut recs = Vec::with_capacity(font.glyph_count().into());
-
-        let mut offset_x = 0;
-        let mut offset_y = 0;
-
-        let mut min_x = 0;
-        let mut max_y = 0;
-
-        let mut pot_y = size;
-
-        for idx in 0..font.glyph_count() {
-            let metrics = font.metrics_indexed(idx, px);
-            
-            // went over the right-most edge, go back to the start of the line
-            if offset_x + metrics.width >= size {
-                offset_x = min_x;
-                offset_y = max_y;
-
-                // went to the bottom of the screen, resize and use the new part to the right
-                if offset_y + metrics.height >= size {
-                    pot_y = max_y;
-
-                    min_x = size;
-                    max_y = 0;
-
-                    offset_x = size;
-                    offset_y = 0;
-
-                    size *= 2;
-                }
-
-                // finished using the new right part, use lower half of resized
-                if offset_y + metrics.height >= pot_y {
-                    offset_x = 0;
-                    offset_y = pot_y;
-
-                    min_x = 0;
-                    max_y = pot_y;
-                    pot_y = size;
-                }
-
-            }
-
-            recs.push((false, Rectangle::new(offset_x as f32, offset_y as f32, metrics.width as f32, metrics.height as f32)));
-
-            offset_x += metrics.width;
-            max_y = max_y.max(offset_y + metrics.height);
+    fn new(rl: &Raylib, font: &fontdue::Font) -> Self {
+        Self {
+            texture: Texture::load_empty(rl, 128, 128, PixelFormat::UncompressedGrayAlpha).unwrap(),
+            recs: vec![None; font.glyph_count() as usize],
+            atlas_rectangle: AtlasRectangle::new(128)
         }
-
-        (size, recs)
     }
 
     fn texture(&self) -> &Texture {
         &self.texture
     }
 
-    fn get_glyph(&self, font: &fontdue::Font, index: u16, _size: f32) -> Rectangle {
-        let (rendered, rec) = &mut self.recs.borrow_mut()[index as usize];
+    fn get_glyph(&mut self, font: &fontdue::Font, index: u16, size: f32) -> Rectangle {
+        let rec = &mut self.recs[index as usize];
         // skip if glyph was already rendered
-        if *rendered { return *rec }
+        if let Some(rec) = rec { return *rec }
 
-        let (_, rasterized) = font.rasterize_indexed(index, self.size);
+        let (_, rasterized) = font.rasterize_indexed(index, size);
         // convert to GrayAlpha
         let mut data = Vec::with_capacity(rasterized.len()*2);
         for alpha in rasterized {
             data.push(255);
             data.push(alpha);
         }
-        self.texture.update_rec_raw(*rec, &data).unwrap();
-        *rendered = true;
-        *rec
+
+        let new_rec = self.atlas_rectangle.get_new_rect(&mut self.texture, font.metrics_indexed(index, size));
+        self.texture.update_rec_raw(new_rec, &data).unwrap();
+        *rec = Some(new_rec);
+        new_rec
     }
 }
 
+impl AtlasRectangle {
+    fn new(texture_size: usize) -> Self {
+        Self {
+            offset_x: 0,
+            offset_y: 0,
+            min_x: 0,
+            max_y: 0,
+            pot_y: texture_size
+        }
+    }
+
+    /// Asks for a new rectangle in the texture atlas.
+    /// May resize the given texture.
+    /// `metrics` can be obtained using [`fontdue::Font::metrics_indexed`].
+    /// Returns the position of the glyph in the texture.
+    fn get_new_rect(&mut self, texture: &mut Texture, metrics: fontdue::Metrics) -> Rectangle {
+        let mut size = texture.width() as usize;
+           
+        // went over the right-most edge, go back to the start of the line
+        if self.offset_x + metrics.width >= size {
+            self.offset_x = self.min_x;
+            self.offset_y = self.max_y;
+        }
+
+        // went to the bottom of the screen, resize and use the new part to the right
+        if self.offset_y + metrics.height >= size {
+            self.pot_y = self.max_y;
+
+            self.min_x = size;
+            self.max_y = 0;
+
+            self.offset_x = size;
+            self.offset_y = 0;
+
+            // resize texture
+            size *= 2;
+            texture.resize_canvas(texture.width()*2, texture.height()*2, 0, 0, Color::BLANK);
+        }
+
+        // finished using the new right part, use lower half of resized
+        if self.offset_y + metrics.height >= self.pot_y {
+            self.offset_x = 0;
+            self.offset_y = self.pot_y;
+
+            self.min_x = 0;
+            self.max_y = self.pot_y;
+            self.pot_y = size;
+        }
+
+        let rec = Rectangle::new(self.offset_x as f32, self.offset_y as f32, metrics.width as f32, metrics.height as f32);
+
+        self.offset_x += metrics.width;
+        self.max_y = self.max_y.max(self.offset_y + metrics.height);
+
+        rec
+    }
+
+}
