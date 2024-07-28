@@ -10,6 +10,7 @@ pub struct TrueTypeFont(fontdue::Font);
 
 impl TrueTypeFont {
     /// Create a font from binary `ttf` or `otf` data.
+    /// 
     /// # Examples
     /// Load a font present in the project directory and draw text with it:
     /// ```
@@ -58,11 +59,13 @@ impl Hash for FontSizeKey {
 }
 
 /// Loads a font into raylib from a path, with default [`FontParams`].
-/// Supports `.ttf` and `.otf` data.
-/// Characters are rendered at the right resolution when calls to [`draw_text`][`super::cache::draw_text`] are issued.
-/// See [`load_font_ex`] and [`TrueTypeFont`] to have more control over font loading.
+/// 
+/// Supports `.ttf` and `.otf` data. 
+/// Characters are rendered at the right resolution when calls to [`draw_text`][`super::cache::draw_text`] are issued. 
+/// See [`load_font_ex`] and [`TrueTypeFont`] to have more control over font loading. 
 /// 
 /// To use the default raylib font, see [`Raylib::default_font`].
+///
 /// # Examples
 /// ```
 /// # use raylib::prelude::*;
@@ -81,9 +84,11 @@ pub fn load_font(rl: &Raylib, path: impl AsRef<Path>) -> std::io::Result<TrueTyp
 }
 
 /// Loads a font into raylib from bytes.
+/// 
 /// # Panics
-/// Panics if the given bytes are not a valid font.
-/// Use [`TrueTypeFont::from_bytes`] and [`load_font_ex`] if you need to handle a potential error.
+/// Panics if the given bytes are not a valid font. 
+/// Use [`TrueTypeFont::from_bytes`] and [`load_font_ex`] if you need to handle a potential error. 
+/// 
 /// # Examples
 /// Include a font in the project directory in the executable:
 /// ```
@@ -109,9 +114,10 @@ pub fn load_font_ex(_rl: &Raylib, font: TrueTypeFont, params: FontParams) -> Tru
 }
 
 /// Parameters for loading a [`TrueTypeFont`] into a [`TrueTypeFontCache`].
-/// See [`load_font_ex`].
-/// For default values (used in [`load_font`] and [`load_font_bytes`]), see [`FontParams::default`].
-/// This struct may be extended in the future.
+/// 
+/// See [`load_font_ex`]. 
+/// For default values (used in [`load_font`] and [`load_font_bytes`]), see [`FontParams::default`]. 
+/// This struct may be extended in the future. 
 pub struct FontParams {
     /// The minimum size at which the font will be rendered.
     /// For sizes smaller than this, the texture will get scaled down.
