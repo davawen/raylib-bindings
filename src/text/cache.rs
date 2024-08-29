@@ -86,17 +86,20 @@ pub trait FontCache {
 
 /// Returns the width and height occupied by the given text in the given font, drawn at the given size.
 pub fn measure_text<F: FontCache>(cache: &F, text: &str, size: f32) -> Vector2 {
-    let mut pos = Vector2::ZERO;
+    let mut pos = 0.0;
     let mut previous = None;
+
     for char in text.chars() {
         let glyph_index = cache.glyph_index(char);
         if let Some(previous) = previous {
-            pos.x += cache.kern_indexed(previous, glyph_index, size).unwrap_or_default();
+            pos += cache.kern_indexed(previous, glyph_index, size).unwrap_or_default();
         }
-        pos.x += cache.metrics_indexed(glyph_index, size).advance_width;
+        let metrics = cache.metrics_indexed(glyph_index, size);
+        pos += metrics.advance_width;
+
         previous = Some(glyph_index);
     }
-    pos
+    vec2(pos, size)
 }
 
 /// Draws some text at the specified location using the given font at the given size.
